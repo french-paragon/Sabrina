@@ -1,0 +1,3 @@
+[submodule "modules/aline"]
+	path = modules/aline
+	url = https://french-paragon@bitbucket.org/french-paragon/aline.git
