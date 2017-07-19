@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/editable_item_default.svg</file>
+    </qresource>
+</RCC>
