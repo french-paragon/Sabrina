@@ -59,6 +59,12 @@ public:
 
 	QString getRef() const;
 
+	/*!
+	 * \brief acceptChildrens indicate if the item accept childs or not.
+	 * \return true if the item accept children, false otherwise.
+	 */
+	virtual bool acceptChildrens() const;
+
 signals:
 
 	void refChanged(QString newRef);
@@ -88,6 +94,12 @@ public slots:
 	 */
 	void warnUnReffering(QString refReferant);
 
+	/*!
+	 * \brief save save the item.
+	 * \return true if sucess, false otherwise.
+	 */
+	bool save();
+
 protected:
 
 	/*!
@@ -116,6 +128,7 @@ protected:
 	QVector<QString>  _childrenItemRefs;
 
 	EditableItemManager* _manager;
+
 };
 
 } // namespace Cathia

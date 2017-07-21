@@ -131,6 +131,15 @@ void EditableItem::warnUnReffering(QString refReferant) {
 	_referentItems.remove(refReferant);
 }
 
+bool EditableItem::save() {
+
+	if (_manager != nullptr) {
+		return _manager->saveItem(getRef());
+	}
+
+	return false;
+}
+
 void EditableItem::refferedItemAboutToBeDeleted(QString ref) {
 	treatDeletedRef(ref);
 	_referencedItems.remove(ref);
