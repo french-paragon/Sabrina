@@ -1,12 +1,15 @@
 #include "editableitemmanager.h"
 
 #include "editableitem.h"
+#include "editableitemfactory.h"
 
 namespace Cathia {
 
 const QChar EditableItemManager::RefSeparator = QChar('/');
 
-EditableItemManager::EditableItemManager(QObject *parent) : QAbstractItemModel(parent)
+EditableItemManager::EditableItemManager(QObject *parent) :
+	QAbstractItemModel(parent),
+	_factoryManager(&EditableItemFactoryManager::GlobalEditableItemFactoryManager)
 {
 
 }
@@ -125,8 +128,32 @@ bool EditableItemManager::isItemLoaded(QString const& ref) const {
 	return _loadedItems.contains(ref);
 }
 
+QVector<QString> EditableItemManager::listChildren(QString ref) {
+	treeStruct* s = _treeIndex.value(ref);
 
-ItemLoadingException::ItemLoadingException (QString ref,
+	if (s != nullptr) {
+		QVector<QString> r;
+		r.reserve(s->_childrens.size());
+
+		for (treeStruct* ss : s->_childrens) {
+			r.push_back(ss->_ref);
+		}
+
+		return r;
+	}
+
+	return QVector<QString>();
+}
+
+bool EditableItemManager::saveItem(QString ref) {
+	if (isItemLoaded(ref)) {
+		return effectivelySaveItem(ref);
+	}
+	return false;
+}
+
+
+ItemIOException::ItemIOException (QString ref,
 											QString infos,
 											EditableItemManager const* manager) :
 	_ref(ref),
@@ -139,7 +166,7 @@ ItemLoadingException::ItemLoadingException (QString ref,
 
 }
 
-ItemLoadingException::ItemLoadingException (ItemLoadingException const& other) :
+ItemIOException::ItemIOException (ItemIOException const& other) :
 	_ref(other.ref()),
 	_infos(other.infos()),
 	_manager(other.manager())
@@ -147,34 +174,34 @@ ItemLoadingException::ItemLoadingException (ItemLoadingException const& other) :
 
 }
 
-const char* ItemLoadingException::what() const throw() {
+const char* ItemIOException::what() const throw() {
 
 	return _what.c_str();
 
 }
 
 
-QString ItemLoadingException::ref() const
+QString ItemIOException::ref() const
 {
 	return _ref;
 }
 
-QString ItemLoadingException::infos() const
+QString ItemIOException::infos() const
 {
 	return _infos;
 }
 
-const EditableItemManager *ItemLoadingException::manager() const
+const EditableItemManager *ItemIOException::manager() const
 {
 	return _manager;
 }
 
-void ItemLoadingException::raise() const {
+void ItemIOException::raise() const {
 	throw *this;
 }
 
-ItemLoadingException * ItemLoadingException::clone() const {
-	return new ItemLoadingException(*this);
+ItemIOException * ItemIOException::clone() const {
+	return new ItemIOException(*this);
 }
 
 } // namespace Cathia

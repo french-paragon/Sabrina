@@ -6,6 +6,14 @@
 
 namespace Cathia {
 
+const QString EditableItem::REF_PROP_NAME = "ref";
+const QString EditableItem::PREF_PROP_NAME = "parentRef";
+const QString EditableItem::TYPE_ID_NAME = "type_id";
+
+const QString EditableItem::REF_IN_PROP_NAME = "ref_in_to_out";
+const QString EditableItem::REF_FROM_PROP_NAME = "ref_from_out";
+const QString EditableItem::CHILDREN_PROP_NAME = "ref_childrens";
+
 EditableItem::EditableItem(EditableItemManager *parent) : QObject(parent)
 {
 
@@ -52,16 +60,19 @@ QString EditableItem::simplifyRef(QString ref) {
 
 }
 
-QSet<QString> EditableItem::getLinkedItemsRefs() const {
+const QSet<QString> & EditableItem::getLinkedItemsRefs() const {
 	return _referencedItems;
 }
 
-QSet<QString> EditableItem::getReferentItemRefs() const {
+const QSet<QString> & EditableItem::getReferentItemRefs() const {
 	return _referentItems;
 }
 
 QVector<QString> EditableItem::getChildrenItemsRefs() const {
-	return _childrenItemRefs;
+	if (_manager != nullptr) {
+		return _manager->listChildren(getRef());
+	}
+	return QVector<QString>();
 }
 
 QString EditableItem::iconInternalUrl() const {
@@ -78,6 +89,14 @@ QString EditableItem::getRef() const
 	return _ref;
 }
 
+void EditableItem::addOutRef(QString const& ref) {
+	_referentItems.insert(ref);
+}
+
+void EditableItem::addInRef(QString const& ref) {
+	_referencedItems.insert(ref);
+}
+
 void EditableItem::suppress() {
 
 	for (QString ref : _referentItems) {
@@ -87,7 +106,7 @@ void EditableItem::suppress() {
 
 			referentItem = _manager->loadItem(ref);
 
-		} catch (ItemLoadingException & e) {
+		} catch (ItemIOException & e) {
 
 			qDebug() << e.what();
 
@@ -108,7 +127,7 @@ void EditableItem::changeRef(QString const& newRef) {
 
 			referentItem = _manager->loadItem(ref);
 
-		} catch (ItemLoadingException & e) {
+		} catch (ItemIOException & e) {
 
 			qDebug() << e.what();
 

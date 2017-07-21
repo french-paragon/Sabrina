@@ -22,8 +22,17 @@ public:
 
 	Q_PROPERTY(bool hasUnsavedChanges READ getHasUnsavedChanged NOTIFY unsavedStateChanged)
 
+	static const QString REF_PROP_NAME;
+	static const QString PREF_PROP_NAME;
+	static const QString TYPE_ID_NAME;
+
+	static const QString REF_IN_PROP_NAME;
+	static const QString REF_FROM_PROP_NAME;
+	static const QString CHILDREN_PROP_NAME;
+
 	Q_PROPERTY(QString ref READ getRef WRITE changeRef NOTIFY refChanged)
 	Q_PROPERTY(QString parentRef MEMBER _p_ref NOTIFY parentChanged)
+	Q_PROPERTY(QString type_id READ getTypeId)
 
 	/*!
 	 * \brief getTypeId allow to get info on the type of the editable item.
@@ -35,13 +44,13 @@ public:
 	 * \brief getLinkedItemsRefs get the list of reference of item refered in the current item.
 	 * \return the list of references.
 	 */
-	QSet<QString> getLinkedItemsRefs() const;
+	const QSet<QString> & getLinkedItemsRefs() const;
 
 	/*!
 	 * \brief getReferentItemRefs allow to acess the list of items which refer to this item.
 	 * \return the list of refs of the refering items.
 	 */
-	QSet<QString> getReferentItemRefs() const;
+	const QSet<QString> & getReferentItemRefs() const;
 
 	/*!
 	 * \brief getChildrenItemsRefs is a function to fetch all children item of that item.
@@ -64,6 +73,9 @@ public:
 	 * \return true if the item accept children, false otherwise.
 	 */
 	virtual bool acceptChildrens() const;
+
+	void addOutRef(QString const& ref);
+	virtual void addInRef(QString const& ref);
 
 signals:
 
@@ -124,8 +136,6 @@ protected:
 
 	QSet<QString> _referencedItems;
 	QSet<QString> _referentItems;
-
-	QVector<QString>  _childrenItemRefs;
 
 	EditableItemManager* _manager;
 

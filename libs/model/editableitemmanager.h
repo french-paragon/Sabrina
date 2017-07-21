@@ -13,18 +13,19 @@ namespace Cathia {
 
 class EditableItem;
 class EditableItemManager;
+class EditableItemFactoryManager;
 
-class CATHIA_MODEL_EXPORT ItemLoadingException : public QException
+class CATHIA_MODEL_EXPORT ItemIOException : public QException
 {
 public:
 
-	ItemLoadingException (QString ref, QString infos, EditableItemManager const* manager);
-	ItemLoadingException (ItemLoadingException const& other);
+	ItemIOException (QString ref, QString infos, EditableItemManager const* manager);
+	ItemIOException (ItemIOException const& other);
 
 	const char* what() const throw();
 
 	void raise() const;
-	ItemLoadingException *clone() const;
+	ItemIOException *clone() const;
 
 	QString ref() const;
 	QString infos() const;
@@ -65,7 +66,9 @@ public:
 	void forceUnloadItem(QString ref);
 	bool isItemLoaded(const QString &ref) const;
 
-	virtual bool saveItem(QString ref) = 0;
+	QVector<QString> listChildren(QString ref);
+
+	virtual bool saveItem(QString ref);
 
 signals:
 
@@ -99,11 +102,15 @@ protected:
 	 * \param ref the ref of the item to load.
 	 */
 	virtual EditableItem* effectivelyLoadItem(QString const& ref) = 0;
+	virtual bool effectivelySaveItem(QString const& ref) = 0;
 
 	QMap<QString, loadedItem> _loadedItems;
 
 	treeStruct* _root; //the root of the tree.
 	QVector<treeStruct> _tree; //store the tree struct one place in memory.
+	QMap<QString, treeStruct*> _treeIndex; //build an index of the tree.
+
+	EditableItemFactoryManager* _factoryManager;
 
 };
 

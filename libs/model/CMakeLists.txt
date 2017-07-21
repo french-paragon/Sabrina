@@ -1,6 +1,8 @@
 set(LIB_NAME Model)
 set(LIB_SRC editableitem.cpp
+            editableitemfactory.cpp
             editableitemmanager.cpp
+            editableItemsManagers/jsoneditableitemmanager.cpp
             model_global.h
             ressources/ressources.qrc)
 
