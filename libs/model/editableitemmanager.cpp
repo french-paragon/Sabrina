@@ -6,6 +6,7 @@
 namespace Cathia {
 
 const QChar EditableItemManager::RefSeparator = QChar('/');
+const QString EditableItemManager::RefRoot = QString("root");
 
 EditableItemManager::EditableItemManager(QObject *parent) :
 	QAbstractItemModel(parent),
@@ -53,6 +54,10 @@ QModelIndex EditableItemManager::parent(const QModelIndex &index) const {
 
 }
 int EditableItemManager::rowCount(const QModelIndex &parent) const {
+
+	if (parent == QModelIndex()) {
+		return _root->_childrens.size();
+	}
 
 	void * dataPtr = parent.internalPointer();
 	treeStruct* data = reinterpret_cast <treeStruct*> (dataPtr);
@@ -150,6 +155,33 @@ bool EditableItemManager::saveItem(QString ref) {
 		return effectivelySaveItem(ref);
 	}
 	return false;
+}
+
+void EditableItemManager::closeAll() {
+
+	for (QString ref : _loadedItems.keys()) {
+
+		emit itemAboutToBeUnloaded(ref); //at that point the items can still be saved or other operations can be carried on by the watchers.
+
+		_loadedItems.remove(ref);
+
+		emit itemUnloaded(ref);
+
+	}
+
+}
+
+void EditableItemManager::cleanTreeStruct() {
+
+	beginResetModel();
+
+	_treeIndex.clear();
+	_tree.clear();
+	_tree.push_back({nullptr, RefRoot, RefRoot, {}, false});
+	_root = &_tree.first();
+
+	endResetModel();
+
 }
 
 

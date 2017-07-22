@@ -50,6 +50,7 @@ public:
 	};
 
 	static const QChar RefSeparator;
+	static const QString RefRoot;
 
 	explicit EditableItemManager(QObject *parent = nullptr);
 
@@ -79,7 +80,12 @@ signals:
 
 public slots:
 
+	virtual void reset() = 0;
+	virtual void closeAll();
+
 protected:
+
+	void cleanTreeStruct();
 
 	/*!
 	 * \brief The treeStruct struct allow for the EditableItemManager to store the structure of loadable items in tree.

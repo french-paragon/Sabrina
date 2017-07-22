@@ -25,6 +25,18 @@ bool JsonEditableItemManager::hasDataSource() const {
 	return _hasAProjectOpen;
 }
 
+void JsonEditableItemManager::reset() {
+
+	if (!hasDataSource()) {
+		return;
+	}
+
+	closeAll();
+	cleanTreeStruct();
+
+	_hasAProjectOpen = false;
+}
+
 EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 
 	QString fileName = _projectFolder + ITEM_FOLDER_NAME + ref + ".json";

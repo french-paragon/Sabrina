@@ -25,5 +25,13 @@ SET(CMAKE_AUTOUIC ON)
 
 set(BUILD_SHARED_LIBS ON)
 
+#include dirs
+
+include_directories(${CMAKE_SOURCE_DIR}/libs)
+include_directories(${CMAKE_SOURCE_DIR}/modules)
+
+#sub dirs
+
 add_subdirectory(modules)
 add_subdirectory(libs)
+add_subdirectory(prog)

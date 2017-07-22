@@ -10,9 +10,11 @@ namespace Cathia {
 class CATHIA_MODEL_EXPORT JsonEditableItemManager : public EditableItemManager
 {
 public:
-	JsonEditableItemManager(QObject *parent = nullptr);
+	explicit JsonEditableItemManager(QObject *parent = nullptr);
 
 	virtual bool hasDataSource() const;
+
+	virtual void reset();
 
 protected:
 
