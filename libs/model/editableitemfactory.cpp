@@ -2,13 +2,14 @@
 
 #include "editableitem.h"
 
-namespace Cathia {
+namespace Sabrina {
 
 EditableItemFactoryManager EditableItemFactoryManager::GlobalEditableItemFactoryManager;
 
 EditableItemFactory::EditableItemFactory(QObject *parent) : QObject(parent)
 {
 	_typeId = "";
+	_typeName = "";
 }
 
 QString EditableItemFactory::getItemTypeId() const {
@@ -24,7 +25,21 @@ QString EditableItemFactory::getItemTypeId() const {
 	return _typeId;
 }
 
-EditableItemFactoryManager::EditableItemFactoryManager(QObject *parent) : QObject(parent)
+QString EditableItemFactory::getItemTypeName() const {
+
+	if (_typeName == "") {
+		//get the type name.
+		EditableItem* temp = createItem(nullptr);
+		_typeName = temp->getTypeName();
+
+		delete temp;
+	}
+
+	return _typeName;
+
+}
+
+EditableItemFactoryManager::EditableItemFactoryManager(QObject *parent) : QAbstractListModel(parent)
 {
 
 }
@@ -35,9 +50,15 @@ void EditableItemFactoryManager::installFactory(EditableItemFactory* factory, bo
 		if (takeOwnership) {
 			factory->deleteLater();
 		}
+		return;
 	}
 
+	beginInsertRows(QModelIndex(), _installedFactoriesKeys.size(), _installedFactoriesKeys.size());
+
 	_installedFactories.insert(factory->getItemTypeId(), factory);
+	_installedFactoriesKeys.push_back(factory->getItemTypeId());
+
+	endInsertRows();
 }
 
 bool EditableItemFactoryManager::hasFactoryInstalled(QString type_id) const {
@@ -55,6 +76,35 @@ EditableItem* EditableItemFactoryManager::createItem(QString type_id, EditableIt
 	}
 
 	return nullptr;
+
+}
+
+int EditableItemFactoryManager::rowCount(const QModelIndex &parent) const {
+
+	if (parent != QModelIndex()) {
+		return 0;
+	}
+
+	return _installedFactoriesKeys.size();
+
+}
+
+QVariant EditableItemFactoryManager::data(const QModelIndex &index,
+										  int role) const {
+
+	int r = index.row();
+	QString associatedKey = _installedFactoriesKeys.at(r);
+
+	switch(role) {
+	case Qt::DisplayRole:
+		return _installedFactories.value(associatedKey)->getItemTypeName();
+	case Qt::ToolTipRole:
+		return associatedKey;
+	default:
+		break;
+	}
+
+	return QVariant();
 
 }
 

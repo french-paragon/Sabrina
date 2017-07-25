@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-namespace Cathia {
+namespace Sabrina {
 
 namespace Ui {
 class AboutDialog;

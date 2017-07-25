@@ -3,7 +3,7 @@
 #include "editableitem.h"
 #include "editableitemfactory.h"
 
-namespace Cathia {
+namespace Sabrina {
 
 const QChar EditableItemManager::RefSeparator = QChar('/');
 const QString EditableItemManager::RefRoot = QString("root");

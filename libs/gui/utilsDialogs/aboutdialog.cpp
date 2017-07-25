@@ -1,7 +1,7 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 
-namespace Cathia {
+namespace Sabrina {
 
 AboutDialog::AboutDialog(QWidget *parent) :
 	QDialog(parent),

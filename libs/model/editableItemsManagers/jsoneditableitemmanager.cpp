@@ -11,7 +11,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-namespace Cathia {
+namespace Sabrina {
 
 const QString JsonEditableItemManager::ITEM_FOLDER_NAME = "items/";
 

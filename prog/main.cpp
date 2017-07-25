@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv) {
 
-	Cathia::App app(argc, argv);
+	Sabrina::App app(argc, argv);
 
 	app.start();
 

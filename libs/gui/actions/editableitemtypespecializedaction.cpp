@@ -1,6 +1,6 @@
 #include "editableitemtypespecializedaction.h"
 
-namespace Cathia {
+namespace Sabrina {
 
 EditableItemTypeSpecializedAction::EditableItemTypeSpecializedAction(const QString &type_id,
 																	 QObject *parent) :

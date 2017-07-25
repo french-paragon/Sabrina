@@ -5,7 +5,7 @@
 
 #include "aline/src/mainwindow.h"
 
-namespace Cathia {
+namespace Sabrina {
 
 class CATHIA_GUI_EXPORT MainWindow : public Aline::MainWindow
 {

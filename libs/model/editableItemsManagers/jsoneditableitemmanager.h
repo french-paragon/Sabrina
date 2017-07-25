@@ -5,7 +5,7 @@
 
 #include "editableitemmanager.h"
 
-namespace Cathia {
+namespace Sabrina {
 
 class CATHIA_MODEL_EXPORT JsonEditableItemManager : public EditableItemManager
 {

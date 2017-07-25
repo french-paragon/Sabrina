@@ -5,7 +5,7 @@
 
 #include <QAction>
 
-namespace Cathia {
+namespace Sabrina {
 
 class EditableItemTypeSpecializedAction : public QAction
 {

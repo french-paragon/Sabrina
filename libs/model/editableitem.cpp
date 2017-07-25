@@ -4,7 +4,7 @@
 
 #include <QDebug>
 
-namespace Cathia {
+namespace Sabrina {
 
 const QString EditableItem::REF_PROP_NAME = "ref";
 const QString EditableItem::PREF_PROP_NAME = "parentRef";

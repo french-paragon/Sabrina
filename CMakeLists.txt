@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-project(Cathia)
+project(Sabrina)
 
 #cross compilation
 unset(MXE_CROSS_COMPILE)

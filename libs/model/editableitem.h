@@ -7,7 +7,7 @@
 #include <QSet>
 #include <QVector>
 
-namespace Cathia {
+namespace Sabrina {
 
 class EditableItemManager;
 
@@ -39,6 +39,12 @@ public:
 	 * \return a type id as a string.
 	 */
 	virtual QString getTypeId() const = 0;
+
+	/*!
+	 * \brief getTypeName allow to get the name of the editable item type as a string.
+	 * \return
+	 */
+	virtual QString getTypeName() const = 0;
 
 	/*!
 	 * \brief getLinkedItemsRefs get the list of reference of item refered in the current item.

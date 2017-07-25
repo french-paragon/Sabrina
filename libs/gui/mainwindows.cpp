@@ -2,7 +2,7 @@
 
 #include "utilsDialogs/aboutdialog.h"
 
-namespace Cathia {
+namespace Sabrina {
 
 MainWindow::MainWindow(QWidget* parent) :
 	Aline::MainWindow(parent)

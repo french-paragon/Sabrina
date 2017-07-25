@@ -9,7 +9,7 @@
 
 #include <functional>
 
-namespace Cathia {
+namespace Sabrina {
 
 class EditableItem;
 class EditableItemManager;

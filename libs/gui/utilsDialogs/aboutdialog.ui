@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Cathia::AboutDialog</class>
- <widget class="QDialog" name="Cathia::AboutDialog">
+ <class>Sabrina::AboutDialog</class>
+ <widget class="QDialog" name="Sabrina::AboutDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -35,7 +35,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Cathia::AboutDialog</receiver>
+   <receiver>Sabrina::AboutDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -51,7 +51,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Cathia::AboutDialog</receiver>
+   <receiver>Sabrina::AboutDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

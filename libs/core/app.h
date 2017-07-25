@@ -6,7 +6,7 @@
 #include "aline/src/app.h"
 #include <QString>
 
-namespace Cathia {
+namespace Sabrina {
 
 class MainWindow;
 class EditableItemManager;

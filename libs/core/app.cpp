@@ -8,7 +8,7 @@
 
 #include "model/editableitemmanager.h"
 
-namespace Cathia {
+namespace Sabrina {
 
 App::App(int &argc, char **argv) :
 	Aline::App(argc, argv),
