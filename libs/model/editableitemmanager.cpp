@@ -133,6 +133,10 @@ bool EditableItemManager::isItemLoaded(QString const& ref) const {
 	return _loadedItems.contains(ref);
 }
 
+bool EditableItemManager::containItem(const QString & ref) const {
+	return _treeIndex.keys().contains(ref);
+}
+
 QVector<QString> EditableItemManager::listChildren(QString ref) {
 	treeStruct* s = _treeIndex.value(ref);
 
@@ -148,6 +152,35 @@ QVector<QString> EditableItemManager::listChildren(QString ref) {
 	}
 
 	return QVector<QString>();
+}
+
+bool EditableItemManager::createItem(QString typeRef, QString ref, EditableItem *parent) {
+
+	if (!_factoryManager->hasFactoryInstalled(typeRef)) {
+		return false;
+	}
+
+	if (containItem(ref)) {
+		return false;
+	}
+
+	if (parent != nullptr) {
+		if (qobject_cast<EditableItemManager*>(parent->parent()) != this) {
+			return false; //the parent need to be in the project.
+		}
+	}
+
+	EditableItem* item = _factoryManager->createItem(typeRef, this);
+
+	if (item != nullptr) {
+
+		insertItem(item, parent);
+		return true;
+
+	}
+
+	return false;
+
 }
 
 bool EditableItemManager::saveItem(QString ref) {

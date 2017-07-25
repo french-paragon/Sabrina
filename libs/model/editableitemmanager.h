@@ -66,6 +66,9 @@ public:
 	QStringList loadedItems() const;
 	void forceUnloadItem(QString ref);
 	bool isItemLoaded(const QString &ref) const;
+	bool containItem(const QString & ref) const;
+
+	bool createItem(QString typeRef, QString ref, EditableItem* parent = nullptr);
 
 	QVector<QString> listChildren(QString ref);
 
@@ -109,6 +112,12 @@ protected:
 	 */
 	virtual EditableItem* effectivelyLoadItem(QString const& ref) = 0;
 	virtual bool effectivelySaveItem(QString const& ref) = 0;
+
+	/*!
+	 * \brief insertItem insert an item in the manager, the manager take ownership of the item.
+	 * \param item the item to insert
+	 */
+	virtual void insertItem(EditableItem* item, EditableItem* parent) = 0;
 
 	QMap<QString, loadedItem> _loadedItems;
 
