@@ -217,10 +217,15 @@ void EditableItemManager::cleanTreeStruct() {
 
 }
 
+EditableItemFactoryManager *EditableItemManager::factoryManager() const
+{
+	return _factoryManager;
+}
+
 
 ItemIOException::ItemIOException (QString ref,
-											QString infos,
-											EditableItemManager const* manager) :
+								  QString infos,
+								  EditableItemManager const* manager) :
 	_ref(ref),
 	_infos(infos),
 	_manager(manager)

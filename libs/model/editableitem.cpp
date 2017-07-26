@@ -89,6 +89,10 @@ QString EditableItem::getRef() const
 	return _ref;
 }
 
+bool EditableItem::acceptChildrens() const {
+	return false; //return false by default
+}
+
 void EditableItem::addOutRef(QString const& ref) {
 	_referentItems.insert(ref);
 }

@@ -99,6 +99,7 @@ QVariant EditableItemFactoryManager::data(const QModelIndex &index,
 	case Qt::DisplayRole:
 		return _installedFactories.value(associatedKey)->getItemTypeName();
 	case Qt::ToolTipRole:
+	case ItemRefRole:
 		return associatedKey;
 	default:
 		break;

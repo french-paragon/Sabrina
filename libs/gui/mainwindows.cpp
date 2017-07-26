@@ -18,4 +18,17 @@ void MainWindow::displayAboutWindows() {
 
 }
 
+EditableItemManager *MainWindow::currentProject() const
+{
+    return _currentProject;
+}
+
+void MainWindow::setCurrentProject(EditableItemManager *currentProject)
+{
+	if (currentProject != _currentProject) {
+		_currentProject = currentProject;
+		emit currentProjectChanged(_currentProject);
+	}
+}
+
 } // namespace Cathia

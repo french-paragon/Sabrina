@@ -74,6 +74,8 @@ public:
 
 	virtual bool saveItem(QString ref);
 
+	EditableItemFactoryManager *factoryManager() const;
+
 signals:
 
 	void loadingItemSucessFull(QString ref);

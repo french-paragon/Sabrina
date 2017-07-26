@@ -35,6 +35,10 @@ class EditableItemFactoryManager : public QAbstractListModel
 	Q_OBJECT
 public:
 
+	enum InternalDataRole{
+		ItemRefRole = Qt::UserRole + 1
+	};
+
 	static EditableItemFactoryManager GlobalEditableItemFactoryManager;
 
 	explicit EditableItemFactoryManager(QObject *parent = nullptr);

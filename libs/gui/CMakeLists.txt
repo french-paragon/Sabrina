@@ -3,7 +3,9 @@ set(LIB_SRC mainwindows.cpp
             gui_global.h
             actions/editableitemtypespecializedaction.cpp
             utilsDialogs/aboutdialog.cpp
-            utilsDialogs/aboutdialog.ui)
+            utilsDialogs/aboutdialog.ui
+            dockWidgets/projecttreedockwidget.cpp
+            dockWidgets/projecttreedockwidget.ui)
 
 add_library(${LIB_NAME} ${LIB_SRC})
 

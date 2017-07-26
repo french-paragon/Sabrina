@@ -4,6 +4,7 @@
 #include "gui_global.h"
 
 #include "aline/src/mainwindow.h"
+#include "model/editableitemmanager.h"
 
 namespace Sabrina {
 
@@ -13,11 +14,20 @@ class CATHIA_GUI_EXPORT MainWindow : public Aline::MainWindow
 public:
 	explicit MainWindow(QWidget* parent = nullptr);
 
+	EditableItemManager *currentProject() const;
+	void setCurrentProject(EditableItemManager *currentProject);
+
 signals:
+
+	void currentProjectChanged(EditableItemManager*);
 
 public slots:
 
 	void displayAboutWindows();
+
+protected:
+
+	EditableItemManager* _currentProject;
 
 };
 
