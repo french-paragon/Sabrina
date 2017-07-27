@@ -4,7 +4,10 @@ set(LIB_SRC editableitem.cpp
             editableitemmanager.cpp
             editableItemsManagers/jsoneditableitemmanager.cpp
             model_global.h
-            ressources/ressources.qrc)
+            ressources/ressources.qrc
+            editableItems/personnage.cpp
+            editableItems/place.cpp
+            editableItems/folder.cpp)
 
 add_library(${LIB_NAME} ${LIB_SRC})
 
