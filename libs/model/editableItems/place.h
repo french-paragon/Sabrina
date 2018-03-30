@@ -1,8 +1,8 @@
 #ifndef LIEU_H
 #define LIEU_H
 
-#include "editableitem.h"
-#include "editableitemfactory.h"
+#include "model/editableitem.h"
+#include "model/editableitemfactory.h"
 
 namespace Sabrina {
 
@@ -10,6 +10,8 @@ class Place : public EditableItem
 {
 	Q_OBJECT
 public:
+
+	static const QString PLACE_TYPE_ID;
 
 	class PlaceFactory : public EditableItemFactory
 	{

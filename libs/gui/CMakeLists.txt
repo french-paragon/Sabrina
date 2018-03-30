@@ -7,7 +7,9 @@ set(LIB_SRC mainwindows.cpp
             dockWidgets/projecttreedockwidget.cpp
             dockWidgets/projecttreedockwidget.ui
             editors/personnageeditor.cpp
-            editors/personnageeditor.ui)
+            editors/personnageeditor.ui
+            editors/placeeditor.cpp
+            editors/placeeditor.ui)
 
 add_library(${LIB_NAME} ${LIB_SRC})
 

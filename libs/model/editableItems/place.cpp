@@ -2,6 +2,8 @@
 
 namespace Sabrina {
 
+const QString Place::PLACE_TYPE_ID = "sabrina_jdr_place";
+
 Place::Place(EditableItemManager *parent) : EditableItem(parent)
 {
 

@@ -73,6 +73,8 @@ bool PersonnageEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 	connect(perso, &Personnage::persoBackgroundChanged, ui->textEdit_background, &QTextEdit::setHtml);
 
 	_currentPerso = perso;
+
+	return true;
 }
 
 void PersonnageEditor::onBackgroundTextChanged() {
