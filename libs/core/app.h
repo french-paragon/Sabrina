@@ -24,6 +24,7 @@ public:
 protected:
 
 	void openFileProject();
+	void createFileProject();
 	void closeProject();
 
 	void buildMainWindow();

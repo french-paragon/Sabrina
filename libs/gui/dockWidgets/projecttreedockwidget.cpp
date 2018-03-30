@@ -40,17 +40,18 @@ void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
 		disconnect(_newItemFactoryWatcher);
 	}
 
+	if (project == nullptr) {
+		setEnabled(false);
+		return;
+	} else {
+		setEnabled(true);
+	}
+
 	reselectProject(project);
 	rebuildMenu(project);
 
 	_newItemFactoryWatcher = connect(project->factoryManager(), &EditableItemFactoryManager::rowsInserted,
 									 this, &ProjectTreeDockWidget::rebuildMenuWithoutProject);
-
-	if (project == nullptr) {
-		setEnabled(false);
-	} else {
-		setEnabled(true);
-	}
 }
 
 void ProjectTreeDockWidget::reselectProject(EditableItemManager *project) {

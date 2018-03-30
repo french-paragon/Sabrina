@@ -15,6 +15,10 @@ App::App(int &argc, char **argv) :
 	_mainWindow(nullptr),
 	_project(nullptr)
 {
+	QCoreApplication::setOrganizationName(ORG_NAME);
+	QCoreApplication::setOrganizationDomain(ORG_DOMAIN);
+	QCoreApplication::setApplicationName(APP_NAME);
+
 	connect(this, &QApplication::aboutToQuit, this, &App::quitCathia);
 }
 
@@ -55,6 +59,10 @@ void App::buildMainWindow() {
 	connect(openProjectAction, &QAction::triggered, this, &App::openFileProject);
 	fileMenu->addAction(openProjectAction);
 
+	QAction* createProjectAction = new QAction(tr("créer un projet"), fileMenu);
+	connect(createProjectAction, &QAction::triggered, this, &App::createFileProject);
+	fileMenu->addAction(createProjectAction);
+
 	fileMenu->addSeparator();
 
 	QAction* closeProjectAction = new QAction(tr("fermer le projet"), fileMenu);
@@ -68,6 +76,10 @@ void App::buildMainWindow() {
 }
 
 void App::openFileProject() {
+	//TODO implement
+}
+
+void App::createFileProject() {
 	//TODO implement
 }
 

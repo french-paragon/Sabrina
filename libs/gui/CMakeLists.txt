@@ -16,4 +16,4 @@ QT5_USE_MODULES(${LIB_NAME} Core)
 QT5_USE_MODULES(${LIB_NAME} Widgets)
 QT5_USE_MODULES(${LIB_NAME} Gui)
 
-target_link_libraries(${LIB_NAME} Aline)
+target_link_libraries(${LIB_NAME} Aline Model)

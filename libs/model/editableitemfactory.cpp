@@ -6,10 +6,13 @@ namespace Sabrina {
 
 EditableItemFactoryManager EditableItemFactoryManager::GlobalEditableItemFactoryManager;
 
-EditableItemFactory::EditableItemFactory(QObject *parent) : QObject(parent)
+EditableItemFactory::EditableItemFactory(QObject *parent) :
+	QObject(parent),
+	_typeId(""),
+	_typeName(""),
+	_typeIconUrl("")
 {
-	_typeId = "";
-	_typeName = "";
+
 }
 
 QString EditableItemFactory::getItemTypeId() const {
@@ -38,6 +41,23 @@ QString EditableItemFactory::getItemTypeName() const {
 	return _typeName;
 
 }
+
+QString EditableItemFactory::getItemTypeIconUrl() const {
+
+	if (_typeIconUrl == "") {
+
+		//get the type name.
+		EditableItem* temp = createItem(nullptr);
+		_typeName = temp->iconInternalUrl();
+
+		delete temp;
+
+	}
+
+	return _typeIconUrl;
+
+}
+
 
 EditableItemFactoryManager::EditableItemFactoryManager(QObject *parent) : QAbstractListModel(parent)
 {

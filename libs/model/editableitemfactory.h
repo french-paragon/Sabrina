@@ -18,6 +18,7 @@ public:
 
 	QString getItemTypeId() const;
 	QString getItemTypeName() const;
+	QString getItemTypeIconUrl() const;
 	virtual EditableItem* createItem(EditableItemManager* parent) const = 0;
 
 signals:
@@ -28,6 +29,7 @@ protected:
 
 	mutable QString _typeId;
 	mutable QString _typeName;
+	mutable QString _typeIconUrl;
 };
 
 class EditableItemFactoryManager : public QAbstractListModel
