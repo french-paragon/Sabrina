@@ -13,6 +13,14 @@
 
 namespace Sabrina {
 
+const QString JsonEditableItemManager::PROJECT_FILE_EXT = ".sabrinaproject";
+
+const QString JsonEditableItemManager::TREE_REF_ID = "reference";
+const QString JsonEditableItemManager::TREE_TYPE_ID = "type";
+const QString JsonEditableItemManager::TREE_NAME_ID = "name";
+const QString JsonEditableItemManager::TREE_CHILDRENS_ID = "childrens";
+const QString JsonEditableItemManager::TREE_ACCEPT_CHILDRENS_ID = "accept_childrens";
+
 const QString JsonEditableItemManager::ITEM_FOLDER_NAME = "items/";
 
 JsonEditableItemManager::JsonEditableItemManager(QObject *parent) :
@@ -35,6 +43,148 @@ void JsonEditableItemManager::reset() {
 	cleanTreeStruct();
 
 	_hasAProjectOpen = false;
+}
+
+bool JsonEditableItemManager::saveStruct() {
+
+	QJsonObject obj;
+	encapsulateTreeLeaf(_root, obj);
+
+	QJsonDocument doc(obj);
+	QByteArray datas = doc.toJson();
+
+	QString fileName =  _projectFolder + _projectFileName;
+
+	if (!_projectFileName.endsWith(PROJECT_FILE_EXT)) {
+		fileName += PROJECT_FILE_EXT;
+	}
+
+	QFile out(fileName);
+
+	if(!out.open(QIODevice::WriteOnly)){
+		throw ItemIOException("root", QString("Cannot write to file %1.").arg(fileName), this);
+	}
+
+	qint64 w_stat = out.write(datas);
+	out.close();
+
+	if(w_stat < 0){
+		throw ItemIOException("root", QString("Cannot write to file %1.").arg(fileName), this);
+	}
+
+	return true;
+}
+
+void JsonEditableItemManager::encapsulateTreeLeaf(treeStruct* branch, QJsonObject & obj) {
+
+	obj.insert(TREE_REF_ID, branch->_ref);
+	obj.insert(TREE_TYPE_ID, branch->_type_ref);
+	obj.insert(TREE_NAME_ID, branch->_name);
+	obj.insert(TREE_ACCEPT_CHILDRENS_ID, branch->_acceptChildrens);
+
+	QJsonArray childrens;
+
+	for (treeStruct* leaf : branch->_childrens) {
+		QJsonObject obj;
+		encapsulateTreeLeaf(leaf, obj);
+		childrens.append(obj);
+	}
+
+	obj.insert(TREE_CHILDRENS_ID, childrens);
+
+}
+
+bool JsonEditableItemManager::loadStruct() {
+
+	reset();
+
+	QString fileName =  _projectFolder + _projectFileName;
+
+	if (!_projectFileName.endsWith(PROJECT_FILE_EXT)) {
+		fileName += PROJECT_FILE_EXT;
+	}
+
+	QFile file(fileName);
+
+	if (!file.exists()) {
+		throw ItemIOException("root", QString("File %1 do not exist.").arg(fileName), this);
+	}
+
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		throw ItemIOException("root", QString("File %1 is not readable.").arg(fileName), this);
+	}
+
+	QByteArray datas = file.readAll();
+	file.close();
+
+	QJsonParseError errors;
+	QJsonDocument doc = QJsonDocument::fromJson(datas, &errors);
+
+	if(errors.error != QJsonParseError::NoError){
+		throw ItemIOException("root", QString("Error while parsing JSON data in file %1.").arg(fileName), this);
+	}
+
+	QJsonObject obj = doc.object();
+
+	extractTreeLeaf(_root, obj);
+
+}
+void JsonEditableItemManager::extractTreeLeaf(treeStruct* leaf, QJsonObject &obj) {
+
+	if (!obj.contains(TREE_REF_ID)) {
+
+		if (leaf->_parent != nullptr) {
+			throw ItemIOException(leaf->_parent->_ref, QString("Error while parsing JSON data in object %1, missing reference for children.").arg(leaf->_parent->_ref), this);
+		}
+
+	}
+
+	leaf->_ref = obj.value(TREE_REF_ID).toString();
+
+	if (!obj.contains(TREE_TYPE_ID)) {
+		throw ItemIOException(leaf->_ref, QString("Error while parsing JSON data in object %1, missing type id.").arg(leaf->_ref), this);
+	}
+
+	leaf->_type_ref = obj.value(TREE_TYPE_ID).toString();
+	leaf->_name = (obj.contains(TREE_NAME_ID)) ? obj.value(TREE_NAME_ID).toString() : leaf->_ref;
+	leaf->_acceptChildrens = (obj.contains(TREE_ACCEPT_CHILDRENS_ID)) ? obj.value(TREE_ACCEPT_CHILDRENS_ID).toBool() : false;
+
+	if (leaf->_acceptChildrens) {
+
+		if (obj.contains(TREE_CHILDRENS_ID)) {
+
+			QJsonValue val = obj.value(TREE_CHILDRENS_ID);
+
+			if (val.isArray()) {
+
+				QJsonArray array = val.toArray();
+
+				for (QJsonValue v : array) {
+
+					if (v.isObject()) {
+						QJsonObject sub_obj = v.toObject();
+
+						treeStruct sub_leaf;
+
+						sub_leaf._parent = leaf;
+						_tree.push_back(sub_leaf);
+						treeStruct* ptr = &_tree.back();
+
+						extractTreeLeaf(ptr, sub_obj);
+
+						leaf->_childrens.append(ptr);
+						_treeIndex.insert(ptr->_ref, ptr);
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
 }
 
 EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {

@@ -10,11 +10,25 @@ namespace Sabrina {
 class CATHIA_MODEL_EXPORT JsonEditableItemManager : public EditableItemManager
 {
 public:
+
+	static const QString PROJECT_FILE_EXT;
+
+	static const QString TREE_REF_ID;
+	static const QString TREE_TYPE_ID;
+	static const QString TREE_NAME_ID;
+	static const QString TREE_CHILDRENS_ID;
+	static const QString TREE_ACCEPT_CHILDRENS_ID;
+
 	explicit JsonEditableItemManager(QObject *parent = nullptr);
 
 	virtual bool hasDataSource() const;
 
 	virtual void reset();
+
+	void openProject(QString projectFolder, QString projectFile);
+
+	virtual bool saveStruct();
+	virtual bool loadStruct();
 
 protected:
 
@@ -22,6 +36,9 @@ protected:
 
 	virtual EditableItem* effectivelyLoadItem(QString const& ref);
 	virtual bool effectivelySaveItem(QString ref);
+
+	void encapsulateTreeLeaf(treeStruct* leaf, QJsonObject &obj);
+	void extractTreeLeaf(treeStruct* leaf, QJsonObject &obj);
 
 	bool _hasAProjectOpen;
 	QString _projectFileName;

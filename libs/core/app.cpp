@@ -114,7 +114,12 @@ void App::openFileProject() {
 }
 
 void App::createFileProject() {
-	//TODO implement
+
+	closeProject(); //ensure previous project is closed.
+	//TODO: change the architecture so that we can have multiple projects open at once.
+
+
+
 }
 
 void App::closeProject() {

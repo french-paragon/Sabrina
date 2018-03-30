@@ -129,4 +129,13 @@ QVariant EditableItemFactoryManager::data(const QModelIndex &index,
 
 }
 
+QString EditableItemFactoryManager::itemIconUrl(QString type_ref) {
+
+	if (!hasFactoryInstalled(type_ref)) {
+		return "";
+	}
+
+	return _installedFactories.value(type_ref)->getItemTypeIconUrl();
+}
+
 } // namespace Cathia

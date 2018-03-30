@@ -3,6 +3,8 @@
 #include "editableitem.h"
 #include "editableitemfactory.h"
 
+#include <QIcon>
+
 namespace Sabrina {
 
 const QChar EditableItemManager::RefSeparator = QChar('/');
@@ -84,12 +86,29 @@ QVariant EditableItemManager::data(const QModelIndex &index, int role) const {
 	}
 
 	switch (role) {
+
 	case Qt::DisplayRole:
+
 		return data->_name;
+
 	case ItemRefRole:
+
 		return data->_ref;
+
 	case ItemAcceptChildrenRole:
+
 		return data->_acceptChildrens;
+
+	case Qt::DecorationRole: //icon
+
+		{
+			QString iconPath = _factoryManager->itemIconUrl(data->_type_ref);
+
+			if (iconPath != "") {
+				return QIcon(iconPath);
+			}
+		}
+		break;
 	default:
 		break;
 	}
@@ -154,7 +173,7 @@ QVector<QString> EditableItemManager::listChildren(QString ref) {
 	return QVector<QString>();
 }
 
-bool EditableItemManager::createItem(QString typeRef, QString ref, EditableItem *parent) {
+bool EditableItemManager::createItem(QString typeRef, QString ref, QString parent_ref) {
 
 	if (!_factoryManager->hasFactoryInstalled(typeRef)) {
 		return false;
@@ -164,8 +183,8 @@ bool EditableItemManager::createItem(QString typeRef, QString ref, EditableItem 
 		return false;
 	}
 
-	if (parent != nullptr) {
-		if (qobject_cast<EditableItemManager*>(parent->parent()) != this) {
+	if (parent_ref != nullptr) {
+		if (!_treeIndex.contains(parent_ref)) {
 			return false; //the parent need to be in the project.
 		}
 	}
@@ -174,8 +193,9 @@ bool EditableItemManager::createItem(QString typeRef, QString ref, EditableItem 
 
 	if (item != nullptr) {
 
-		insertItem(item, parent);
-		return true;
+		if (insertItem(item, _treeIndex.value(parent_ref, nullptr)) ) {
+			return true;
+		}
 
 	}
 
@@ -204,13 +224,56 @@ void EditableItemManager::closeAll() {
 
 }
 
+bool EditableItemManager::insertItem(EditableItem* item, treeStruct* parent_branch) {
+
+	if (parent_branch == nullptr) {
+		return false;
+	}
+
+	treeStruct item_leaf;
+
+	item_leaf._parent = parent_branch;
+	item_leaf._acceptChildrens = item->acceptChildrens();
+	item_leaf._name = item->objectName();
+	item_leaf._ref = item->getRef();
+	item_leaf._type_ref = item->getTypeId();
+
+	beginInsertRows(indexFromLeaf(parent_branch), parent_branch->_childrens.size(), parent_branch->_childrens.size());
+
+	_tree.push_back(item_leaf);
+	parent_branch->_childrens.append(&_tree.back());
+	_treeIndex.insert(_tree.back()._ref, &_tree.back());
+
+	_loadedItems.insert(_tree.back()._ref, {&_tree.back(), item});
+
+	endInsertRows();
+
+	return true;
+
+}
+
+QModelIndex EditableItemManager::indexFromLeaf(treeStruct* leaf) const {
+
+	if (leaf == _root || leaf == nullptr) {
+		return QModelIndex();
+	}
+
+	int row = leaf->_parent->_childrens.indexOf(leaf);
+
+	if (row > 0) {
+		return createIndex(row, 0, leaf);
+	}
+
+	return QModelIndex();
+}
+
 void EditableItemManager::cleanTreeStruct() {
 
 	beginResetModel();
 
 	_treeIndex.clear();
 	_tree.clear();
-	_tree.push_back({nullptr, RefRoot, RefRoot, {}, false});
+	_tree.push_back({nullptr, RefRoot, RefRoot, RefRoot, {}, true});
 	_root = &_tree.first();
 
 	endResetModel();

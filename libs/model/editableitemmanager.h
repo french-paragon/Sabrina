@@ -68,11 +68,13 @@ public:
 	bool isItemLoaded(const QString &ref) const;
 	bool containItem(const QString & ref) const;
 
-	bool createItem(QString typeRef, QString ref, EditableItem* parent = nullptr);
+	bool createItem(QString typeRef, QString ref, QString parent_ref = "");
 
 	QVector<QString> listChildren(QString ref);
 
 	virtual bool saveItem(QString ref);
+	virtual bool saveStruct() = 0;
+	virtual bool loadStruct() = 0;
 
 	EditableItemFactoryManager *factoryManager() const;
 
@@ -99,6 +101,7 @@ protected:
 		treeStruct* _parent;
 		QString _ref;
 		QString _name;
+		QString _type_ref;
 		QVector<treeStruct*> _childrens;
 		bool _acceptChildrens;
 	};
@@ -107,6 +110,8 @@ protected:
 		treeStruct* _treeStruct;
 		EditableItem* _item;
 	};
+
+	QModelIndex indexFromLeaf(treeStruct* leaf) const;
 
 	/*!
 	 * \brief effectivelyLoadItem load an item without checking if it is cached before.
@@ -119,7 +124,7 @@ protected:
 	 * \brief insertItem insert an item in the manager, the manager take ownership of the item.
 	 * \param item the item to insert
 	 */
-	virtual void insertItem(EditableItem* item, EditableItem* parent) = 0;
+	virtual bool insertItem(EditableItem* item, treeStruct *parent_branch);
 
 	QMap<QString, loadedItem> _loadedItems;
 

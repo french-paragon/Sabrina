@@ -53,6 +53,8 @@ public:
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
+	QString itemIconUrl(QString type_ref);
+
 protected:
 
 	QMap<QString, EditableItemFactory*> _installedFactories;
