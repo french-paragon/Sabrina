@@ -18,6 +18,10 @@ void MainWindow::displayAboutWindows() {
 
 }
 
+void MainWindow::editItem(QString const& itemRef, QString const& itemType) {
+	//TODO: implement
+}
+
 EditableItemManager *MainWindow::currentProject() const
 {
     return _currentProject;

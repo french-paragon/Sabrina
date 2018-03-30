@@ -15,3 +15,5 @@ target_compile_definitions(${LIB_NAME}
   PRIVATE CATHIA_MODEL_LIBRARY)
 
 QT5_USE_MODULES(${LIB_NAME} Core)
+
+target_link_libraries(${LIB_NAME} Aline)

@@ -14,7 +14,8 @@ const QString EditableItem::REF_IN_PROP_NAME = "ref_in_to_out";
 const QString EditableItem::REF_FROM_PROP_NAME = "ref_from_out";
 const QString EditableItem::CHILDREN_PROP_NAME = "ref_childrens";
 
-EditableItem::EditableItem(EditableItemManager *parent) : QObject(parent)
+EditableItem::EditableItem(EditableItemManager *parent) :
+	Aline::EditableItem(parent)
 {
 
 }

@@ -25,6 +25,8 @@ public slots:
 
 	void displayAboutWindows();
 
+	void editItem(QString const& itemRef, QString const& itemType);
+
 protected:
 
 	EditableItemManager* _currentProject;

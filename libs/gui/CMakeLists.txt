@@ -5,7 +5,9 @@ set(LIB_SRC mainwindows.cpp
             utilsDialogs/aboutdialog.cpp
             utilsDialogs/aboutdialog.ui
             dockWidgets/projecttreedockwidget.cpp
-            dockWidgets/projecttreedockwidget.ui)
+            dockWidgets/projecttreedockwidget.ui
+            editors/personnageeditor.cpp
+            editors/personnageeditor.ui)
 
 add_library(${LIB_NAME} ${LIB_SRC})
 

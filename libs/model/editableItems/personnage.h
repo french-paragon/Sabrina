@@ -1,8 +1,8 @@
 #ifndef PERSONNAGE_H
 #define PERSONNAGE_H
 
-#include "editableitem.h"
-#include "editableitemfactory.h"
+#include "model/editableitem.h"
+#include "model/editableitemfactory.h"
 
 namespace Sabrina {
 
@@ -10,6 +10,8 @@ class Personnage : public EditableItem
 {
 	Q_OBJECT
 public:
+
+	static const QString PERSONNAGE_TYPE_ID;
 
 	class PersonnageFactory : public EditableItemFactory
 	{

@@ -1,7 +1,9 @@
-#ifndef EDITABLEITEM_H
-#define EDITABLEITEM_H
+#ifndef SABRINA_EDITABLEITEM_H
+#define SABRINA_EDITABLEITEM_H
 
 #include "model_global.h"
+
+#include <aline/src/editableitem.h>
 
 #include <QObject>
 #include <QSet>
@@ -11,7 +13,7 @@ namespace Sabrina {
 
 class EditableItemManager;
 
-class CATHIA_MODEL_EXPORT EditableItem : public QObject
+class CATHIA_MODEL_EXPORT EditableItem : public Aline::EditableItem
 {
 	Q_OBJECT
 public:
@@ -33,18 +35,6 @@ public:
 	Q_PROPERTY(QString ref READ getRef WRITE changeRef NOTIFY refChanged)
 	Q_PROPERTY(QString parentRef MEMBER _p_ref NOTIFY parentChanged)
 	Q_PROPERTY(QString type_id READ getTypeId)
-
-	/*!
-	 * \brief getTypeId allow to get info on the type of the editable item.
-	 * \return a type id as a string.
-	 */
-	virtual QString getTypeId() const = 0;
-
-	/*!
-	 * \brief getTypeName allow to get the name of the editable item type as a string.
-	 * \return
-	 */
-	virtual QString getTypeName() const = 0;
 
 	/*!
 	 * \brief getLinkedItemsRefs get the list of reference of item refered in the current item.
@@ -149,4 +139,4 @@ protected:
 
 } // namespace Cathia
 
-#endif // EDITABLEITEM_H
+#endif // SABRINA_EDITABLEITEM_H

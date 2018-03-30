@@ -2,6 +2,9 @@
 
 namespace Sabrina {
 
+
+const QString Personnage::PERSONNAGE_TYPE_ID = "sabrina_jdr_personnage";
+
 Personnage::Personnage(EditableItemManager *parent) : EditableItem(parent)
 {
 
@@ -16,7 +19,7 @@ EditableItem* Personnage::PersonnageFactory::createItem(EditableItemManager* par
 }
 
 QString Personnage::getTypeId() const {
-	return QString("sabrina_jdr_personnage");
+	return PERSONNAGE_TYPE_ID;
 }
 QString Personnage::getTypeName() const {
 	return tr("Personnage");
