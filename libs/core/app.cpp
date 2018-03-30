@@ -7,6 +7,16 @@
 #include <QMenuBar>
 
 #include "model/editableitemmanager.h"
+#include "model/editableItems/personnage.h"
+#include "model/editableItems/place.h"
+#include "model/editableItems/folder.h"
+
+#include "gui/editors/personnageeditor.h"
+#include "gui/editors/placeeditor.h"
+
+#include <aline/src/editor.h>
+#include <aline/src/editorfactory.h>
+#include <aline/src/editorfactorymanager.h>
 
 namespace Sabrina {
 
@@ -72,6 +82,21 @@ void App::buildMainWindow() {
 	QAction* exitAction = new QAction(tr("fermer le programme"), fileMenu);
 	connect(exitAction, &QAction::triggered, this, &App::quit);
 	fileMenu->addAction(exitAction);
+
+}
+
+void App::loadEditorsFactories() {
+
+	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new PersonnageEditor::PersonnageEditorFactory());
+	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new PlaceEditor::PlaceEditorFactory());
+
+}
+
+void App::loadEditableFactories() {
+
+	EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Personnage::PersonnageFactory());
+	EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Place::PlaceFactory());
+	EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Folder::FolderFactory());
 
 }
 

@@ -2,6 +2,8 @@
 
 namespace Sabrina {
 
+const QString Folder::FOLDER_TYPE_ID = "sabrina_general_folder";
+
 Folder::Folder(EditableItemManager *parent) : EditableItem(parent)
 {
 
@@ -9,7 +11,7 @@ Folder::Folder(EditableItemManager *parent) : EditableItem(parent)
 
 QString Folder::getTypeId() const {
 
-	return QString("sabrina_general_folder");
+	return FOLDER_TYPE_ID;
 
 }
 
@@ -36,6 +38,16 @@ void Folder::treatChangedRef(QString oldRef, QString newRef) {
 	(void) newRef;
 	//Do nothing, since a folder is nothing more than a children container.
 
+}
+
+Folder::FolderFactory::FolderFactory(QObject *parent) :
+	EditableItemFactory(parent)
+{
+
+}
+
+EditableItem* Folder::FolderFactory::createItem(EditableItemManager* parent) const {
+	return new Folder(parent);
 }
 
 } // namespace Sabrina

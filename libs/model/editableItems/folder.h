@@ -1,14 +1,25 @@
 #ifndef FOLDER_H
 #define FOLDER_H
 
-#include "editableitem.h"
-#include "editableitemfactory.h"
+#include "model/editableitem.h"
+#include "model/editableitemfactory.h"
 
 namespace Sabrina {
 
 class Folder : public EditableItem
 {
 public:
+
+	static const QString FOLDER_TYPE_ID;
+
+	class FolderFactory : public EditableItemFactory
+	{
+	public:
+		explicit FolderFactory(QObject *parent = nullptr);
+		EditableItem* createItem(EditableItemManager* parent) const;
+
+	};
+
 	Folder(EditableItemManager* parent = nullptr);
 
 	virtual QString getTypeId() const;

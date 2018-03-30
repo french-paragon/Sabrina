@@ -68,12 +68,12 @@ void PlaceEditor::onBackgroundTextChanged() {
 
 }
 
-PlaceEditor::PersonnageEditorFactory::PersonnageEditorFactory(QObject* parent) :
+PlaceEditor::PlaceEditorFactory::PlaceEditorFactory(QObject* parent) :
 	Aline::EditorFactory(parent)
 {
 
 }
-Aline::Editor* PlaceEditor::PersonnageEditorFactory::createItem(QWidget* parent) const {
+Aline::Editor* PlaceEditor::PlaceEditorFactory::createItem(QWidget* parent) const {
 	return new PlaceEditor(parent);
 }
 

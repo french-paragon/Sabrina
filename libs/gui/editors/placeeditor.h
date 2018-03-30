@@ -21,10 +21,10 @@ public:
 
 	static const QString PLACE_EDITOR_TYPE_ID;
 
-	class PersonnageEditorFactory : public Aline::EditorFactory
+	class PlaceEditorFactory : public Aline::EditorFactory
 	{
 		public :
-			explicit PersonnageEditorFactory(QObject* parent = nullptr);
+			explicit PlaceEditorFactory(QObject* parent = nullptr);
 			virtual Aline::Editor* createItem(QWidget* parent) const;
 	};
 

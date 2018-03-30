@@ -28,6 +28,8 @@ protected:
 	void closeProject();
 
 	void buildMainWindow();
+	void loadEditorsFactories();
+	void loadEditableFactories();
 
 	void quitCathia();
 
