@@ -1,7 +1,9 @@
 #include "app.h"
 
 #include <QMainWindow>
+
 #include "gui/mainwindows.h"
+#include "gui/dockWidgets/projecttreedockwidget.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -63,6 +65,8 @@ void App::buildMainWindow() {
 	_mainWindow = new MainWindow();
 	_mainWindow->setMenuBar(_mainWindow->menuBar());
 
+	//menu
+
 	QMenu* fileMenu = _mainWindow->menuBar()->addMenu(tr("fichier"));
 
 	QAction* openProjectAction = new QAction(tr("ouvrir un projet"), fileMenu);
@@ -82,6 +86,11 @@ void App::buildMainWindow() {
 	QAction* exitAction = new QAction(tr("fermer le programme"), fileMenu);
 	connect(exitAction, &QAction::triggered, this, &App::quit);
 	fileMenu->addAction(exitAction);
+
+	//Dock widgets.
+
+	ProjectTreeDockWidget* project_dock = new ProjectTreeDockWidget(_mainWindow);
+	_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, project_dock);
 
 }
 

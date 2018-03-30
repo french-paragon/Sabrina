@@ -1,10 +1,10 @@
 #ifndef PROJECTTREEDOCKWIDGET_H
 #define PROJECTTREEDOCKWIDGET_H
 
-#include "gui_global.h"
+#include "gui/gui_global.h"
 #include <QDockWidget>
 
-#include "mainwindows.h"
+#include "gui/mainwindows.h"
 #include "model/editableitemmanager.h"
 #include <QSortFilterProxyModel>
 
