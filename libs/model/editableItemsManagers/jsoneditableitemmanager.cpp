@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QMetaObject>
 #include <QMetaProperty>
+#include <QFileInfo>
+#include <QDir>
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -43,6 +45,45 @@ void JsonEditableItemManager::reset() {
 	cleanTreeStruct();
 
 	_hasAProjectOpen = false;
+}
+
+void JsonEditableItemManager::connectProject(QString projectFile) {
+
+	QFileInfo info(projectFile);
+
+	if (info.isFile() || projectFile.endsWith(PROJECT_FILE_EXT)) {
+
+		_projectFolder = info.dir().absolutePath();
+		_projectFileName = info.fileName();
+	} else {
+		_projectFolder = info.absoluteFilePath();
+		_projectFileName = "project" + PROJECT_FILE_EXT;
+	}
+
+	_projectFolder = QDir::fromNativeSeparators(_projectFolder);
+
+	if (!_projectFolder.endsWith('/')) {
+		_projectFolder += '/';
+	}
+
+	if (!_projectFileName.endsWith(PROJECT_FILE_EXT)) {
+		_projectFileName += PROJECT_FILE_EXT;
+	}
+
+	if (!info.exists()) {
+		saveStruct();
+	} else {
+		loadStruct();
+	}
+
+	QDir itemDir(_projectFolder + ITEM_FOLDER_NAME);
+
+	if (!itemDir.exists()) {
+		itemDir.mkdir(itemDir.absolutePath());
+	}
+
+	_hasAProjectOpen = true;
+
 }
 
 bool JsonEditableItemManager::saveStruct() {
@@ -268,7 +309,7 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 	return item;
 }
 
-bool JsonEditableItemManager::effectivelySaveItem(QString ref) {
+bool JsonEditableItemManager::effectivelySaveItem(const QString &ref) {
 
 	EditableItem* item = loadItem(ref);
 

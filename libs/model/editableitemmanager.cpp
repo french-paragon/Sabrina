@@ -14,7 +14,7 @@ EditableItemManager::EditableItemManager(QObject *parent) :
 	QAbstractItemModel(parent),
 	_factoryManager(&EditableItemFactoryManager::GlobalEditableItemFactoryManager)
 {
-
+	cleanTreeStruct();
 }
 
 QModelIndex EditableItemManager::index(int row, int column, const QModelIndex &parent) const {

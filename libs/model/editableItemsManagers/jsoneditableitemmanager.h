@@ -1,9 +1,9 @@
 #ifndef JSONEDITABLEITEMMANAGER_H
 #define JSONEDITABLEITEMMANAGER_H
 
-#include "model_global.h"
+#include "model/model_global.h"
 
-#include "editableitemmanager.h"
+#include "model/editableitemmanager.h"
 
 namespace Sabrina {
 
@@ -25,7 +25,7 @@ public:
 
 	virtual void reset();
 
-	void openProject(QString projectFolder, QString projectFile);
+	void connectProject(QString projectFile);
 
 	virtual bool saveStruct();
 	virtual bool loadStruct();
@@ -35,7 +35,7 @@ protected:
 	static const QString ITEM_FOLDER_NAME;
 
 	virtual EditableItem* effectivelyLoadItem(QString const& ref);
-	virtual bool effectivelySaveItem(QString ref);
+	virtual bool effectivelySaveItem(QString const& ref);
 
 	void encapsulateTreeLeaf(treeStruct* leaf, QJsonObject &obj);
 	void extractTreeLeaf(treeStruct* leaf, QJsonObject &obj);

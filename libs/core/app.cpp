@@ -7,11 +7,16 @@
 
 #include <QMenu>
 #include <QMenuBar>
+#include <QFileDialog>
+
+#include <QUrl>
 
 #include "model/editableitemmanager.h"
 #include "model/editableItems/personnage.h"
 #include "model/editableItems/place.h"
 #include "model/editableItems/folder.h"
+
+#include "model/editableItemsManagers/jsoneditableitemmanager.h"
 
 #include "gui/editors/personnageeditor.h"
 #include "gui/editors/placeeditor.h"
@@ -110,15 +115,66 @@ void App::loadEditableFactories() {
 }
 
 void App::openFileProject() {
-	//TODO implement
-}
 
-void App::createFileProject() {
+	QString projectFile = QFileDialog::getOpenFileName(
+				_mainWindow,
+				tr("Ouvrir un projet Sabrina."),
+				QDir::homePath(),
+				QString("*") + JsonEditableItemManager::PROJECT_FILE_EXT);
+
+	if (projectFile == "") {
+		return;
+	}
+
+	JsonEditableItemManager* project = new JsonEditableItemManager(this);
+
+	project->connectProject(projectFile);
+
+	if (!project->hasDataSource()) {
+		delete project;
+		return;
+	}
 
 	closeProject(); //ensure previous project is closed.
 	//TODO: change the architecture so that we can have multiple projects open at once.
 
+	_project = project;
 
+	_mainWindow->setCurrentProject(_project);
+
+}
+
+void App::createFileProject() {
+
+	QString projectFile = QFileDialog::getSaveFileName(
+				_mainWindow,
+				tr("Créer un projet Sabrina."),
+				QDir::homePath(),
+				QString("*") + JsonEditableItemManager::PROJECT_FILE_EXT);
+
+	if (projectFile == "") {
+		return;
+	}
+
+	if (!projectFile.endsWith(JsonEditableItemManager::PROJECT_FILE_EXT)) {
+		projectFile += JsonEditableItemManager::PROJECT_FILE_EXT;
+	}
+
+	JsonEditableItemManager* project = new JsonEditableItemManager(this);
+
+	project->connectProject(projectFile);
+
+	if (!project->hasDataSource()) {
+		delete project;
+		return;
+	}
+
+	closeProject(); //ensure previous project is closed.
+	//TODO: change the architecture so that we can have multiple projects open at once.
+
+	_project = project;
+
+	_mainWindow->setCurrentProject(_project);
 
 }
 
@@ -131,6 +187,8 @@ void App::closeProject() {
 	_project->deleteLater();
 
 	_project = nullptr;
+
+	_mainWindow->setCurrentProject(nullptr);
 }
 
 void App::quitCathia() {

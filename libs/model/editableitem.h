@@ -106,7 +106,7 @@ public slots:
 	 * \brief save save the item.
 	 * \return true if sucess, false otherwise.
 	 */
-	bool save();
+	virtual bool save();
 
 protected:
 
