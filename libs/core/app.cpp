@@ -54,6 +54,9 @@ App::~App() {
 bool App::start(QString appCode) {
 	int code = Aline::App::start(appCode);
 
+	loadEditableFactories();
+	loadEditorsFactories();
+
 	buildMainWindow();
 
 	_mainWindow->show();

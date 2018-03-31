@@ -94,6 +94,7 @@ void ProjectTreeDockWidget::rebuildMenu(EditableItemManager* project) {
 	}
 
 	ui->toolButton_new->setMenu(_newItemMenu);
+	ui->toolButton_new->setPopupMode(QToolButton::MenuButtonPopup);
 
 }
 

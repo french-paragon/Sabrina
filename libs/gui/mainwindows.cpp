@@ -5,7 +5,8 @@
 namespace Sabrina {
 
 MainWindow::MainWindow(QWidget* parent) :
-	Aline::MainWindow(parent)
+	Aline::MainWindow(parent),
+	_currentProject(nullptr)
 {
 	resize(800, 600);
 }
