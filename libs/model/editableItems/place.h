@@ -17,11 +17,11 @@ public:
 	{
 	public:
 		explicit PlaceFactory(QObject *parent = nullptr);
-		EditableItem* createItem(EditableItemManager* parent) const;
+		EditableItem* createItem(QString ref, EditableItemManager* parent) const;
 
 	};
 
-	Place(EditableItemManager *parent = nullptr);
+	Place(QString ref, EditableItemManager *parent = nullptr);
 
 	Q_PROPERTY(QString placeDescription READ placeDescription WRITE setplaceDescription)
 

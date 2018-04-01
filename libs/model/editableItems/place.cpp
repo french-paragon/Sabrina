@@ -4,7 +4,8 @@ namespace Sabrina {
 
 const QString Place::PLACE_TYPE_ID = "sabrina_jdr_place";
 
-Place::Place(EditableItemManager *parent) : EditableItem(parent)
+Place::Place(QString ref, EditableItemManager *parent) :
+	EditableItem(ref, parent)
 {
 
 }
@@ -13,8 +14,8 @@ Place::PlaceFactory::PlaceFactory(QObject *parent) : EditableItemFactory(parent)
 
 }
 
-EditableItem* Place::PlaceFactory::createItem(EditableItemManager* parent) const {
-	return new Place(parent);
+EditableItem* Place::PlaceFactory::createItem(QString ref, EditableItemManager* parent) const {
+	return new Place(ref, parent);
 }
 
 QString Place::getTypeId() const {

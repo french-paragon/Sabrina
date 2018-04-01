@@ -264,7 +264,7 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 		throw ItemIOException(ref, QString("Editable item type %1 found in file %2 is not registered.").arg(id).arg(fileName), this);
 	}
 
-	EditableItem* item = _factoryManager->createItem(id, this);
+	EditableItem* item = _factoryManager->createItem(id, ref, this);
 
 	for (QString prop : obj.keys()) {
 
@@ -281,6 +281,10 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 		}
 
 		if (prop == EditableItem::CHILDREN_PROP_NAME) {
+			continue;
+		}
+
+		if (prop == EditableItem::REF_PROP_NAME) {
 			continue;
 		}
 

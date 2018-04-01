@@ -89,7 +89,7 @@ QVariant EditableItemManager::data(const QModelIndex &index, int role) const {
 
 	case Qt::DisplayRole:
 
-		return data->_name;
+		return data->_ref + ": " + data->_name;
 
 	case ItemRefRole:
 
@@ -183,15 +183,23 @@ bool EditableItemManager::createItem(QString typeRef, QString ref, QString paren
 		return false;
 	}
 
-	if (parent_ref != nullptr) {
+	if (parent_ref != "") {
 		if (!_treeIndex.contains(parent_ref)) {
 			return false; //the parent need to be in the project.
 		}
 	}
 
-	EditableItem* item = _factoryManager->createItem(typeRef, this);
+	EditableItem* item = _factoryManager->createItem(typeRef, ref, this);
 
 	if (item != nullptr) {
+
+		if (parent_ref == "") {
+			if (insertItem(item, _root) ) {
+				return true;
+			} else {
+				return false;
+			}
+		}
 
 		if (insertItem(item, _treeIndex.value(parent_ref, nullptr)) ) {
 			return true;

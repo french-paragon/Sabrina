@@ -20,7 +20,7 @@ public:
 
 	static QString simplifyRef(QString ref);
 
-	explicit EditableItem(EditableItemManager *parent = nullptr);
+	explicit EditableItem(QString ref, EditableItemManager *parent = nullptr);
 
 	Q_PROPERTY(bool hasUnsavedChanges READ getHasUnsavedChanged NOTIFY unsavedStateChanged)
 

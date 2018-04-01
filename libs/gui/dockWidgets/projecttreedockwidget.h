@@ -26,11 +26,13 @@ public:
 
 signals:
 
-	void itemCreationTriggered(QString itemTypeRef);
+	void itemCreationTriggered(QString itemTypeRef, QString ref, QString parent_ref);
 	void itemDoubleClicked(QString itemRef);
 	void itemSuppressionTriggered(QStringList itemRef);
 
 private:
+
+	void onItemCreationTriggered(QString itemTypeRef);
 
 	void projectChanged(EditableItemManager* project);
 
@@ -49,6 +51,7 @@ private:
 	Ui::ProjectTreeDockWidget *ui;
 
 	QMetaObject::Connection _newItemFactoryWatcher;
+	QMetaObject::Connection _itemCreationTrigger;
 };
 
 } //namespace Sabrina

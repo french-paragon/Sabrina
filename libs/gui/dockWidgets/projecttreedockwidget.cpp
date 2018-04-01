@@ -2,6 +2,7 @@
 #include "ui_projecttreedockwidget.h"
 
 #include <QMenu>
+#include <QInputDialog>
 
 #include "actions/editableitemtypespecializedaction.h"
 
@@ -34,10 +35,50 @@ ProjectTreeDockWidget::~ProjectTreeDockWidget()
 	delete ui;
 }
 
+void ProjectTreeDockWidget::onItemCreationTriggered(QString itemTypeRef) {
+
+
+	QString parent_ref = "";
+
+	QModelIndexList selection = ui->treeView->selectionModel()->selectedIndexes();
+
+	if (selection.size() > 0) {
+
+		QVariant info = ui->treeView->model()->data(selection.first(), EditableItemManager::ItemAcceptChildrenRole);
+
+		if (info.userType() == QMetaType::Bool) { //a bool has been set.
+			if (info.toBool() == true) {
+				parent_ref = ui->treeView->model()->data(selection.first(), EditableItemManager::ItemRefRole).toString();
+			}
+		}
+
+	}
+
+	bool ok;
+
+	QString ref = QInputDialog::getText(_mw_parent,
+										tr("Saisir une référence"),
+										tr("référence"),
+										QLineEdit::Normal,
+										itemTypeRef,
+										&ok);
+
+	if (!ok) {
+		return;
+	}
+
+	emit itemCreationTriggered(itemTypeRef, ref, parent_ref);
+
+}
+
 void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
 
 	if(_newItemFactoryWatcher) {
 		disconnect(_newItemFactoryWatcher);
+	}
+
+	if (_itemCreationTrigger) {
+		disconnect(_itemCreationTrigger);
 	}
 
 	if (project == nullptr) {
@@ -52,6 +93,9 @@ void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
 
 	_newItemFactoryWatcher = connect(project->factoryManager(), &EditableItemFactoryManager::rowsInserted,
 									 this, &ProjectTreeDockWidget::rebuildMenuWithoutProject);
+
+	_itemCreationTrigger = connect(this, &ProjectTreeDockWidget::itemCreationTriggered,
+								   project, &EditableItemManager::createItem);
 }
 
 void ProjectTreeDockWidget::reselectProject(EditableItemManager *project) {
@@ -87,7 +131,7 @@ void ProjectTreeDockWidget::rebuildMenu(EditableItemManager* project) {
 																						  _newItemMenu);
 
 		connect(action, &EditableItemTypeSpecializedAction::triggered,
-				this, &ProjectTreeDockWidget::itemCreationTriggered);
+				this, &ProjectTreeDockWidget::onItemCreationTriggered);
 
 		_newItemMenu->addAction(action);
 

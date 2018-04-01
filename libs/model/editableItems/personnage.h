@@ -17,11 +17,11 @@ public:
 	{
 	public:
 		explicit PersonnageFactory(QObject *parent = nullptr);
-		EditableItem* createItem(EditableItemManager* parent) const;
+		EditableItem* createItem(QString ref, EditableItemManager* parent) const;
 
 	};
 
-	Personnage(EditableItemManager *parent = nullptr);
+	Personnage(QString ref, EditableItemManager *parent = nullptr);
 
 	Q_PROPERTY(QString persoRace READ persoRace WRITE setPersoRace)
 	Q_PROPERTY(int age READ age WRITE setAge)

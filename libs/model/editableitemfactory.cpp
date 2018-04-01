@@ -19,7 +19,7 @@ QString EditableItemFactory::getItemTypeId() const {
 
 	if (_typeId == "") {
 		//get the type id.
-		EditableItem* temp = createItem(nullptr);
+		EditableItem* temp = createItem("", nullptr);
 		_typeId = temp->getTypeId();
 
 		delete temp;
@@ -32,7 +32,7 @@ QString EditableItemFactory::getItemTypeName() const {
 
 	if (_typeName == "") {
 		//get the type name.
-		EditableItem* temp = createItem(nullptr);
+		EditableItem* temp = createItem("", nullptr);
 		_typeName = temp->getTypeName();
 
 		delete temp;
@@ -47,7 +47,7 @@ QString EditableItemFactory::getItemTypeIconUrl() const {
 	if (_typeIconUrl == "") {
 
 		//get the type name.
-		EditableItem* temp = createItem(nullptr);
+		EditableItem* temp = createItem("", nullptr);
 		_typeName = temp->iconInternalUrl();
 
 		delete temp;
@@ -87,12 +87,12 @@ bool EditableItemFactoryManager::hasFactoryInstalled(QString type_id) const {
 
 }
 
-EditableItem* EditableItemFactoryManager::createItem(QString type_id, EditableItemManager* parent) const {
+EditableItem* EditableItemFactoryManager::createItem(QString type_id, QString item_id, EditableItemManager* parent) const {
 
 	const EditableItemFactory* f = _installedFactories.value(type_id, nullptr);
 
 	if (f != nullptr) {
-		return f->createItem(parent);
+		return f->createItem(item_id, parent);
 	}
 
 	return nullptr;

@@ -16,11 +16,11 @@ public:
 	{
 	public:
 		explicit FolderFactory(QObject *parent = nullptr);
-		EditableItem* createItem(EditableItemManager* parent) const;
+		EditableItem* createItem(QString ref, EditableItemManager* parent) const;
 
 	};
 
-	Folder(EditableItemManager* parent = nullptr);
+	Folder(QString ref, EditableItemManager* parent = nullptr);
 
 	virtual QString getTypeId() const;
 	virtual QString getTypeName() const;
