@@ -30,6 +30,8 @@ public:
 
 	QString placeDescription() const;
 
+	virtual QString iconInternalUrl() const;
+
 signals:
 
 	void placeDescriptionChanged(QString newDescription);

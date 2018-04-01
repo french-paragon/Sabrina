@@ -54,6 +54,10 @@ int Personnage::age() const
 	return _age;
 }
 
+QString Personnage::iconInternalUrl() const {
+	return ":/icons/icons/editable_item_perso.svg";
+}
+
 void Personnage::setAge(int age)
 {
 	if (_age != age) {

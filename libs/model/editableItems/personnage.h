@@ -37,6 +37,8 @@ public:
 
 	int age() const;
 
+	virtual QString iconInternalUrl() const;
+
 signals:
 
 	void persoRaceChanged(QString newRace);

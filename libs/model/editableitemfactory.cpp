@@ -48,7 +48,7 @@ QString EditableItemFactory::getItemTypeIconUrl() const {
 
 		//get the type name.
 		EditableItem* temp = createItem("", nullptr);
-		_typeName = temp->iconInternalUrl();
+		_typeIconUrl = temp->iconInternalUrl();
 
 		delete temp;
 

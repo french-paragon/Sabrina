@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="SVGRoot"
+   version="1.1"
+   viewBox="0 0 16 16"
+   height="16px"
+   width="16px">
+  <defs
+     id="defs8417" />
+  <metadata
+     id="metadata8420">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1">
+    <rect
+       ry="1.25"
+       y="1.5625"
+       x="2"
+       height="14.3125"
+       width="11.5"
+       id="rect12908"
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#534d40;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.75590551;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:4.84255743;stroke-opacity:1;paint-order:markers fill stroke;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+    <rect
+       ry="1.25"
+       y="0.59375"
+       x="0.75"
+       height="14.3125"
+       width="11.5"
+       id="rect12908-3"
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#e9dcbc;fill-opacity:1;fill-rule:nonzero;stroke:#8c8c8c;stroke-width:0.75590551;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:4.84255743;stroke-opacity:1;paint-order:markers fill stroke;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+    <g
+       id="g13004">
+      <path
+         style="fill:#8c8c8c;fill-opacity:1;fill-rule:evenodd;stroke:#989898;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 2.1655145,2.8301362 H 10.69499"
+         id="path12939" />
+      <path
+         style="fill:#8c8c8c;fill-opacity:1;fill-rule:evenodd;stroke:#989898;stroke-width:0.70893627px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 2.1655145,4.8566529 H 6.452349"
+         id="path12939-6" />
+      <path
+         style="fill:#8c8c8c;fill-opacity:1;fill-rule:evenodd;stroke:#989898;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 2.1655145,6.8831689 H 10.69499"
+         id="path12939-6-7" />
+      <path
+         style="fill:#8c8c8c;fill-opacity:1;fill-rule:evenodd;stroke:#989898;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 2.1655145,12.962719 H 10.69499"
+         id="path12939-6-7-5" />
+      <path
+         style="fill:#8c8c8c;fill-opacity:1;fill-rule:evenodd;stroke:#989898;stroke-width:0.78192002px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 2.1655145,10.936203 h 5.214912"
+         id="path12939-6-7-3" />
+      <path
+         style="fill:#8c8c8c;fill-opacity:1;fill-rule:evenodd;stroke:#989898;stroke-width:0.77526528px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 2.1655145,8.9096863 H 7.2920381"
+         id="path12939-6-7-56" />
+    </g>
+    <path
+       id="path4758"
+       d="M 11.127532,2.858337 C 9.7838652,2.858088 8.6944681,3.9554474 8.6944354,5.3092165 8.6945283,6.1181207 9.6913676,7.0189386 10.147826,7.3336171 7.6568092,7.9107066 7.3412783,11.6191 7.3412783,11.6191 h 7.4997557 c 0,0 -0.349423,-3.3994666 -2.788764,-4.2955063 0.44934,-0.3151671 1.507192,-1.2136403 1.508357,-2.0143772 -3.3e-5,-1.3537691 -1.089429,-2.4511284 -2.433095,-2.4508795 z"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.82773769px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+  </g>
+</svg>

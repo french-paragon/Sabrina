@@ -27,6 +27,10 @@ public:
 
 	virtual bool acceptChildrens() const;
 
+	virtual QString iconInternalUrl() const;
+
+protected:
+
 	virtual void treatDeletedRef(QString deletedRef);
 	virtual void treatChangedRef(QString oldRef, QString newRef);
 };

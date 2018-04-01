@@ -26,6 +26,10 @@ bool Folder::acceptChildrens() const {
 	return true; //folder accept all childrens.
 }
 
+QString Folder::iconInternalUrl() const {
+	return ":/icons/icons/editable_item_folder.svg";
+}
+
 void Folder::treatDeletedRef(QString deletedRef) {
 
 	(void) deletedRef;

@@ -31,6 +31,10 @@ QString Place::placeDescription() const
 	return _place_description;
 }
 
+QString Place::iconInternalUrl() const {
+	return ":/icons/icons/editable_item_place.svg";
+}
+
 void Place::setplaceDescription(QString place_description)
 {
 	if (place_description != _place_description) {
