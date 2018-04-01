@@ -205,16 +205,14 @@ void JsonEditableItemManager::extractTreeLeaf(treeStruct* leaf, QJsonObject &obj
 					if (v.isObject()) {
 						QJsonObject sub_obj = v.toObject();
 
-						treeStruct sub_leaf;
+						treeStruct* sub_leaf = new treeStruct();
 
-						sub_leaf._parent = leaf;
-						_tree.push_back(sub_leaf);
-						treeStruct* ptr = &_tree.back();
+						sub_leaf->_parent = leaf;
 
-						extractTreeLeaf(ptr, sub_obj);
+						extractTreeLeaf(sub_leaf, sub_obj);
 
-						leaf->_childrens.append(ptr);
-						_treeIndex.insert(ptr->_ref, ptr);
+						leaf->_childrens.append(sub_leaf);
+						_treeIndex.insert(sub_leaf->_ref, sub_leaf);
 
 					}
 

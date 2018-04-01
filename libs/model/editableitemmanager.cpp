@@ -24,6 +24,11 @@ QModelIndex EditableItemManager::index(int row, int column, const QModelIndex &p
 	}
 
 	if (parent == QModelIndex()) {
+
+		if (row >= _root->_childrens.size()) {
+			return QModelIndex();
+		}
+
 		return createIndex(row, column, _root->_childrens.at(row));
 	}
 
@@ -238,21 +243,20 @@ bool EditableItemManager::insertItem(EditableItem* item, treeStruct* parent_bran
 		return false;
 	}
 
-	treeStruct item_leaf;
+	treeStruct* item_leaf = new treeStruct();
 
-	item_leaf._parent = parent_branch;
-	item_leaf._acceptChildrens = item->acceptChildrens();
-	item_leaf._name = item->objectName();
-	item_leaf._ref = item->getRef();
-	item_leaf._type_ref = item->getTypeId();
+	item_leaf->_parent = parent_branch;
+	item_leaf->_acceptChildrens = item->acceptChildrens();
+	item_leaf->_name = item->objectName();
+	item_leaf->_ref = item->getRef();
+	item_leaf->_type_ref = item->getTypeId();
 
 	beginInsertRows(indexFromLeaf(parent_branch), parent_branch->_childrens.size(), parent_branch->_childrens.size());
 
-	_tree.push_back(item_leaf);
-	parent_branch->_childrens.append(&_tree.back());
-	_treeIndex.insert(_tree.back()._ref, &_tree.back());
+	parent_branch->_childrens.append(item_leaf);
+	_treeIndex.insert(item_leaf->_ref, item_leaf);
 
-	_loadedItems.insert(_tree.back()._ref, {&_tree.back(), item});
+	_loadedItems.insert(item_leaf->_ref, {item_leaf, item});
 
 	endInsertRows();
 
@@ -268,7 +272,7 @@ QModelIndex EditableItemManager::indexFromLeaf(treeStruct* leaf) const {
 
 	int row = leaf->_parent->_childrens.indexOf(leaf);
 
-	if (row > 0) {
+	if (row >= 0) {
 		return createIndex(row, 0, leaf);
 	}
 
@@ -279,10 +283,18 @@ void EditableItemManager::cleanTreeStruct() {
 
 	beginResetModel();
 
+	for (treeStruct* leaf : _treeIndex.values()) {
+		delete leaf;
+	}
+
 	_treeIndex.clear();
-	_tree.clear();
-	_tree.push_back({nullptr, RefRoot, RefRoot, RefRoot, {}, true});
-	_root = &_tree.first();
+	_root = new treeStruct();
+
+	_root->_parent = nullptr;
+	_root->_ref = RefRoot;
+	_root->_name = RefRoot;
+	_root->_childrens = {};
+	_root->_acceptChildrens = true;
 
 	endResetModel();
 

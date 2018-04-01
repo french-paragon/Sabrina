@@ -69,6 +69,10 @@ void ProjectTreeDockWidget::onItemCreationTriggered(QString itemTypeRef) {
 
 	emit itemCreationTriggered(itemTypeRef, ref, parent_ref);
 
+	if (selection.size() > 0) {
+		ui->treeView->expand(selection.first());
+	}
+
 }
 
 void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {

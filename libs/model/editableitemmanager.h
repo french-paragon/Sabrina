@@ -129,7 +129,6 @@ protected:
 	QMap<QString, loadedItem> _loadedItems;
 
 	treeStruct* _root; //the root of the tree.
-	QVector<treeStruct> _tree; //store the tree struct one place in memory.
 	QMap<QString, treeStruct*> _treeIndex; //build an index of the tree.
 
 	EditableItemFactoryManager* _factoryManager;
