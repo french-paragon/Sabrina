@@ -52,7 +52,7 @@ bool PlaceEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 	connect(ui->lineEdit_name, &QLineEdit::textEdited, place, &Place::setObjectName);
 
 	connect(place, &Place::objectNameChanged, ui->lineEdit_name, &QLineEdit::setText);
-	connect(place, &Place::placeDescriptionChanged, ui->textEdit_background, &QTextEdit::setHtml);
+	//connect(place, &Place::placeDescriptionChanged, ui->textEdit_background, &QTextEdit::setHtml);
 
 	_current_place = place;
 

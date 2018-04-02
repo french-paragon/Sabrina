@@ -70,7 +70,7 @@ bool PersonnageEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 	connect(perso, &Personnage::persoRaceChanged, ui->lineEdit_race, &QLineEdit::setText);
 	connect(perso, &Personnage::persoAgeChanged, ui->spinBox_age, &QSpinBox::setValue);
 
-	connect(perso, &Personnage::persoBackgroundChanged, ui->textEdit_background, &QTextEdit::setHtml);
+	//connect(perso, &Personnage::persoBackgroundChanged, ui->textEdit_background, &QTextEdit::setHtml);
 
 	_currentPerso = perso;
 

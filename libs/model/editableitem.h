@@ -22,8 +22,6 @@ public:
 
 	explicit EditableItem(QString ref, EditableItemManager *parent = nullptr);
 
-	Q_PROPERTY(bool hasUnsavedChanges READ getHasUnsavedChanged NOTIFY unsavedStateChanged)
-
 	static const QString REF_PROP_NAME;
 	static const QString PREF_PROP_NAME;
 	static const QString TYPE_ID_NAME;
@@ -60,7 +58,7 @@ public:
 	 */
 	virtual QString iconInternalUrl() const;
 
-	bool getHasUnsavedChanged() const;
+	virtual bool getHasUnsavedChanged() const;
 
 	QString getRef() const;
 
@@ -76,7 +74,6 @@ public:
 signals:
 
 	void refChanged(QString newRef);
-	void unsavedStateChanged(bool saveState);
 	void parentChanged(QString newRef);
 
 public slots:

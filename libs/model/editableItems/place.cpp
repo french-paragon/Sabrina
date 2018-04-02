@@ -19,7 +19,7 @@ EditableItem* Place::PlaceFactory::createItem(QString ref, EditableItemManager* 
 }
 
 QString Place::getTypeId() const {
-	return QString("sabrina_jdr_lieu");
+	return PLACE_TYPE_ID;
 }
 
 QString Place::getTypeName() const {

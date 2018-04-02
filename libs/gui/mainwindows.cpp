@@ -2,6 +2,11 @@
 
 #include "utilsDialogs/aboutdialog.h"
 
+#include "model/editableitem.h"
+
+#include "aline/src/editorfactorymanager.h"
+#include "aline/src/editableitemeditor.h"
+
 namespace Sabrina {
 
 MainWindow::MainWindow(QWidget* parent) :
@@ -19,8 +24,17 @@ void MainWindow::displayAboutWindows() {
 
 }
 
-void MainWindow::editItem(QString const& itemRef, QString const& itemType) {
-	//TODO: implement
+void MainWindow::editItem(QString const& itemRef) {
+	//TODO: check if an editor is already there.
+
+	EditableItem* item = _currentProject->loadItem(itemRef);
+
+	Aline::Editor* editor = Aline::EditorFactoryManager::GlobalEditorFactoryManager.createItemForEditableItem(item, this);
+
+	if (editor != nullptr) {
+		addEditor(editor);
+	}
+
 }
 
 EditableItemManager *MainWindow::currentProject() const

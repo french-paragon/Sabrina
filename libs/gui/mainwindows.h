@@ -25,7 +25,7 @@ public slots:
 
 	void displayAboutWindows();
 
-	void editItem(QString const& itemRef, QString const& itemType);
+	void editItem(QString const& itemRef);
 
 protected:
 

@@ -100,6 +100,9 @@ void App::buildMainWindow() {
 	ProjectTreeDockWidget* project_dock = new ProjectTreeDockWidget(_mainWindow);
 	_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, project_dock);
 
+	connect(project_dock, &ProjectTreeDockWidget::itemDoubleClicked,
+			_mainWindow, &MainWindow::editItem);
+
 }
 
 void App::loadEditorsFactories() {
