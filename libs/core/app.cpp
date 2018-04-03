@@ -8,6 +8,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QFileDialog>
+#include <QToolBar>
 
 #include <QUrl>
 
@@ -87,6 +88,14 @@ void App::buildMainWindow() {
 
 	fileMenu->addSeparator();
 
+	QAction* saveAction = new QAction(QIcon(":/icons/icons/save_simple.svg"), tr("sauver le projet"), _mainWindow);
+	saveAction->setShortcut(QKeySequence::Save);
+	connect(saveAction, &QAction::triggered, _mainWindow, &MainWindow::saveAll);
+
+	fileMenu->addAction(saveAction);
+
+	fileMenu->addSeparator();
+
 	QAction* closeProjectAction = new QAction(tr("fermer le projet"), fileMenu);
 	connect(closeProjectAction, &QAction::triggered, this, &App::closeProject);
 	fileMenu->addAction(closeProjectAction);
@@ -94,6 +103,14 @@ void App::buildMainWindow() {
 	QAction* exitAction = new QAction(tr("fermer le programme"), fileMenu);
 	connect(exitAction, &QAction::triggered, this, &App::quit);
 	fileMenu->addAction(exitAction);
+
+	//tool bar
+
+	QToolBar* mainToolBar = new QToolBar(_mainWindow);
+
+	mainToolBar->addAction(saveAction);
+
+	_mainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
 
 	//Dock widgets.
 

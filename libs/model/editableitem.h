@@ -16,6 +16,9 @@ class EditableItemManager;
 class CATHIA_MODEL_EXPORT EditableItem : public Aline::EditableItem
 {
 	Q_OBJECT
+
+	friend class EditableItemManager;
+
 public:
 
 	static QString simplifyRef(QString ref);
@@ -76,6 +79,8 @@ signals:
 	void refChanged(QString newRef);
 	void parentChanged(QString newRef);
 
+	void visibleStateChanged(QString ref);
+
 public slots:
 
 	/*!
@@ -119,8 +124,13 @@ protected:
 	 */
 	void refferedItemAboutToChangeRef(QString ref, QString newRef);
 
+	void onVisibleStateChanged();
+
 	virtual void treatDeletedRef(QString deletedRef) = 0;
 	virtual void treatChangedRef(QString oldRef, QString newRef) = 0;
+
+	void newUnsavedChanges();
+	void clearHasUnsavedChanges();
 
 	bool _hasUnsavedChanged;
 

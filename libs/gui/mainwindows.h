@@ -26,10 +26,13 @@ public slots:
 	void displayAboutWindows();
 
 	void editItem(QString const& itemRef);
+	void saveAll();
 
 protected:
 
 	EditableItemManager* _currentProject;
+
+	QMap<QString, Aline::Editor*> _openedEditors;
 
 };
 

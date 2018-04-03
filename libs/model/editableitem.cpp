@@ -19,6 +19,10 @@ EditableItem::EditableItem(QString ref, EditableItemManager *parent) :
 	_ref(ref)
 {
 
+	connect(this, &EditableItem::objectNameChanged, this, &EditableItem::newUnsavedChanges);
+	connect(this, &EditableItem::objectNameChanged, this, &EditableItem::onVisibleStateChanged);
+	connect(this, &EditableItem::unsavedStateChanged, this, &EditableItem::onVisibleStateChanged);
+
 }
 
 QString removeAccents(QString s) {
@@ -159,10 +163,22 @@ void EditableItem::warnUnReffering(QString refReferant) {
 bool EditableItem::save() {
 
 	if (_manager != nullptr) {
-		return _manager->saveItem(getRef());
+		bool status = _manager->saveItem(getRef());
+
+		if (status && _hasUnsavedChanged) {
+			_hasUnsavedChanged = false;
+			emit unsavedStateChanged(false);
+		}
 	}
 
 	return false;
+}
+
+void EditableItem::clearHasUnsavedChanges() {
+	if (_hasUnsavedChanged) {
+		_hasUnsavedChanged = false;
+		emit unsavedStateChanged(false);
+	}
 }
 
 void EditableItem::refferedItemAboutToBeDeleted(QString ref) {
@@ -174,6 +190,26 @@ void EditableItem::refferedItemAboutToChangeRef(QString ref, QString newRef) {
 	treatChangedRef(ref, newRef);
 	_referencedItems.remove(ref);
 	_referencedItems.insert(newRef);
+}
+
+void EditableItem::onVisibleStateChanged() {
+	emit visibleStateChanged(_ref);
+}
+
+void EditableItem::newUnsavedChanges() {
+
+	if (autoSave()) {
+		save();
+		return;
+	}
+
+	bool previous = _hasUnsavedChanged;
+
+	_hasUnsavedChanged = true;
+
+	if (previous != _hasUnsavedChanged) {
+		emit unsavedStateChanged(_hasUnsavedChanged);
+	}
 }
 
 } // namespace Cathia

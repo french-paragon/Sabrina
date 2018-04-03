@@ -264,6 +264,8 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 
 	EditableItem* item = _factoryManager->createItem(id, ref, this);
 
+	item->blockSignals(true);
+
 	for (QString prop : obj.keys()) {
 
 		if (prop == EditableItem::TYPE_ID_NAME) {
@@ -306,6 +308,7 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 			item->addOutRef(v.toString());
 		}
 	}
+	item->blockSignals(false);
 
 
 	return item;

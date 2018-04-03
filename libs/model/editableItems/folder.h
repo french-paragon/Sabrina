@@ -29,6 +29,8 @@ public:
 
 	virtual QString iconInternalUrl() const;
 
+	virtual bool autoSave() const;
+
 protected:
 
 	virtual void treatDeletedRef(QString deletedRef);

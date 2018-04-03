@@ -58,9 +58,13 @@ bool PersonnageEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 		disconnect(_currentPerso, &Personnage::persoRaceChanged, ui->lineEdit_race, &QLineEdit::setText);
 		disconnect(_currentPerso, &Personnage::persoAgeChanged, ui->spinBox_age, &QSpinBox::setValue);
 
-		disconnect(_currentPerso, &Personnage::persoBackgroundChanged, ui->textEdit_background, &QTextEdit::setHtml);
-
 	}
+
+	ui->lineEdit_name->setText(perso->objectName());
+	ui->lineEdit_race->setText(perso->persoRace());
+	ui->spinBox_age->setValue(perso->age());
+
+	ui->textEdit_background->setPlainText(perso->background());
 
 	connect(ui->lineEdit_name, &QLineEdit::textEdited, perso, &Personnage::setObjectName);
 	connect(ui->lineEdit_race, &QLineEdit::textEdited, perso, &Personnage::setPersoRace);
@@ -70,8 +74,6 @@ bool PersonnageEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 	connect(perso, &Personnage::persoRaceChanged, ui->lineEdit_race, &QLineEdit::setText);
 	connect(perso, &Personnage::persoAgeChanged, ui->spinBox_age, &QSpinBox::setValue);
 
-	//connect(perso, &Personnage::persoBackgroundChanged, ui->textEdit_background, &QTextEdit::setHtml);
-
 	_currentPerso = perso;
 
 	return true;
@@ -80,7 +82,7 @@ bool PersonnageEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 void PersonnageEditor::onBackgroundTextChanged() {
 
 	if (_currentPerso != nullptr) {
-		_currentPerso->setBackground(ui->textEdit_background->document()->toHtml());
+		_currentPerso->setBackground(ui->textEdit_background->document()->toPlainText());
 	}
 
 }

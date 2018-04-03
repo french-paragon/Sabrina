@@ -73,6 +73,7 @@ public:
 	QVector<QString> listChildren(QString ref);
 
 	virtual bool saveItem(QString ref);
+	virtual bool saveAll();
 	virtual bool saveStruct() = 0;
 	virtual bool loadStruct() = 0;
 
@@ -112,6 +113,8 @@ protected:
 	};
 
 	QModelIndex indexFromLeaf(treeStruct* leaf) const;
+
+	void itemVisibleStateChanged(QString ref);
 
 	/*!
 	 * \brief effectivelyLoadItem load an item without checking if it is cached before.

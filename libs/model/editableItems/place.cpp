@@ -7,7 +7,7 @@ const QString Place::PLACE_TYPE_ID = "sabrina_jdr_place";
 Place::Place(QString ref, EditableItemManager *parent) :
 	EditableItem(ref, parent)
 {
-
+	connect(this, &Place::placeDescriptionChanged, this, &Place::newUnsavedChanges);
 }
 
 Place::PlaceFactory::PlaceFactory(QObject *parent) : EditableItemFactory(parent) {

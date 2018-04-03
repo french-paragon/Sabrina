@@ -8,7 +8,9 @@ const QString Personnage::PERSONNAGE_TYPE_ID = "sabrina_jdr_personnage";
 Personnage::Personnage(QString ref, EditableItemManager *parent) :
 	EditableItem(ref, parent)
 {
-
+	connect(this, &Personnage::persoRaceChanged, this, &Personnage::newUnsavedChanges);
+	connect(this, &Personnage::persoAgeChanged, this, &Personnage::newUnsavedChanges);
+	connect(this, &Personnage::persoBackgroundChanged, this, &Personnage::newUnsavedChanges);
 }
 
 Personnage::PersonnageFactory::PersonnageFactory(QObject *parent) : EditableItemFactory(parent) {
@@ -32,6 +34,7 @@ QString Personnage::background() const {
 
 void Personnage::setBackground(QString background) {
 	if (_perso_background != background) {
+		_perso_background = background;
 		emit persoBackgroundChanged(_perso_background);
 	}
 }

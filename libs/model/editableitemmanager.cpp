@@ -130,7 +130,19 @@ EditableItem* EditableItemManager::loadItem(QString const& ref) {
 		return _loadedItems.value(ref)._item;
 	}
 
-	return effectivelyLoadItem(ref);
+	EditableItem* item = effectivelyLoadItem(ref);
+
+	connect(item, &EditableItem::visibleStateChanged, this, &EditableItemManager::itemVisibleStateChanged);
+
+	treeStruct* node = _treeIndex.value(ref, nullptr);
+
+	if (node == nullptr) {
+		insertItem(item, _root);
+	} else {
+		_loadedItems.insert(item->getRef(), {node, item});
+	}
+
+	return item;
 
 }
 
@@ -200,6 +212,7 @@ bool EditableItemManager::createItem(QString typeRef, QString ref, QString paren
 
 		if (parent_ref == "") {
 			if (insertItem(item, _root) ) {
+				connect(item, &EditableItem::visibleStateChanged, this, &EditableItemManager::itemVisibleStateChanged);
 				return true;
 			} else {
 				return false;
@@ -207,6 +220,7 @@ bool EditableItemManager::createItem(QString typeRef, QString ref, QString paren
 		}
 
 		if (insertItem(item, _treeIndex.value(parent_ref, nullptr)) ) {
+			connect(item, &EditableItem::visibleStateChanged, this, &EditableItemManager::itemVisibleStateChanged);
 			return true;
 		}
 
@@ -218,9 +232,24 @@ bool EditableItemManager::createItem(QString typeRef, QString ref, QString paren
 
 bool EditableItemManager::saveItem(QString ref) {
 	if (isItemLoaded(ref)) {
-		return effectivelySaveItem(ref);
+		bool status = effectivelySaveItem(ref);
+
+		if (status) {
+			EditableItem* item = loadItem(ref);
+			item->clearHasUnsavedChanges();
+		}
 	}
 	return false;
+}
+
+bool EditableItemManager::saveAll() {
+
+	for (QString ref : _loadedItems.keys()) {
+		saveItem(ref);
+	}
+
+	saveStruct();
+
 }
 
 void EditableItemManager::closeAll() {
@@ -277,6 +306,24 @@ QModelIndex EditableItemManager::indexFromLeaf(treeStruct* leaf) const {
 	}
 
 	return QModelIndex();
+}
+
+void EditableItemManager::itemVisibleStateChanged(QString ref) {
+
+	if (_treeIndex.contains(ref)) {
+
+		treeStruct* leaf = _treeIndex.value(ref);
+
+		EditableItem* item = loadItem(ref);
+
+		leaf->_name = item->objectName() + ((item->getHasUnsavedChanged()) ? " *" : "");
+
+		QModelIndex index = indexFromLeaf(leaf);
+
+		emit dataChanged(index, index, {Qt::DisplayRole});
+
+	}
+
 }
 
 void EditableItemManager::cleanTreeStruct() {

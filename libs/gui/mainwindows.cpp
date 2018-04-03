@@ -27,12 +27,26 @@ void MainWindow::displayAboutWindows() {
 void MainWindow::editItem(QString const& itemRef) {
 	//TODO: check if an editor is already there.
 
+	if (_openedEditors.contains(itemRef)) {
+		switchToEditor(_openedEditors.value(itemRef));
+		return;
+	}
+
 	EditableItem* item = _currentProject->loadItem(itemRef);
 
 	Aline::Editor* editor = Aline::EditorFactoryManager::GlobalEditorFactoryManager.createItemForEditableItem(item, this);
 
 	if (editor != nullptr) {
 		addEditor(editor);
+	}
+
+	_openedEditors.insert(itemRef, editor);
+
+}
+void MainWindow::saveAll() {
+
+	if (_currentProject != nullptr) {
+		_currentProject->saveAll();
 	}
 
 }

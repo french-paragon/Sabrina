@@ -46,13 +46,14 @@ bool PlaceEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 		disconnect(ui->lineEdit_name, &QLineEdit::textEdited, _current_place, &Place::setObjectName);
 
 		disconnect(_current_place, &Place::objectNameChanged, ui->lineEdit_name, &QLineEdit::setText);
-		disconnect(_current_place, &Place::placeDescriptionChanged, ui->textEdit_background, &QTextEdit::setHtml);
 	}
+
+	ui->lineEdit_name->setText(place->objectName());
+	ui->textEdit_background->setPlainText(place->placeDescription());
 
 	connect(ui->lineEdit_name, &QLineEdit::textEdited, place, &Place::setObjectName);
 
 	connect(place, &Place::objectNameChanged, ui->lineEdit_name, &QLineEdit::setText);
-	//connect(place, &Place::placeDescriptionChanged, ui->textEdit_background, &QTextEdit::setHtml);
 
 	_current_place = place;
 
@@ -63,7 +64,7 @@ bool PlaceEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 void PlaceEditor::onBackgroundTextChanged() {
 
 	if (_current_place != nullptr) {
-		_current_place->setplaceDescription(ui->textEdit_background->document()->toHtml());
+		_current_place->setplaceDescription(ui->textEdit_background->document()->toPlainText());
 	}
 
 }

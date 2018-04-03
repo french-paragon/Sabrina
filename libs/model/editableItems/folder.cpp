@@ -7,7 +7,6 @@ const QString Folder::FOLDER_TYPE_ID = "sabrina_general_folder";
 Folder::Folder(QString ref, EditableItemManager *parent) :
 	EditableItem(ref, parent)
 {
-
 }
 
 QString Folder::getTypeId() const {
@@ -28,6 +27,10 @@ bool Folder::acceptChildrens() const {
 
 QString Folder::iconInternalUrl() const {
 	return ":/icons/icons/editable_item_folder.svg";
+}
+
+bool Folder::autoSave() const {
+	return true;
 }
 
 void Folder::treatDeletedRef(QString deletedRef) {
