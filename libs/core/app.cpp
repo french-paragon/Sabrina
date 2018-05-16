@@ -4,6 +4,7 @@
 
 #include "gui/mainwindows.h"
 #include "gui/dockWidgets/projecttreedockwidget.h"
+#include "gui/dockWidgets/projectlabelsdockwidget.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -119,6 +120,9 @@ void App::buildMainWindow() {
 
 	connect(project_dock, &ProjectTreeDockWidget::itemDoubleClicked,
 			_mainWindow, &MainWindow::editItem);
+
+	ProjectLabelsDockWidget* labels_dock = new ProjectLabelsDockWidget(_mainWindow);
+	_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, labels_dock);
 
 }
 

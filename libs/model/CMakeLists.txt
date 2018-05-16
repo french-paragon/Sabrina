@@ -7,7 +7,9 @@ set(LIB_SRC editableitem.cpp
             ressources/ressources.qrc
             editableItems/personnage.cpp
             editableItems/place.cpp
-            editableItems/folder.cpp)
+            editableItems/folder.cpp
+            labels/labelstree.cpp
+            labels/label.cpp)
 
 add_library(${LIB_NAME} ${LIB_SRC})
 
@@ -17,3 +19,5 @@ target_compile_definitions(${LIB_NAME}
 QT5_USE_MODULES(${LIB_NAME} Core)
 
 target_link_libraries(${LIB_NAME} Aline)
+
+target_link_libraries(${LIB_NAME} Utils)

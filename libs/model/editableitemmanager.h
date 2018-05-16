@@ -14,6 +14,7 @@ namespace Sabrina {
 class EditableItem;
 class EditableItemManager;
 class EditableItemFactoryManager;
+class LabelsTree;
 
 class CATHIA_MODEL_EXPORT ItemIOException : public QException
 {
@@ -68,6 +69,8 @@ public:
 	bool isItemLoaded(const QString &ref) const;
 	bool containItem(const QString & ref) const;
 
+	LabelsTree* labelsTree();
+
 	bool createItem(QString typeRef, QString ref, QString parent_ref = "");
 
 	QVector<QString> listChildren(QString ref);
@@ -75,6 +78,7 @@ public:
 	virtual bool saveItem(QString ref);
 	virtual bool saveAll();
 	virtual bool saveStruct() = 0;
+	virtual bool saveLabels() = 0;
 	virtual bool loadStruct() = 0;
 
 	EditableItemFactoryManager *factoryManager() const;
@@ -121,6 +125,11 @@ protected:
 	 * \param ref the ref of the item to load.
 	 */
 	virtual EditableItem* effectivelyLoadItem(QString const& ref) = 0;
+	/*!
+	 * \brief effectivelyLoadLabels load the labels from the datasource.
+	 */
+	virtual void effectivelyLoadLabels() = 0;
+
 	virtual bool effectivelySaveItem(QString const& ref) = 0;
 
 	/*!
@@ -135,6 +144,8 @@ protected:
 	QMap<QString, treeStruct*> _treeIndex; //build an index of the tree.
 
 	EditableItemFactoryManager* _factoryManager;
+
+	LabelsTree* _labels;
 
 };
 

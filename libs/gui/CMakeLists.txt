@@ -6,6 +6,8 @@ set(LIB_SRC mainwindows.cpp
             utilsDialogs/aboutdialog.ui
             dockWidgets/projecttreedockwidget.cpp
             dockWidgets/projecttreedockwidget.ui
+            dockWidgets/projectlabelsdockwidget.cpp
+            dockWidgets/projectlabelsdockwidget.ui
             editors/personnageeditor.cpp
             editors/personnageeditor.ui
             editors/placeeditor.cpp

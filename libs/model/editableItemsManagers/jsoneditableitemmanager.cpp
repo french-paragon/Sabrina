@@ -2,12 +2,15 @@
 
 #include "editableitem.h"
 #include "editableitemfactory.h"
+#include "labels/labelstree.h"
+#include "labels/label.h"
 
 #include <QFile>
 #include <QMetaObject>
 #include <QMetaProperty>
 #include <QFileInfo>
 #include <QDir>
+#include <QDebug>
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -23,7 +26,15 @@ const QString JsonEditableItemManager::TREE_NAME_ID = "name";
 const QString JsonEditableItemManager::TREE_CHILDRENS_ID = "childrens";
 const QString JsonEditableItemManager::TREE_ACCEPT_CHILDRENS_ID = "accept_childrens";
 
+const QString JsonEditableItemManager::LABEL_REF = "labels";
+
+const QString JsonEditableItemManager::LABEL_REF_ID = "reference";
+const QString JsonEditableItemManager::LABEL_NAME_ID = "name";
+const QString JsonEditableItemManager::LABEL_ITEMS_REFS_ID = "marked_items";
+const QString JsonEditableItemManager::LABEL_SUBLABELS_ID = "sublabels";
+
 const QString JsonEditableItemManager::ITEM_FOLDER_NAME = "items/";
+const QString JsonEditableItemManager::LABELS_FILE_NAME = "labels.json";
 
 JsonEditableItemManager::JsonEditableItemManager(QObject *parent) :
 	EditableItemManager(parent)
@@ -114,6 +125,76 @@ bool JsonEditableItemManager::saveStruct() {
 	}
 
 	return true;
+}
+
+bool JsonEditableItemManager::saveLabels() {
+
+	QJsonArray arr;
+
+	int n_rootId = _labels->rowCount();
+
+	for (int i = 0; i < n_rootId; i++) {
+
+		QJsonObject encoded = encodeLabelAsJson(_labels->index(i, 0));
+
+		arr.push_back(QJsonValue(encoded));
+
+	}
+
+	QJsonDocument doc(arr);
+
+	QByteArray datas = doc.toJson();
+
+	QString fileName =  _projectFolder + LABELS_FILE_NAME;
+
+	QFile out(fileName);
+
+	if(!out.open(QIODevice::WriteOnly)){
+		throw ItemIOException(LABEL_REF, QString("Cannot write to file %1.").arg(fileName), this);
+	}
+
+	qint64 w_stat = out.write(datas);
+	out.close();
+
+	if(w_stat < 0){
+		throw ItemIOException(LABEL_REF, QString("Cannot write to file %1.").arg(fileName), this);
+	}
+
+	return true;
+
+}
+
+QJsonObject JsonEditableItemManager::encodeLabelAsJson(QModelIndex const& index) {
+
+	QJsonObject obj;
+
+	QVariant name = _labels->data(index, Qt::DisplayRole);
+	QVariant ref = _labels->data(index, LabelsTree::LabelRefRole);
+
+	obj.insert(LABEL_NAME_ID, QJsonValue::fromVariant(name));
+	obj.insert(LABEL_REF_ID, QJsonValue::fromVariant(ref));
+
+	QVariant items_refs = _labels->data(index, LabelsTree::LabelItemsRefsRole);
+
+	if (items_refs != QVariant()) {
+		obj.insert(LABEL_ITEMS_REFS_ID, QJsonValue::fromVariant(items_refs));
+	}
+
+	if (_labels->rowCount(index) > 0) {
+
+		QJsonArray subLabels;
+
+		for (int i = 0; i < _labels->rowCount(index); i++) {
+			QJsonObject subobj = encodeLabelAsJson(_labels->index(i, 0, index));
+			subLabels.push_back(QJsonValue(subobj));
+		}
+
+		obj.insert(LABEL_SUBLABELS_ID, QJsonValue(subLabels));
+
+	}
+
+	return obj;
+
 }
 
 void JsonEditableItemManager::encapsulateTreeLeaf(treeStruct* branch, QJsonObject & obj) {
@@ -312,6 +393,147 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 
 
 	return item;
+}
+
+void JsonEditableItemManager::effectivelyLoadLabels() {
+
+	_labels = new LabelsTree(this);
+
+
+	QString fileName = _projectFolder + LABELS_FILE_NAME;
+
+	QFile file(fileName);
+
+	if (!file.exists()) {
+		return; //no labels saved now. nothing more to do.
+	}
+
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		throw ItemIOException(LABEL_REF, QString("File %1 is not readable.").arg(fileName), this);
+	}
+
+	QByteArray datas = file.readAll();
+	file.close();
+
+	QJsonParseError errors;
+	QJsonDocument doc = QJsonDocument::fromJson(datas, &errors);
+
+	if(errors.error != QJsonParseError::NoError){
+		throw ItemIOException(LABEL_REF, QString("Error while parsing JSON data in file %1.").arg(fileName), this);
+	}
+
+	if (!doc.isArray()) {
+		throw ItemIOException(LABEL_REF, QString("Expected JSON data in file %1 to represent an array of labels.").arg(fileName), this);
+	}
+	QJsonArray array = doc.array(); //should be a list of labels
+
+	QVector<Label*> labels;
+	labels.reserve(array.size());
+
+	for (QJsonValue val : array) {
+
+		Label* l;
+
+		try {
+			l = extractJsonLabel(val, _labels);
+		} catch (ItemIOException const& e) {
+			Q_UNUSED(e);
+			qDebug() << "Unexpected object while parsing data in " << fileName << "! Skip it for the moment."; //TODO: do we want some other kind of error ?
+			continue;
+		}
+
+		labels.push_back(l);
+	}
+
+	_labels->insertRows(0, labels);
+}
+
+Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, LabelsTree* parent) {
+
+	Label* l = new Label(parent);
+
+	try {
+		extractJsonLabelDatas(val, l);
+	} catch (ItemIOException const& e) {
+		Q_UNUSED(e);
+		delete l;
+		return nullptr;
+	}
+
+
+	return l;
+
+}
+
+Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, Label* parent) {
+
+	Label* l = new Label(parent);
+
+	try {
+		extractJsonLabelDatas(val, l);
+	} catch (ItemIOException const& e) {
+		Q_UNUSED(e);
+		delete l;
+		return nullptr;
+	}
+
+	return l;
+}
+
+void JsonEditableItemManager::extractJsonLabelDatas(QJsonValue const& val, Label* label) {
+
+	if (!val.isObject()) {
+		throw ItemIOException(LABEL_REF, "Error while extracting labels", this);
+	}
+
+	QJsonObject obj = val.toObject();
+
+	if (!obj.contains(LABEL_REF_ID) || !obj.contains(LABEL_NAME_ID)) {
+		throw ItemIOException(LABEL_REF, "Missing label name or reference.", this);
+	}
+
+	QJsonValue ref = obj.value(LABEL_REF_ID);
+	QJsonValue name = obj.value(LABEL_NAME_ID);
+
+
+	if (!ref.isString() || !name.isString()) {
+		throw ItemIOException(LABEL_REF, "Label name or reference can't be converted to string.", this);
+	}
+
+	label->setRef(ref.toString());
+	label->setObjectName(name.toString());
+
+	if (obj.contains(LABEL_ITEMS_REFS_ID)) {
+		QJsonValue items = obj.value(LABEL_ITEMS_REFS_ID);
+
+		if (items.isArray()) {
+			for (QJsonValue value : items.toArray()) {
+
+				if (value.isString()) {
+					label->markItem(value.toString());
+				}
+
+			}
+		}
+	}
+
+	if (obj.contains(LABEL_SUBLABELS_ID)) {
+		QJsonValue sublabels = obj.value(LABEL_SUBLABELS_ID);
+
+		if (sublabels.isArray()) {
+
+			for (QJsonValue val : sublabels.toArray()) {
+				Label* sublabel = extractJsonLabel(val, label);
+
+				if (sublabel != nullptr) {
+					label->addChild(sublabel);
+				}
+			}
+
+		}
+	}
+
+
 }
 
 bool JsonEditableItemManager::effectivelySaveItem(const QString &ref) {

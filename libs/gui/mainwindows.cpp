@@ -25,7 +25,6 @@ void MainWindow::displayAboutWindows() {
 }
 
 void MainWindow::editItem(QString const& itemRef) {
-	//TODO: check if an editor is already there.
 
 	if (_openedEditors.contains(itemRef)) {
 		switchToEditor(_openedEditors.value(itemRef));

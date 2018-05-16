@@ -3,6 +3,8 @@
 #include "editableitem.h"
 #include "editableitemfactory.h"
 
+#include "labels/labelstree.h"
+
 #include <QIcon>
 
 namespace Sabrina {
@@ -12,7 +14,8 @@ const QString EditableItemManager::RefRoot = QString("root");
 
 EditableItemManager::EditableItemManager(QObject *parent) :
 	QAbstractItemModel(parent),
-	_factoryManager(&EditableItemFactoryManager::GlobalEditableItemFactoryManager)
+	_factoryManager(&EditableItemFactoryManager::GlobalEditableItemFactoryManager),
+	_labels(nullptr)
 {
 	cleanTreeStruct();
 }
@@ -173,6 +176,20 @@ bool EditableItemManager::containItem(const QString & ref) const {
 	return _treeIndex.keys().contains(ref);
 }
 
+LabelsTree* EditableItemManager::labelsTree() {
+
+	if (!hasDataSource()) {
+		return nullptr;
+	}
+
+	if (_labels == nullptr) {
+		effectivelyLoadLabels();
+	}
+
+	return _labels;
+
+}
+
 QVector<QString> EditableItemManager::listChildren(QString ref) {
 	treeStruct* s = _treeIndex.value(ref);
 
@@ -248,6 +265,7 @@ bool EditableItemManager::saveAll() {
 		saveItem(ref);
 	}
 
+	saveLabels();
 	saveStruct();
 
 }
