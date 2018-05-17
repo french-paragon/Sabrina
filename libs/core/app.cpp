@@ -79,11 +79,13 @@ void App::buildMainWindow() {
 
 	QMenu* fileMenu = _mainWindow->menuBar()->addMenu(tr("fichier"));
 
-	QAction* openProjectAction = new QAction(tr("ouvrir un projet"), fileMenu);
+	QAction* openProjectAction = new QAction(QIcon(":/icons/icons/editable_item_folder.svg"), tr("ouvrir un projet"), _mainWindow);
+	openProjectAction->setShortcut(QKeySequence::Open);
 	connect(openProjectAction, &QAction::triggered, this, &App::openFileProject);
 	fileMenu->addAction(openProjectAction);
 
-	QAction* createProjectAction = new QAction(tr("créer un projet"), fileMenu);
+	QAction* createProjectAction = new QAction(QIcon(":/icons/icons/new_simple.svg"), tr("créer un projet"), _mainWindow);
+	createProjectAction->setShortcut(QKeySequence::New);
 	connect(createProjectAction, &QAction::triggered, this, &App::createFileProject);
 	fileMenu->addAction(createProjectAction);
 
@@ -109,6 +111,8 @@ void App::buildMainWindow() {
 
 	QToolBar* mainToolBar = new QToolBar(_mainWindow);
 
+	mainToolBar->addAction(createProjectAction);
+	mainToolBar->addAction(openProjectAction);
 	mainToolBar->addAction(saveAction);
 
 	_mainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
