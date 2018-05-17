@@ -6,11 +6,14 @@
 #include "labels/labelstree.h"
 
 #include <QIcon>
+#include <QMimeData>
 
 namespace Sabrina {
 
 const QChar EditableItemManager::RefSeparator = QChar('/');
 const QString EditableItemManager::RefRoot = QString("root");
+
+const QString EditableItemManager::RefMimeType = "text/editableitemref";
 
 EditableItemManager::EditableItemManager(QObject *parent) :
 	QAbstractItemModel(parent),
@@ -124,6 +127,43 @@ QVariant EditableItemManager::data(const QModelIndex &index, int role) const {
 	return QVariant();
 }
 
+
+Qt::ItemFlags EditableItemManager::flags(const QModelIndex &index) const {
+
+	if (index.isValid()) {
+		return Qt::ItemIsDragEnabled | QAbstractItemModel::flags(index);
+	}
+
+	return QAbstractItemModel::flags(index);
+
+}
+
+QStringList EditableItemManager::mimeTypes() const {
+
+	QStringList mimes;
+	mimes << RefMimeType;
+
+	return mimes;
+
+}
+
+QMimeData* EditableItemManager::mimeData(const QModelIndexList &indexes) const {
+
+	QMimeData *mimeData = new QMimeData();
+	QByteArray encodedData;
+
+	QDataStream stream(&encodedData, QIODevice::WriteOnly);
+
+	for (QModelIndex index : indexes) {
+		if (index.isValid()) {
+			QString text = data(index, ItemRefRole).toString();
+			stream << text;
+		}
+	}
+
+	mimeData->setData(RefMimeType, encodedData);
+	return mimeData;
+}
 
 
 

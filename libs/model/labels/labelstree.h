@@ -9,6 +9,7 @@
 namespace Sabrina {
 
 class Label;
+class EditableItemManager;
 
 class CATHIA_MODEL_EXPORT LabelsTree : public QAbstractItemModel
 {
@@ -20,7 +21,7 @@ public:
 		LabelItemsRefsRole = Qt::UserRole+1
 	};
 
-	explicit LabelsTree(QObject *parent = nullptr);
+	explicit LabelsTree(EditableItemManager *parent = nullptr);
 
 	virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
 	virtual QModelIndex parent(const QModelIndex &index) const;
@@ -31,7 +32,11 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
-	//TODO: create insertions and deletions of labels.
+	virtual QStringList mimeTypes() const;
+	bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
+
+	Qt::DropActions supportedDropActions() const;
+
 	virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
 	bool insertRows(int row, QVector<Label*> const& labels, const QModelIndex &parent = QModelIndex());
 	virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
@@ -52,6 +57,8 @@ protected:
 	QVector<Label*> _labels;
 
 	QSet<QString> _labelsRefs;
+
+	EditableItemManager* _parentManager;
 
 };
 

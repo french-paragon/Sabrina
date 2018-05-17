@@ -28,6 +28,10 @@ ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
 			this, &ProjectLabelsDockWidget::labelDeletionButtonClicked);
 
 	ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+	ui->treeView->setDragDropMode(QAbstractItemView::DropOnly);
+	ui->treeView->setAcceptDrops(true);
+	ui->treeView->setDropIndicatorShown(true);
 }
 
 ProjectLabelsDockWidget::~ProjectLabelsDockWidget()

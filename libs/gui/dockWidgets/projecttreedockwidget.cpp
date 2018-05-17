@@ -28,6 +28,11 @@ ProjectTreeDockWidget::ProjectTreeDockWidget(MainWindow *parent) :
 
 	connect(ui->treeView, &QTreeView::doubleClicked,
 			this, &ProjectTreeDockWidget::receiveDoubleClick);
+
+	ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
+	ui->treeView->setDragDropMode(QAbstractItemView::DragOnly);
+	ui->treeView->setDragEnabled(true);
+	ui->treeView->setDropIndicatorShown(true);
 }
 
 ProjectTreeDockWidget::~ProjectTreeDockWidget()

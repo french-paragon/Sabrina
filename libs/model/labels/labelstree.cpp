@@ -1,12 +1,16 @@
 #include "labelstree.h"
 
 #include "label.h"
+#include "editableitemmanager.h"
 
 #include <QIcon>
+#include <QMimeData>
 
 namespace Sabrina {
 
-LabelsTree::LabelsTree(QObject *parent) : QAbstractItemModel(parent)
+LabelsTree::LabelsTree(EditableItemManager *parent) :
+	QAbstractItemModel(parent),
+	_parentManager(parent)
 {
 
 }
@@ -88,7 +92,7 @@ int LabelsTree::columnCount(const QModelIndex &parent) const {
 Qt::ItemFlags LabelsTree::flags(const QModelIndex &index) const {
 
 	if (index != QModelIndex()) {
-		return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+		return Qt::ItemIsEditable | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 	}
 
 	return QAbstractItemModel::flags(index);
@@ -150,6 +154,82 @@ bool LabelsTree::setData(const QModelIndex &index, const QVariant &value, int ro
 	}
 
 	return false;
+}
+
+QStringList LabelsTree::mimeTypes() const {
+
+	QStringList mimes;
+	mimes << EditableItemManager::RefMimeType;
+
+	return mimes;
+
+}
+
+bool LabelsTree::dropMimeData(const QMimeData *data,
+							  Qt::DropAction action,
+							  int row,
+							  int column,
+							  const QModelIndex &parent) {
+
+	if (action == Qt::IgnoreAction) {
+		return true;
+	}
+
+	if (action != Qt::LinkAction && action != Qt::CopyAction) {
+		return false;
+	}
+
+	if (!data->hasFormat(EditableItemManager::RefMimeType)) { //only accept refs to editableitems.
+		return false;
+	}
+
+	QModelIndex target = index(row, column, parent);
+
+	if (row == -1) {
+		target = parent;
+	}
+
+	if (!target.isValid()) {
+		return false;
+	}
+
+	QByteArray encodedData = data->data(EditableItemManager::RefMimeType);
+	QDataStream stream(&encodedData, QIODevice::ReadOnly);
+	QStringList newItems;
+	int rows = 0;
+
+	while (!stream.atEnd()) {
+		QString text;
+		stream >> text;
+		newItems << text;
+		++rows;
+	}
+
+	Label* label = reinterpret_cast<Label*> (target.internalPointer());
+
+	if (label == nullptr) {
+		return false;
+	}
+
+	for (QString ref : newItems) {
+
+		if (label->itemsRefs().contains(ref)) {
+			continue;
+		}
+
+		EditableItem* item = _parentManager->loadItem(ref);
+
+		if (item != nullptr) {
+			label->markItem(item);
+		}
+	}
+
+	return true;
+
+}
+
+Qt::DropActions LabelsTree::supportedDropActions() const {
+	return Qt::LinkAction | Qt::CopyAction;
 }
 
 bool LabelsTree::insertRows(int row, int count, const QModelIndex &parent) {

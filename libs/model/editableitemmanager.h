@@ -53,6 +53,8 @@ public:
 	static const QChar RefSeparator;
 	static const QString RefRoot;
 
+	static const QString RefMimeType;
+
 	explicit EditableItemManager(QObject *parent = nullptr);
 
 	virtual bool hasDataSource() const = 0;
@@ -62,6 +64,11 @@ public:
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
+	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+
+	virtual QStringList mimeTypes() const;
+	virtual QMimeData* mimeData(const QModelIndexList &indexes) const;
 
 	EditableItem* loadItem(QString const& ref);
 	QStringList loadedItems() const;
