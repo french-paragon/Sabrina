@@ -11,6 +11,7 @@ class ProjectLabelsDockWidget;
 
 class MainWindow;
 class EditableItemManager;
+class LabelSelectionForItemProxyModel;
 
 class ProjectLabelsDockWidget : public QDockWidget
 {
@@ -30,6 +31,7 @@ private:
 	Ui::ProjectLabelsDockWidget *ui;
 
 	EditableItemManager* _currentProject;
+	LabelSelectionForItemProxyModel* _proxy;
 
 	MainWindow* _mw_parent;
 };

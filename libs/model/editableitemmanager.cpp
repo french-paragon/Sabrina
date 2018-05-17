@@ -18,7 +18,8 @@ const QString EditableItemManager::RefMimeType = "text/editableitemref";
 EditableItemManager::EditableItemManager(QObject *parent) :
 	QAbstractItemModel(parent),
 	_factoryManager(&EditableItemFactoryManager::GlobalEditableItemFactoryManager),
-	_labels(nullptr)
+	_labels(nullptr),
+	_activeItem(nullptr)
 {
 	cleanTreeStruct();
 }
@@ -166,6 +167,9 @@ QMimeData* EditableItemManager::mimeData(const QModelIndexList &indexes) const {
 }
 
 
+EditableItem* EditableItemManager::activeItem() const {
+	return _activeItem;
+}
 
 EditableItem* EditableItemManager::loadItem(QString const& ref) {
 
@@ -410,6 +414,20 @@ EditableItemFactoryManager *EditableItemManager::factoryManager() const
 	return _factoryManager;
 }
 
+void EditableItemManager::setActiveItem(QString ref) {
+
+	if (_activeItem == nullptr || _activeItem->getRef() != ref) {
+
+		EditableItem* potential = loadItem(ref);
+
+		if (potential != nullptr) {
+			_activeItem = potential;
+			emit activeItemChanged();
+		}
+
+	}
+
+}
 
 ItemIOException::ItemIOException (QString ref,
 								  QString infos,

@@ -32,6 +32,8 @@ signals:
 
 private:
 
+	void selectionChanged();
+
 	void onItemCreationTriggered(QString itemTypeRef);
 
 	void projectChanged(EditableItemManager* project);

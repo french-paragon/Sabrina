@@ -148,6 +148,40 @@ bool LabelsTree::setData(const QModelIndex &index, const QVariant &value, int ro
 
 		return true;
 
+	case MarkLabelForItem:
+	{
+		QString itemRef = value.toString();
+
+		EditableItem* item = _parentManager->loadItem(itemRef);
+
+		if (item != nullptr) {
+			label->markItem(item);
+		}
+
+		emit dataChanged(index, index, {Qt::CheckStateRole});
+
+		return true;
+
+	}
+		break;
+
+	case UnmarkLabelForItem:
+	{
+		QString itemRef = value.toString();
+
+		EditableItem* item = _parentManager->loadItem(itemRef);
+
+		if (item != nullptr) {
+			label->unmarkItem(item);
+		}
+
+		emit dataChanged(index, index, {Qt::CheckStateRole});
+
+		return true;
+
+	}
+		break;
+
 	default:
 		return false;
 
@@ -403,6 +437,11 @@ void LabelsTree::insertRefs(const QStringList &refs) {
 		_labelsRefs.insert(ref);
 	}
 
+}
+
+EditableItemManager *LabelsTree::parentManager() const
+{
+	return _parentManager;
 }
 
 

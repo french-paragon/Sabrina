@@ -29,6 +29,9 @@ ProjectTreeDockWidget::ProjectTreeDockWidget(MainWindow *parent) :
 	connect(ui->treeView, &QTreeView::doubleClicked,
 			this, &ProjectTreeDockWidget::receiveDoubleClick);
 
+	connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged,
+			this, &ProjectTreeDockWidget::selectionChanged);
+
 	ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
 	ui->treeView->setDragDropMode(QAbstractItemView::DragOnly);
 	ui->treeView->setDragEnabled(true);
@@ -38,6 +41,18 @@ ProjectTreeDockWidget::ProjectTreeDockWidget(MainWindow *parent) :
 ProjectTreeDockWidget::~ProjectTreeDockWidget()
 {
 	delete ui;
+}
+
+void ProjectTreeDockWidget::selectionChanged() {
+
+	QModelIndexList selection = ui->treeView->selectionModel()->selectedIndexes();
+
+	if (selection.size() > 0) {
+
+		QString ref = ui->treeView->model()->data(selection.first(), EditableItemManager::ItemRefRole).toString();
+
+		_mw_parent->currentProject()->setActiveItem(ref);
+	}
 }
 
 void ProjectTreeDockWidget::onItemCreationTriggered(QString itemTypeRef) {

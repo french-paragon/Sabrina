@@ -18,7 +18,9 @@ public:
 
 	enum specialRoles{
 		LabelRefRole = Qt::UserRole,
-		LabelItemsRefsRole = Qt::UserRole+1
+		LabelItemsRefsRole = Qt::UserRole+1,
+		MarkLabelForItem = Qt::UserRole+2,
+		UnmarkLabelForItem = Qt::UserRole+3
 	};
 
 	explicit LabelsTree(EditableItemManager *parent = nullptr);
@@ -30,18 +32,20 @@ public:
 
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
 	virtual QStringList mimeTypes() const;
-	bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
+	virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
-	Qt::DropActions supportedDropActions() const;
+	virtual Qt::DropActions supportedDropActions() const;
 
 	virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
 	bool insertRows(int row, QVector<Label*> const& labels, const QModelIndex &parent = QModelIndex());
 	virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
 	bool makeRefUniq(QString &ref) const;
+
+	EditableItemManager *parentManager() const;
 
 signals:
 

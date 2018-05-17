@@ -70,6 +70,7 @@ public:
 	virtual QStringList mimeTypes() const;
 	virtual QMimeData* mimeData(const QModelIndexList &indexes) const;
 
+	EditableItem* activeItem() const;
 	EditableItem* loadItem(QString const& ref);
 	QStringList loadedItems() const;
 	void forceUnloadItem(QString ref);
@@ -97,7 +98,11 @@ signals:
 	void itemAboutToBeUnloaded(QString ref);
 	void itemUnloaded(QString ref);
 
+	void activeItemChanged();
+
 public slots:
+
+	void setActiveItem(QString ref);
 
 	virtual void reset() = 0;
 	virtual void closeAll();
@@ -153,6 +158,8 @@ protected:
 	EditableItemFactoryManager* _factoryManager;
 
 	LabelsTree* _labels;
+
+	EditableItem* _activeItem;
 
 };
 

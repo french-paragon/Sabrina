@@ -4,6 +4,7 @@
 #include "mainwindows.h"
 #include "model/editableitemmanager.h"
 #include "model/labels/labelstree.h"
+#include "model/labels/labelselectionforitemproxymodel.h"
 
 namespace Sabrina {
 
@@ -13,6 +14,8 @@ ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
 	_mw_parent(parent)
 {
 	ui->setupUi(this);
+
+	_proxy = new LabelSelectionForItemProxyModel(this);
 
 	projectChanged(_mw_parent->currentProject());
 
@@ -32,6 +35,8 @@ ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
 	ui->treeView->setDragDropMode(QAbstractItemView::DropOnly);
 	ui->treeView->setAcceptDrops(true);
 	ui->treeView->setDropIndicatorShown(true);
+
+	ui->treeView->setModel(_proxy);
 }
 
 ProjectLabelsDockWidget::~ProjectLabelsDockWidget()
@@ -44,10 +49,10 @@ void ProjectLabelsDockWidget::projectChanged(EditableItemManager* project) {
 	_currentProject = project;
 
 	if (_currentProject != nullptr) {
-		ui->treeView->setModel(project->labelsTree());
+		_proxy->setSourceModel(project->labelsTree());
 		setEnabled(true);
 	} else {
-		ui->treeView->setModel(nullptr);
+		_proxy->setSourceModel((LabelsTree*) nullptr);
 		setEnabled(false);
 	}
 
