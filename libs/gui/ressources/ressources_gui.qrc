@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/icons">
         <file>icons/save_simple.svg</file>
+        <file>icons/new_simple.svg</file>
+        <file>icons/delete_simple.svg</file>
     </qresource>
 </RCC>

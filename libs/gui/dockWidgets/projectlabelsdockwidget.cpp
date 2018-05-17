@@ -6,6 +6,8 @@
 #include "model/labels/labelstree.h"
 #include "model/labels/labelselectionforitemproxymodel.h"
 
+#include "delegates/labelsmodelitemdelegate.h"
+
 namespace Sabrina {
 
 ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
@@ -35,6 +37,8 @@ ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
 	ui->treeView->setDragDropMode(QAbstractItemView::DropOnly);
 	ui->treeView->setAcceptDrops(true);
 	ui->treeView->setDropIndicatorShown(true);
+
+	ui->treeView->setItemDelegate(new LabelsModelItemDelegate(ui->treeView));
 
 	ui->treeView->setModel(_proxy);
 }

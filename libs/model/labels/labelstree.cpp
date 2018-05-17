@@ -386,7 +386,7 @@ bool LabelsTree::removeRows(int row, int count, const QModelIndex &parent) {
 
 	removeRefs(removedRefs);
 
-	endInsertRows();
+	endRemoveRows();
 
 	return true;
 

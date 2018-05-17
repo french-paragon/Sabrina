@@ -12,6 +12,7 @@ set(LIB_SRC mainwindows.cpp
             editors/personnageeditor.ui
             editors/placeeditor.cpp
             editors/placeeditor.ui
+            delegates/labelsmodelitemdelegate.cpp
             ressources/ressources_gui.qrc)
 
 add_library(${LIB_NAME} ${LIB_SRC})
