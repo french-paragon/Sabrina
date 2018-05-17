@@ -24,6 +24,8 @@
 #include "gui/editors/personnageeditor.h"
 #include "gui/editors/placeeditor.h"
 
+#include "gui/utilsDialogs/aboutdialog.h"
+
 #include <aline/src/editor.h>
 #include <aline/src/editorfactory.h>
 #include <aline/src/editorfactorymanager.h>
@@ -61,6 +63,8 @@ bool App::start(QString appCode) {
 
 	loadEditableFactories();
 	loadEditorsFactories();
+
+	MainWindowsFactory::GlobalMainWindowsFactory.registerPostAction([this] (MainWindow* mw) {this->addAboutActionsToMainWindows(mw);});
 
 	buildMainWindow();
 
@@ -134,6 +138,20 @@ void App::addAppActionsToMainWindows(MainWindow* mw) {
 	ProjectLabelsDockWidget* labels_dock = new ProjectLabelsDockWidget(mw);
 	mw->addDockWidget(Qt::LeftDockWidgetArea, labels_dock);
 
+}
+
+void App::addAboutActionsToMainWindows(MainWindow* mw) {
+
+	//menu
+
+	QMenu* aboutMenu = mw->menuBar()->addMenu(tr("à propos"));
+
+	QAction* openAboutAction = new QAction(tr("à propos de %1").arg(APP_NAME), mw);
+	connect(openAboutAction, &QAction::triggered, [mw] () {
+		AboutDialog dialog(mw);
+		dialog.exec();
+	});
+	aboutMenu->addAction(openAboutAction);
 
 }
 

@@ -4,4 +4,7 @@
         <file>icons/new_simple.svg</file>
         <file>icons/delete_simple.svg</file>
     </qresource>
+    <qresource prefix="/images">
+        <file>images/logo_paragon.png</file>
+    </qresource>
 </RCC>

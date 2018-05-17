@@ -1,0 +1,20 @@
+#include "app_info.h"
+
+namespace Sabrina {
+
+const char* appTag() {
+    return "@GIT_TAG@";
+}
+const char* appHash() {
+    return "@GIT_HASH@";
+}
+
+
+const char* compileDateFull() {
+    return "@COMPILE_TIME_FULL@";
+}
+const char* compileDate() {
+    return "@COMPILE_DATE@";
+}
+
+} //namespace Sabrina

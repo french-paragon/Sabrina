@@ -7,8 +7,6 @@
 #  define CATHIA_CORE_EXPORT Q_DECL_IMPORT
 #endif
 
-#define APP_NAME "Sabrina"
-#define ORG_NAME "Paragon"
-#define ORG_DOMAIN "famillejospin.ch"
+#include "utils/app_info.h"
 
 #endif // CORE_GLOBAL_H

@@ -29,6 +29,7 @@ protected:
 
 	void buildMainWindow();
 	void addAppActionsToMainWindows(MainWindow* mw);
+	void addAboutActionsToMainWindows(MainWindow* mw);
 	void loadEditorsFactories();
 	void loadEditableFactories();
 
