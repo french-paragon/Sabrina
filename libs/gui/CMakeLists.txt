@@ -1,5 +1,6 @@
 set(LIB_NAME Gui)
 set(LIB_SRC mainwindows.cpp
+            mainwindowsfactory.cpp
             gui_global.h
             actions/editableitemtypespecializedaction.cpp
             utilsDialogs/aboutdialog.cpp

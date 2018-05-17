@@ -3,15 +3,16 @@
 #include <QMainWindow>
 
 #include "gui/mainwindows.h"
+#include "gui/mainwindowsfactory.h"
 #include "gui/dockWidgets/projecttreedockwidget.h"
 #include "gui/dockWidgets/projectlabelsdockwidget.h"
 
+#include <QUrl>
+
 #include <QMenu>
 #include <QMenuBar>
-#include <QFileDialog>
 #include <QToolBar>
-
-#include <QUrl>
+#include <QFileDialog>
 
 #include "model/editableitemmanager.h"
 #include "model/editableItems/personnage.h"
@@ -56,6 +57,8 @@ App::~App() {
 bool App::start(QString appCode) {
 	int code = Aline::App::start(appCode);
 
+	MainWindowsFactory::GlobalMainWindowsFactory.registerPreAction([this] (MainWindow* mw) {this->addAppActionsToMainWindows(mw);});
+
 	loadEditableFactories();
 	loadEditorsFactories();
 
@@ -72,28 +75,31 @@ void App::buildMainWindow() {
 		return;
 	}
 
-	_mainWindow = new MainWindow();
-	_mainWindow->setMenuBar(_mainWindow->menuBar());
+	_mainWindow = MainWindowsFactory::GlobalMainWindowsFactory.factorizeMainWindows();
+
+}
+
+void App::addAppActionsToMainWindows(MainWindow* mw) {
 
 	//menu
 
-	QMenu* fileMenu = _mainWindow->menuBar()->addMenu(tr("fichier"));
+	QMenu* fileMenu = mw->menuBar()->addMenu(tr("fichier"));
 
-	QAction* openProjectAction = new QAction(QIcon(":/icons/icons/editable_item_folder.svg"), tr("ouvrir un projet"), _mainWindow);
+	QAction* openProjectAction = new QAction(QIcon(":/icons/icons/editable_item_folder.svg"), tr("ouvrir un projet"), mw);
 	openProjectAction->setShortcut(QKeySequence::Open);
 	connect(openProjectAction, &QAction::triggered, this, &App::openFileProject);
 	fileMenu->addAction(openProjectAction);
 
-	QAction* createProjectAction = new QAction(QIcon(":/icons/icons/new_simple.svg"), tr("créer un projet"), _mainWindow);
+	QAction* createProjectAction = new QAction(QIcon(":/icons/icons/new_simple.svg"), tr("créer un projet"), mw);
 	createProjectAction->setShortcut(QKeySequence::New);
 	connect(createProjectAction, &QAction::triggered, this, &App::createFileProject);
 	fileMenu->addAction(createProjectAction);
 
 	fileMenu->addSeparator();
 
-	QAction* saveAction = new QAction(QIcon(":/icons/icons/save_simple.svg"), tr("sauver le projet"), _mainWindow);
+	QAction* saveAction = new QAction(QIcon(":/icons/icons/save_simple.svg"), tr("sauver le projet"), mw);
 	saveAction->setShortcut(QKeySequence::Save);
-	connect(saveAction, &QAction::triggered, _mainWindow, &MainWindow::saveAll);
+	connect(saveAction, &QAction::triggered, mw, &MainWindow::saveAll);
 
 	fileMenu->addAction(saveAction);
 
@@ -109,24 +115,25 @@ void App::buildMainWindow() {
 
 	//tool bar
 
-	QToolBar* mainToolBar = new QToolBar(_mainWindow);
+	QToolBar* mainToolBar = new QToolBar(mw);
 
 	mainToolBar->addAction(createProjectAction);
 	mainToolBar->addAction(openProjectAction);
 	mainToolBar->addAction(saveAction);
 
-	_mainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
+	mw->addToolBar(Qt::TopToolBarArea, mainToolBar);
 
 	//Dock widgets.
 
-	ProjectTreeDockWidget* project_dock = new ProjectTreeDockWidget(_mainWindow);
-	_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, project_dock);
+	ProjectTreeDockWidget* project_dock = new ProjectTreeDockWidget(mw);
+	mw->addDockWidget(Qt::LeftDockWidgetArea, project_dock);
 
 	connect(project_dock, &ProjectTreeDockWidget::itemDoubleClicked,
-			_mainWindow, &MainWindow::editItem);
+			mw, &MainWindow::editItem);
 
-	ProjectLabelsDockWidget* labels_dock = new ProjectLabelsDockWidget(_mainWindow);
-	_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, labels_dock);
+	ProjectLabelsDockWidget* labels_dock = new ProjectLabelsDockWidget(mw);
+	mw->addDockWidget(Qt::LeftDockWidgetArea, labels_dock);
+
 
 }
 
