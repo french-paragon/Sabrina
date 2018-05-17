@@ -560,6 +560,16 @@ bool JsonEditableItemManager::effectivelySaveItem(const QString &ref) {
 		obj.insert(sprop, QJsonValue::fromVariant(item->property(prop)) ); // insert the property.
 	}
 
+	QList<QByteArray> dynamicProperties = item->dynamicPropertyNames();
+
+	for (QByteArray cpropName : dynamicProperties) {
+
+		QString sprop(cpropName);
+
+		obj.insert(sprop, QJsonValue::fromVariant(item->property(cpropName.constData())));
+
+	}
+
 	QJsonArray referentItems;
 	QJsonArray referedItems;
 
