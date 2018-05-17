@@ -139,6 +139,19 @@ Qt::ItemFlags EditableItemManager::flags(const QModelIndex &index) const {
 
 }
 
+QVariant EditableItemManager::headerData(int section, Qt::Orientation orientation, int role) const {
+
+	Q_UNUSED(section);
+	Q_UNUSED(orientation);
+
+	if (role == Qt::DisplayRole) {
+		return "";
+	}
+
+	return QVariant();
+
+}
+
 QStringList EditableItemManager::mimeTypes() const {
 
 	QStringList mimes;

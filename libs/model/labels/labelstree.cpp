@@ -99,6 +99,19 @@ Qt::ItemFlags LabelsTree::flags(const QModelIndex &index) const {
 
 }
 
+QVariant LabelsTree::headerData(int section, Qt::Orientation orientation, int role) const {
+
+	Q_UNUSED(section);
+	Q_UNUSED(orientation);
+
+	if (role == Qt::DisplayRole) {
+		return "";
+	}
+
+	return QVariant();
+
+}
+
 QVariant LabelsTree::data(const QModelIndex &index, int role) const {
 
 	Label* label = (Label*) index.internalPointer();
@@ -106,6 +119,7 @@ QVariant LabelsTree::data(const QModelIndex &index, int role) const {
 	switch (role) {
 
 	case Qt::DisplayRole :
+	case Qt::EditRole :
 
 		return label->objectName();
 
