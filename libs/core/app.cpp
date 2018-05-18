@@ -14,6 +14,9 @@
 #include <QToolBar>
 #include <QFileDialog>
 
+#include <QSettings>
+#include <QByteArray>
+
 #include "model/editableitemmanager.h"
 #include "model/editableItems/personnage.h"
 #include "model/editableItems/place.h"
@@ -65,6 +68,21 @@ bool App::start(QString appCode) {
 	loadEditorsFactories();
 
 	MainWindowsFactory::GlobalMainWindowsFactory.registerPostAction([this] (MainWindow* mw) {this->addAboutActionsToMainWindows(mw);});
+	MainWindowsFactory::GlobalMainWindowsFactory.registerPostAction([] (MainWindow* mw) {
+
+		QSettings settings;
+		QVariant geometry = settings.value(MainWindow::GEOMETRY_CONFIG_KEY);
+		QVariant state = settings.value(MainWindow::STATE_CONFIG_KEY);
+
+		if (geometry.isValid() && geometry.canConvert(qMetaTypeId<QByteArray>())) {
+			mw->restoreGeometry(geometry.toByteArray());
+		}
+
+		if (state.isValid() && state.canConvert(qMetaTypeId<QByteArray>())) {
+			mw->restoreState(state.toByteArray());
+		}
+
+	}); //last post action is to restore state.
 
 	buildMainWindow();
 
@@ -87,7 +105,7 @@ void App::addAppActionsToMainWindows(MainWindow* mw) {
 
 	//menu
 
-	QMenu* fileMenu = mw->menuBar()->addMenu(tr("fichier"));
+	QMenu* fileMenu = mw->findMenuByName(MainWindow::MENU_FILE_NAME);
 
 	QAction* openProjectAction = new QAction(QIcon(":/icons/icons/editable_item_folder.svg"), tr("ouvrir un projet"), mw);
 	openProjectAction->setShortcut(QKeySequence::Open);
@@ -252,6 +270,10 @@ void App::quitCathia() {
 	if (_project != nullptr) {
 		_project->closeAll();
 	}
+
+	QSettings settings;
+	settings.setValue(MainWindow::GEOMETRY_CONFIG_KEY, _mainWindow->saveGeometry());
+	settings.setValue(MainWindow::STATE_CONFIG_KEY, _mainWindow->saveState());
 
 	QApplication::exit();
 }

@@ -12,10 +12,22 @@ class CATHIA_GUI_EXPORT MainWindow : public Aline::MainWindow
 {
 	Q_OBJECT
 public:
+
+	static const QString GEOMETRY_CONFIG_KEY;
+	static const QString STATE_CONFIG_KEY;
+
+	static const QString MENU_FILE_NAME;
+	static const QString MENU_DISPLAY_NAME;
+
 	explicit MainWindow(QWidget* parent = nullptr);
 
 	EditableItemManager *currentProject() const;
 	void setCurrentProject(EditableItemManager *currentProject);
+
+	QMenu* findMenuByName(QString const& name, bool createIfNotExist = false);
+
+	void addDockWidget(Qt::DockWidgetArea area, QDockWidget * dockwidget);
+	void addDockWidget(Qt::DockWidgetArea area, QDockWidget * dockwidget, Qt::Orientation orientation);
 
 signals:
 
@@ -33,6 +45,8 @@ protected:
 	EditableItemManager* _currentProject;
 
 	QMap<QString, Aline::Editor*> _openedEditors;
+
+	QMenu* _submenuDock;
 
 };
 
