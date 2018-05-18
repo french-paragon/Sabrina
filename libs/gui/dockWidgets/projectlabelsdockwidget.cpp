@@ -41,6 +41,9 @@ ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
 	ui->treeView->setItemDelegate(new LabelsModelItemDelegate(ui->treeView));
 
 	ui->treeView->setModel(_proxy);
+
+	connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged,
+			this, &ProjectLabelsDockWidget::selectionChanged);
 }
 
 ProjectLabelsDockWidget::~ProjectLabelsDockWidget()
@@ -79,6 +82,18 @@ void ProjectLabelsDockWidget::labelDeletionButtonClicked() {
 		QModelIndex index = selection.first();
 
 		_currentProject->labelsTree()->removeRow(index.row(), index.parent());
+	}
+
+}
+
+void ProjectLabelsDockWidget::selectionChanged() {
+
+	QModelIndexList selection = ui->treeView->selectionModel()->selectedIndexes();
+
+	if (selection.size() == 1) {
+		QModelIndex index = selection.first();
+
+		_currentProject->labelsTree()->setActiveLabel(_proxy->mapToSource(index));
 	}
 
 }

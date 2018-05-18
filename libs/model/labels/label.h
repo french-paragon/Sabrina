@@ -54,6 +54,9 @@ signals:
 	void refChanged(QString oldRef, QString newRef);
 	void gettedRef(QString newRef);
 
+	void itemRefAdded(QString newRef);
+	void itemRefRemoved(QString oldRef);
+
 public slots:
 
 protected:

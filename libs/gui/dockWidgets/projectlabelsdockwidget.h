@@ -28,6 +28,8 @@ private:
 	void labelAdditionButtonClicked();
 	void labelDeletionButtonClicked();
 
+	void selectionChanged();
+
 	Ui::ProjectLabelsDockWidget *ui;
 
 	EditableItemManager* _currentProject;

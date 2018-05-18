@@ -10,7 +10,8 @@ namespace Sabrina {
 
 LabelsTree::LabelsTree(EditableItemManager *parent) :
 	QAbstractItemModel(parent),
-	_parentManager(parent)
+	_parentManager(parent),
+	_activeLabel(nullptr)
 {
 
 }
@@ -458,5 +459,44 @@ EditableItemManager *LabelsTree::parentManager() const
 	return _parentManager;
 }
 
+void LabelsTree::setActiveLabel(QModelIndex const& activeLabelIndex) {
+
+	Label* newLabel = nullptr;
+
+	if (activeLabelIndex.model() == static_cast<QAbstractItemModel*>(this)) {
+
+		void* data = activeLabelIndex.internalPointer();
+
+		newLabel = (Label*) data;
+
+	} else if (!activeLabelIndex.isValid()) {
+
+		newLabel = nullptr;
+
+	}
+
+	if (_activeLabel != nullptr && newLabel != nullptr && newLabel != _activeLabel) {
+		disconnect(_activeLabel, &Label::itemRefAdded, this, &LabelsTree::activeLabelFilterExtend);
+		disconnect(_activeLabel, &Label::itemRefRemoved, this, &LabelsTree::activeLabelFilterReduce);
+	}
+
+	if (newLabel != nullptr && newLabel != _activeLabel) {
+		connect(newLabel, &Label::itemRefAdded, this, &LabelsTree::activeLabelFilterExtend);
+		connect(newLabel, &Label::itemRefRemoved, this, &LabelsTree::activeLabelFilterReduce);
+		_activeLabel = newLabel;
+		emit activeLabelFilterChanged(QStringList::fromVector(_activeLabel->itemsRefs()));
+	}
+
+
+}
+
+QStringList LabelsTree::activeLabelFilter() const {
+
+	if (_activeLabel == nullptr) {
+		return QStringList();
+	}
+
+	return QStringList::fromVector(_activeLabel->itemsRefs());
+}
 
 } // namespace Sabrina

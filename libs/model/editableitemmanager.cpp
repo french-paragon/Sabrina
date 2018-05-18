@@ -4,6 +4,7 @@
 #include "editableitemfactory.h"
 
 #include "labels/labelstree.h"
+#include "labels/label.h"
 
 #include <QIcon>
 #include <QMimeData>
@@ -439,6 +440,12 @@ void EditableItemManager::setActiveItem(QString ref) {
 		}
 
 	}
+
+}
+
+void setActiveLabel(QString ref) {
+
+
 
 }
 

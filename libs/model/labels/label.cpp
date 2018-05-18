@@ -164,6 +164,10 @@ bool Label::markItem(EditableItem* item) {
 
 	item->setProperty(PROP_LABELS, labels);
 
+	if (ok) {
+		emit itemRefAdded(item->getRef());
+	}
+
 	return ok;
 }
 
@@ -213,6 +217,10 @@ bool Label::unmarkItem(EditableItem* item) {
 	labels.removeAt(lindex);
 
 	item->setProperty(PROP_LABELS, labels);
+
+	if (ok) {
+		emit itemRefRemoved(item->getRef());
+	}
 
 	return ok;
 }

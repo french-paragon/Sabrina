@@ -9,6 +9,8 @@ set(LIB_SRC mainwindows.cpp
             dockWidgets/projecttreedockwidget.ui
             dockWidgets/projectlabelsdockwidget.cpp
             dockWidgets/projectlabelsdockwidget.ui
+            dockWidgets/labelitemsdockwidget.cpp
+            dockWidgets/labelitemsdockwidget.ui
             editors/personnageeditor.cpp
             editors/personnageeditor.ui
             editors/placeeditor.cpp

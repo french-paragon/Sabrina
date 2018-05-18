@@ -6,6 +6,7 @@
 #include "gui/mainwindowsfactory.h"
 #include "gui/dockWidgets/projecttreedockwidget.h"
 #include "gui/dockWidgets/projectlabelsdockwidget.h"
+#include "gui/dockWidgets/labelitemsdockwidget.h"
 
 #include <QUrl>
 
@@ -138,6 +139,7 @@ void App::addAppActionsToMainWindows(MainWindow* mw) {
 	//tool bar
 
 	QToolBar* mainToolBar = new QToolBar(mw);
+	mainToolBar->setObjectName("main_tool_bar");
 
 	mainToolBar->addAction(createProjectAction);
 	mainToolBar->addAction(openProjectAction);
@@ -155,6 +157,9 @@ void App::addAppActionsToMainWindows(MainWindow* mw) {
 
 	ProjectLabelsDockWidget* labels_dock = new ProjectLabelsDockWidget(mw);
 	mw->addDockWidget(Qt::LeftDockWidgetArea, labels_dock);
+
+	LabelItemsDockWidget* label_item_dock = new LabelItemsDockWidget(mw);
+	mw->addDockWidget(Qt::RightDockWidgetArea, label_item_dock);
 
 }
 

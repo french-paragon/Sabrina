@@ -48,7 +48,15 @@ public:
 
 	EditableItemManager *parentManager() const;
 
+	void setActiveLabel(const QModelIndex &activeLabelIndex);
+
+	QStringList activeLabelFilter() const;
+
 signals:
+
+	void activeLabelFilterChanged(QStringList labelFilter);
+	void activeLabelFilterExtend(QString newRef);
+	void activeLabelFilterReduce(QString oldRef);
 
 public slots:
 
@@ -64,6 +72,8 @@ protected:
 	QSet<QString> _labelsRefs;
 
 	EditableItemManager* _parentManager;
+
+	Label* _activeLabel;
 
 };
 

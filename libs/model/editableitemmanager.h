@@ -15,6 +15,7 @@ class EditableItem;
 class EditableItemManager;
 class EditableItemFactoryManager;
 class LabelsTree;
+class Label;
 
 class CATHIA_MODEL_EXPORT ItemIOException : public QException
 {

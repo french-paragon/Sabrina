@@ -10,7 +10,8 @@ set(LIB_SRC editableitem.cpp
             editableItems/folder.cpp
             labels/labelstree.cpp
             labels/label.cpp
-            labels/labelselectionforitemproxymodel.cpp)
+            labels/labelselectionforitemproxymodel.cpp
+            labels/projectfilterbylabelproxymodel.cpp)
 
 add_library(${LIB_NAME} ${LIB_SRC})
 
