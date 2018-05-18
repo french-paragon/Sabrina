@@ -15,6 +15,7 @@
 #include <QToolBar>
 #include <QFileDialog>
 
+#include <QDebug>
 #include <QSettings>
 #include <QByteArray>
 
@@ -34,6 +35,8 @@
 #include <aline/src/editorfactory.h>
 #include <aline/src/editorfactorymanager.h>
 
+#include "utils/app_info.h"
+
 namespace Sabrina {
 
 App::App(int &argc, char **argv) :
@@ -44,6 +47,8 @@ App::App(int &argc, char **argv) :
 	QCoreApplication::setOrganizationName(ORG_NAME);
 	QCoreApplication::setOrganizationDomain(ORG_DOMAIN);
 	QCoreApplication::setApplicationName(APP_NAME);
+
+	QCoreApplication::setApplicationVersion(appTag());
 
 	connect(this, &QApplication::aboutToQuit, this, &App::quitCathia);
 }
@@ -90,6 +95,26 @@ bool App::start(QString appCode) {
 	_mainWindow->show();
 
 	return code;
+}
+
+void App::openProject(QString const& projectFile) {
+
+	JsonEditableItemManager* project = new JsonEditableItemManager(this);
+
+	project->connectProject(projectFile);
+
+	if (!project->hasDataSource()) {
+		delete project;
+		return;
+	}
+
+	closeProject(); //ensure previous project is closed.
+	//TODO: change the architecture so that we can have multiple projects open at once.
+
+	_project = project;
+
+	_mainWindow->setCurrentProject(_project);
+
 }
 
 void App::buildMainWindow() {
@@ -205,21 +230,7 @@ void App::openFileProject() {
 		return;
 	}
 
-	JsonEditableItemManager* project = new JsonEditableItemManager(this);
-
-	project->connectProject(projectFile);
-
-	if (!project->hasDataSource()) {
-		delete project;
-		return;
-	}
-
-	closeProject(); //ensure previous project is closed.
-	//TODO: change the architecture so that we can have multiple projects open at once.
-
-	_project = project;
-
-	_mainWindow->setCurrentProject(_project);
+	openProject(projectFile);
 
 }
 

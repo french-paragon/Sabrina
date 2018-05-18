@@ -21,6 +21,8 @@ public:
 
 	virtual bool start(QString appCode = "default");
 
+	void openProject(QString const& projectFile);
+
 protected:
 
 	void openFileProject();
