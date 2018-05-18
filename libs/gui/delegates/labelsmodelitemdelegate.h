@@ -1,12 +1,12 @@
 #ifndef LABELSMODELITEMDELEGATE_H
 #define LABELSMODELITEMDELEGATE_H
 
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QTreeView>
 
 namespace Sabrina {
 
-class LabelsModelItemDelegate : public QItemDelegate
+class LabelsModelItemDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT
 public:

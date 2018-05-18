@@ -8,7 +8,7 @@
 namespace Sabrina {
 
 LabelsModelItemDelegate::LabelsModelItemDelegate(QTreeView *parent) :
-	QItemDelegate(parent)
+	QStyledItemDelegate(parent)
 {
 
 }
@@ -34,7 +34,7 @@ bool LabelsModelItemDelegate::editorEvent(QEvent* event,
 		return true;
 	}
 
-	return QAbstractItemDelegate::editorEvent(
+	return QStyledItemDelegate::editorEvent(
 		event, model, option, index);
 
 }
