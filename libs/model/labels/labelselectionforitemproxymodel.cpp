@@ -113,8 +113,8 @@ void LabelSelectionForItemProxyModel::setSourceModel(LabelsTree* newSourceModel)
 }
 
 void LabelSelectionForItemProxyModel::onActiveItemChanged() {
-	beginResetModel();
-	endResetModel();
+
+	emit dataChanged(QModelIndex(), QModelIndex(), {Qt::CheckStateRole});
 }
 
 } // namespace Sabrina
