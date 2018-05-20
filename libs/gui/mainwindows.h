@@ -42,6 +42,8 @@ public slots:
 
 protected:
 
+	void onEditorAboutToBeRemoved(Aline::Editor* editor);
+
 	EditableItemManager* _currentProject;
 
 	QMap<QString, Aline::Editor*> _openedEditors;

@@ -37,6 +37,9 @@ MainWindow::MainWindow(QWidget* parent) :
 	viewMenu->setObjectName(MENU_DISPLAY_NAME);
 
 	_submenuDock = viewMenu->addMenu(tr("docks"));
+
+	connect(this, &Aline::MainWindow::editorAboutToBeRemoved,
+			this, &MainWindow::onEditorAboutToBeRemoved);
 }
 
 void MainWindow::displayAboutWindows() {
@@ -69,6 +72,18 @@ void MainWindow::saveAll() {
 
 	if (_currentProject != nullptr) {
 		_currentProject->saveAll();
+	}
+
+}
+
+void MainWindow::onEditorAboutToBeRemoved(Aline::Editor* editor) {
+
+	if (_openedEditors.values().contains(editor)) {
+
+		QString key = _openedEditors.key(editor);
+
+		_openedEditors.remove(key);
+
 	}
 
 }
