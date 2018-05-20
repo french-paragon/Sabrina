@@ -50,6 +50,8 @@ private:
 	Ui::PlaceEditor *ui;
 
 	Place* _current_place;
+
+	QMetaObject::Connection _nameWatchConnection;
 };
 
 

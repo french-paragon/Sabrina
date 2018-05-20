@@ -51,6 +51,11 @@ private:
 	Personnage* _currentPerso;
 
 	bool _has_intermediate_connections;
+
+	QMetaObject::Connection _nameWatchConnection;
+	QMetaObject::Connection _raceWatchConnection;
+	QMetaObject::Connection _ageWatchConnection;
+
 };
 
 

@@ -54,9 +54,15 @@ bool PersonnageEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 		disconnect(ui->lineEdit_race, &QLineEdit::textEdited, _currentPerso, &Personnage::setPersoRace);
 		disconnect(ui->spinBox_age, QOverload<int>::of(&QSpinBox::valueChanged), _currentPerso, &Personnage::setAge);
 
-		disconnect(_currentPerso, &Personnage::objectNameChanged, ui->lineEdit_name, &QLineEdit::setText);
-		disconnect(_currentPerso, &Personnage::persoRaceChanged, ui->lineEdit_race, &QLineEdit::setText);
-		disconnect(_currentPerso, &Personnage::persoAgeChanged, ui->spinBox_age, &QSpinBox::setValue);
+		if (_nameWatchConnection) {
+			disconnect(_nameWatchConnection);
+		}
+		if (_raceWatchConnection) {
+			disconnect(_raceWatchConnection);
+		}
+		if (_ageWatchConnection) {
+			disconnect(_ageWatchConnection);
+		}
 
 	}
 
@@ -70,9 +76,9 @@ bool PersonnageEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 	connect(ui->lineEdit_race, &QLineEdit::textEdited, perso, &Personnage::setPersoRace);
 	connect(ui->spinBox_age, QOverload<int>::of(&QSpinBox::valueChanged), perso, &Personnage::setAge);
 
-	connect(perso, &Personnage::objectNameChanged, ui->lineEdit_name, &QLineEdit::setText);
-	connect(perso, &Personnage::persoRaceChanged, ui->lineEdit_race, &QLineEdit::setText);
-	connect(perso, &Personnage::persoAgeChanged, ui->spinBox_age, &QSpinBox::setValue);
+	_nameWatchConnection = connect(perso, &Personnage::objectNameChanged, [this] (QString const& text) {if (text != ui->lineEdit_name->text()) ui->lineEdit_name->setText(text);});
+	_raceWatchConnection = connect(perso, &Personnage::persoRaceChanged, [this] (QString const& text) {if (text != ui->lineEdit_race->text()) ui->lineEdit_race->setText(text);});
+	_ageWatchConnection = connect(perso, &Personnage::persoAgeChanged, [this] (int value) {if (value != ui->spinBox_age->value()) ui->spinBox_age->setValue(value);});
 
 	_currentPerso = perso;
 

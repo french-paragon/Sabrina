@@ -45,7 +45,9 @@ bool PlaceEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 
 		disconnect(ui->lineEdit_name, &QLineEdit::textEdited, _current_place, &Place::setObjectName);
 
-		disconnect(_current_place, &Place::objectNameChanged, ui->lineEdit_name, &QLineEdit::setText);
+		if (_nameWatchConnection) {
+			disconnect(_nameWatchConnection);
+		}
 	}
 
 	ui->lineEdit_name->setText(place->objectName());
@@ -53,7 +55,7 @@ bool PlaceEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 
 	connect(ui->lineEdit_name, &QLineEdit::textEdited, place, &Place::setObjectName);
 
-	connect(place, &Place::objectNameChanged, ui->lineEdit_name, &QLineEdit::setText);
+	_nameWatchConnection = connect(place, &Place::objectNameChanged, [this] (QString const& text) {if (text != ui->lineEdit_name->text()) ui->lineEdit_name->setText(text);});
 
 	_current_place = place;
 
