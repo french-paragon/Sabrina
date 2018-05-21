@@ -314,14 +314,16 @@ QVector<QString> EditableItemManager::listChildren(QString ref) {
 	return QVector<QString>();
 }
 
-bool EditableItemManager::createItem(QString typeRef, QString ref, QString parent_ref) {
+bool EditableItemManager::createItem(QString typeRef, QString pref, QString parent_ref) {
+
+	QString ref = pref;
 
 	if (!_factoryManager->hasFactoryInstalled(typeRef)) {
 		return false;
 	}
 
 	if (containItem(ref)) {
-		return false;
+		makeRefUniq(ref);
 	}
 
 	if (parent_ref != "") {
@@ -514,6 +516,28 @@ void EditableItemManager::cleanTreeStruct() {
 EditableItemFactoryManager *EditableItemManager::factoryManager() const
 {
 	return _factoryManager;
+}
+
+bool EditableItemManager::makeRefUniq(QString &ref) const {
+
+	if (!containItem(ref)) {
+		return true;
+	}
+
+	int i = 1;
+
+	while(containItem(QString("%1_%2").arg(ref).arg(i))) {
+		i++;
+
+		if (i <= 0) {
+			return false; //impossible to make the ref uniq.
+		}
+	}
+
+	ref = QString("%1_%2").arg(ref).arg(i);
+
+	return true;
+
 }
 
 void EditableItemManager::setActiveItem(QString ref) {

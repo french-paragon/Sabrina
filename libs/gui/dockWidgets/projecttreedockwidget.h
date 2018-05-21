@@ -45,6 +45,8 @@ private:
 	void receiveDoubleClick(const QModelIndex &index);
 	void supprButtonClicked();
 
+	void buildTreeContextMenu(QPoint const& pos);
+
 	MainWindow * _mw_parent;
 
 	QMenu* _newItemMenu;

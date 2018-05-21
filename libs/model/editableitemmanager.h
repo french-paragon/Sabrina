@@ -97,6 +97,8 @@ public:
 
 	EditableItemFactoryManager *factoryManager() const;
 
+	bool makeRefUniq(QString &ref) const;
+
 signals:
 
 	void loadingItemSucessFull(QString ref);

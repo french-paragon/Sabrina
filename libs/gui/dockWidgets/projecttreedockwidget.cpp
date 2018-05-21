@@ -8,6 +8,8 @@
 
 #include "model/editableitemfactory.h"
 
+#include <aline/src/editorfactorymanager.h>
+
 namespace Sabrina {
 
 ProjectTreeDockWidget::ProjectTreeDockWidget(MainWindow *parent) :
@@ -40,6 +42,11 @@ ProjectTreeDockWidget::ProjectTreeDockWidget(MainWindow *parent) :
 	ui->treeView->setDragDropMode(QAbstractItemView::DragOnly);
 	ui->treeView->setDragEnabled(true);
 	ui->treeView->setDropIndicatorShown(true);
+
+	ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(ui->treeView, &QTreeView::customContextMenuRequested,
+			this, &ProjectTreeDockWidget::buildTreeContextMenu);
 }
 
 ProjectTreeDockWidget::~ProjectTreeDockWidget()
@@ -197,6 +204,81 @@ void ProjectTreeDockWidget::supprButtonClicked() {
 	}
 
 	emit itemSuppressionTriggered(selectedItems);
+
+}
+
+void ProjectTreeDockWidget::buildTreeContextMenu(QPoint const& pos) {
+
+	QModelIndex index = ui->treeView->indexAt(pos);
+
+	if (index.isValid()) {
+
+		QMenu menu;
+
+		QVariant data  = index.data(EditableItemManager::ItemTypeRefRole);
+		QString itemTypeRef = data.toString();
+
+		if (Aline::EditorFactoryManager::GlobalEditorFactoryManager.hasFactoryInstalledForItem(itemTypeRef)) {
+			QAction* editAction = menu.addAction(tr("éditer"));
+
+			connect(editAction, &QAction::triggered, [this, &index] () {
+				emit itemDoubleClicked(index.data(EditableItemManager::ItemRefRole).toString());
+			});
+
+			menu.addSeparator();
+		}
+
+		if (_internalModel->flags(index) & Qt::ItemIsEditable) {
+
+			QAction* renameAction = menu.addAction(tr("renommer"));
+
+			connect(renameAction, &QAction::triggered, [&index, this] () {ui->treeView->edit(index);});
+
+			menu.addSeparator();
+
+		}
+
+		data = index.data(EditableItemManager::ItemAcceptChildrenRole);
+
+		if (data.toBool()) {
+
+			QMenu* section = menu.addMenu(tr("ajouter un:"));
+
+			EditableItemFactoryManager* f = _mw_parent->currentProject()->factoryManager();
+
+			for (int i = 0; i < f->rowCount(); i++) {
+
+				EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(f->data(f->index(i),
+																										  EditableItemFactoryManager::ItemRefRole).toString(),
+																								  f->data(f->index(i),
+																										  Qt::DisplayRole).toString(),
+																								  _newItemMenu);
+
+				connect(action, &EditableItemTypeSpecializedAction::triggered,
+						this, [&index, this] (QString type_id) {
+
+					QString parentRef = index.data(EditableItemManager::ItemRefRole).toString();
+					emit itemCreationTriggered(type_id, type_id, parentRef);
+
+				});
+
+				section->addAction(action);
+
+			}
+
+			menu.addSeparator();
+
+		}
+
+		QAction* actionRemove = menu.addAction(tr("supprimer"));
+
+		connect(actionRemove, &QAction::triggered, [&index, this] () {
+			itemSuppressionTriggered({index.data(EditableItemManager::ItemRefRole).toString()});
+		});
+
+		menu.exec(ui->treeView->viewport()->mapToGlobal(pos));
+
+	}
 
 }
 

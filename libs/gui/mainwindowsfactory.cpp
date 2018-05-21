@@ -5,6 +5,8 @@
 #include "dockWidgets/projecttreedockwidget.h"
 #include "dockWidgets/projectlabelsdockwidget.h"
 
+#include "utils/app_info.h"
+
 namespace Sabrina {
 
 
@@ -18,6 +20,7 @@ MainWindowsFactory::MainWindowsFactory(QObject *parent) : QObject(parent)
 MainWindow* MainWindowsFactory::factorizeMainWindows() const {
 
 	MainWindow* mw = new MainWindow();
+	mw->setWindowTitle(APP_NAME);
 	mw->setMenuBar(mw->menuBar());
 
 	//preActions
