@@ -18,7 +18,8 @@ const QString EditableItem::CHILDREN_PROP_NAME = "ref_childrens";
 
 EditableItem::EditableItem(QString ref, EditableItemManager *parent) :
 	Aline::EditableItem(parent),
-	_ref(ref)
+	_ref(ref),
+	_manager(parent)
 {
 
 	connect(this, &EditableItem::objectNameChanged, this, &EditableItem::newUnsavedChanges);

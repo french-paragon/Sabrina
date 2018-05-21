@@ -48,7 +48,8 @@ public:
 
 	enum InternalDataRole{
 		ItemRefRole = Qt::UserRole + 1,
-		ItemAcceptChildrenRole = Qt::UserRole + 2
+		ItemAcceptChildrenRole = Qt::UserRole + 2,
+		ItemTypeRefRole = Qt::UserRole + 3
 	};
 
 	static const QChar RefSeparator;
@@ -65,6 +66,7 @@ public:
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
 
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
@@ -82,6 +84,8 @@ public:
 	LabelsTree* labelsTree();
 
 	bool createItem(QString typeRef, QString ref, QString parent_ref = "");
+	bool clearItem(QString itemRef);
+	bool clearItems(QStringList itemRefs);
 
 	QVector<QString> listChildren(QString ref);
 
@@ -143,6 +147,8 @@ protected:
 	 * \brief effectivelyLoadLabels load the labels from the datasource.
 	 */
 	virtual void effectivelyLoadLabels() = 0;
+
+	virtual bool clearItemData(QString itemRef) = 0;
 
 	virtual bool effectivelySaveItem(QString const& ref) = 0;
 

@@ -46,6 +46,9 @@ protected:
 	static const QString LABELS_FILE_NAME;
 
 	virtual EditableItem* effectivelyLoadItem(QString const& ref);
+
+	virtual bool clearItemData(QString itemRef);
+
 	virtual void effectivelyLoadLabels();
 	virtual bool effectivelySaveItem(QString const& ref);
 

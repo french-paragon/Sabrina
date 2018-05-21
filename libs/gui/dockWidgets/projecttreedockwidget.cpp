@@ -19,6 +19,7 @@ ProjectTreeDockWidget::ProjectTreeDockWidget(MainWindow *parent) :
 	_internalModel = new QSortFilterProxyModel(this);
 
 	ui->setupUi(this);
+
 	ui->treeView->setModel(_internalModel);
 
 	projectChanged(_mw_parent->currentProject());
@@ -31,6 +32,9 @@ ProjectTreeDockWidget::ProjectTreeDockWidget(MainWindow *parent) :
 
 	connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged,
 			this, &ProjectTreeDockWidget::selectionChanged);
+
+	connect(ui->pushButtonSuppr, &QPushButton::clicked,
+			this, &ProjectTreeDockWidget::supprButtonClicked);
 
 	ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
 	ui->treeView->setDragDropMode(QAbstractItemView::DragOnly);
@@ -105,6 +109,10 @@ void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
 		disconnect(_itemCreationTrigger);
 	}
 
+	if (_itemSuppresionTrigger) {
+		disconnect(_itemSuppresionTrigger);
+	}
+
 	if (project == nullptr) {
 		setEnabled(false);
 		return;
@@ -120,6 +128,9 @@ void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
 
 	_itemCreationTrigger = connect(this, &ProjectTreeDockWidget::itemCreationTriggered,
 								   project, &EditableItemManager::createItem);
+
+	_itemSuppresionTrigger = connect(this, &ProjectTreeDockWidget::itemSuppressionTriggered,
+									 project, &EditableItemManager::clearItems);
 }
 
 void ProjectTreeDockWidget::reselectProject(EditableItemManager *project) {
@@ -175,6 +186,8 @@ void ProjectTreeDockWidget::receiveDoubleClick(const QModelIndex &index) {
 }
 
 void ProjectTreeDockWidget::supprButtonClicked() {
+
+	//TODO: options to have a warning about deletion.
 
 	QModelIndexList smod = ui->treeView->selectionModel()->selectedIndexes();
 	QStringList selectedItems;

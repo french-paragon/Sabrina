@@ -395,6 +395,18 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 	return item;
 }
 
+bool JsonEditableItemManager::clearItemData(QString itemRef) {
+
+	QString fileName = _projectFolder + ITEM_FOLDER_NAME + itemRef + ".json";
+
+	QFile file(fileName);
+
+	if (file.exists()) {
+		file.remove();
+	}
+
+}
+
 void JsonEditableItemManager::effectivelyLoadLabels() {
 
 	_labels = new LabelsTree(this);

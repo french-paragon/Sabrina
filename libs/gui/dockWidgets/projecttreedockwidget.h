@@ -54,6 +54,7 @@ private:
 
 	QMetaObject::Connection _newItemFactoryWatcher;
 	QMetaObject::Connection _itemCreationTrigger;
+	QMetaObject::Connection _itemSuppresionTrigger;
 };
 
 } //namespace Sabrina

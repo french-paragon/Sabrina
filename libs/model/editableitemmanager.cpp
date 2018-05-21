@@ -6,6 +6,8 @@
 #include "labels/labelstree.h"
 #include "labels/label.h"
 
+#include "aline/src/editorfactorymanager.h"
+
 #include <QIcon>
 #include <QMimeData>
 
@@ -102,7 +104,11 @@ QVariant EditableItemManager::data(const QModelIndex &index, int role) const {
 
 	case Qt::DisplayRole:
 
-		return data->_ref + ": " + data->_name;
+		return data->_name;
+
+	case Qt::EditRole:
+
+		return data->_name;
 
 	case ItemRefRole:
 
@@ -111,6 +117,10 @@ QVariant EditableItemManager::data(const QModelIndex &index, int role) const {
 	case ItemAcceptChildrenRole:
 
 		return data->_acceptChildrens;
+
+	case ItemTypeRefRole:
+
+		return data->_type_ref;
 
 	case Qt::DecorationRole: //icon
 
@@ -129,11 +139,50 @@ QVariant EditableItemManager::data(const QModelIndex &index, int role) const {
 	return QVariant();
 }
 
+bool EditableItemManager::setData(const QModelIndex &index, const QVariant &value, int role) {
+
+	switch (role) {
+
+	case Qt::EditRole:
+
+	{
+		QString ref = data(index, ItemRefRole).toString();
+
+		EditableItem* item = loadItem(ref);
+
+		void * dataPtr = index.internalPointer();
+		treeStruct* data = reinterpret_cast <treeStruct*> (dataPtr);
+
+		if (item != nullptr) {
+			item->setObjectName(value.toString());
+			data->_name = value.toString();
+			emit dataChanged(index, index, {Qt::DisplayRole});
+			return true;
+		}
+	}
+
+	default:
+		return false;
+	}
+
+	return false;
+
+}
+
 
 Qt::ItemFlags EditableItemManager::flags(const QModelIndex &index) const {
 
 	if (index.isValid()) {
-		return Qt::ItemIsDragEnabled | QAbstractItemModel::flags(index);
+
+		Qt::ItemFlags f = Qt::ItemIsDragEnabled | QAbstractItemModel::flags(index);
+
+		QString itemTypeRef = index.data(ItemTypeRefRole).toString();
+
+		if (!Aline::EditorFactoryManager::GlobalEditorFactoryManager.hasFactoryInstalledForItem(itemTypeRef)) {
+			f |= Qt::ItemIsEditable;
+		}
+
+		return f;
 	}
 
 	return QAbstractItemModel::flags(index);
@@ -302,6 +351,45 @@ bool EditableItemManager::createItem(QString typeRef, QString ref, QString paren
 	}
 
 	return false;
+
+}
+
+
+bool EditableItemManager::clearItem(QString itemRef) {
+
+	EditableItem* item = loadItem(itemRef);
+
+	if (item != nullptr) {
+		item->suppress();
+		item->deleteLater();
+	}
+
+	treeStruct* node = _treeIndex.value(itemRef, nullptr);
+
+	QModelIndex index = indexFromLeaf(node);
+
+	if (node != nullptr) {
+		beginRemoveRows(index.parent(), index.row(), index.row());
+
+		treeStruct* parent = node->_parent;
+		parent->_childrens.removeOne(node);
+
+		endRemoveRows();
+	}
+
+	_loadedItems.remove(itemRef);
+
+	clearItemData(itemRef);
+
+
+
+}
+
+bool EditableItemManager::clearItems(QStringList itemRefs) {
+
+	for (QString ref : itemRefs) {
+		clearItem(ref);
+	}
 
 }
 

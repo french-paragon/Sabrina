@@ -186,6 +186,9 @@ void App::addAppActionsToMainWindows(MainWindow* mw) {
 	LabelItemsDockWidget* label_item_dock = new LabelItemsDockWidget(mw);
 	mw->addDockWidget(Qt::RightDockWidgetArea, label_item_dock);
 
+	connect(label_item_dock, &LabelItemsDockWidget::itemDoubleClicked,
+			mw, &MainWindow::editItem);
+
 }
 
 void App::addAboutActionsToMainWindows(MainWindow* mw) {

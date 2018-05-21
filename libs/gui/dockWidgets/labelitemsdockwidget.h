@@ -21,9 +21,19 @@ public:
 	explicit LabelItemsDockWidget(MainWindow *parent = 0);
 	~LabelItemsDockWidget();
 
+signals:
+
+	void itemDoubleClicked(QString itemRef);
+
 private:
 
+	void selectionChanged();
+
 	void projectChanged(EditableItemManager* project);
+
+	void receiveDoubleClick(const QModelIndex &index);
+
+	MainWindow * _mw_parent;
 
 	Ui::LabelItemsDockWidget *ui;
 
