@@ -58,6 +58,10 @@ void Label::setRef(QString ref) {
 		}
 	}
 }
+void Label::setParentLabel(Label* parent) {
+	_parentLabel = parent;
+	setParent(parent);
+}
 
 bool Label::addChild(Label* child) {
 
@@ -67,12 +71,16 @@ bool Label::addChild(Label* child) {
 
 	_childrens.push_back(child);
 
+	if (child->parentLabel() != this) {
+		child->setParentLabel(this);
+	}
+
 }
 void Label::removeChild(Label* child) {
 
 	int index = _childrens.indexOf(child);
 
-	if (index > 0) {
+	if (index >= 0) {
 		_childrens.removeAt(index);
 	}
 

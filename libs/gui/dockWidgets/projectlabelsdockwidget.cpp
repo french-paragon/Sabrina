@@ -34,7 +34,8 @@ ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
 
 	ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
 
-	ui->treeView->setDragDropMode(QAbstractItemView::DropOnly);
+	ui->treeView->setDragDropMode(QAbstractItemView::DragDrop);
+	ui->treeView->setDragEnabled(true);
 	ui->treeView->setAcceptDrops(true);
 	ui->treeView->setDropIndicatorShown(true);
 

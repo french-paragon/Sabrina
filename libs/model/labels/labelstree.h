@@ -23,6 +23,8 @@ public:
 		UnmarkLabelForItem = Qt::UserRole+3
 	};
 
+	static const QString LabelRefMimeType;
+
 	explicit LabelsTree(EditableItemManager *parent = nullptr);
 
 	virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
@@ -36,6 +38,7 @@ public:
 	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
 	virtual QStringList mimeTypes() const;
+	virtual QMimeData* mimeData(const QModelIndexList &indexes) const;
 	virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
 	virtual Qt::DropActions supportedDropActions() const;
@@ -66,6 +69,12 @@ protected:
 	void exchangeRef(QString oldRef, QString newRef);
 	void removeRefs(QStringList const& refs);
 	void insertRefs(QStringList const& refs);
+
+	int getRowFromLabel(Label* label);
+	bool moveRefsToParent(QStringList refs, QModelIndex const& parent);
+	bool moveRefToParent(QString ref, QModelIndex const& parent);
+
+	Label* findLabelByRef(QString const& ref, Label* parentLabel = nullptr);
 
 	QVector<Label*> _labels;
 

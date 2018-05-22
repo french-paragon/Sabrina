@@ -8,6 +8,8 @@
 
 namespace Sabrina {
 
+const QString LabelsTree::LabelRefMimeType = "text/itemlabelref";
+
 LabelsTree::LabelsTree(EditableItemManager *parent) :
 	QAbstractItemModel(parent),
 	_parentManager(parent),
@@ -93,7 +95,7 @@ int LabelsTree::columnCount(const QModelIndex &parent) const {
 Qt::ItemFlags LabelsTree::flags(const QModelIndex &index) const {
 
 	if (index != QModelIndex()) {
-		return Qt::ItemIsEditable | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
+		return Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 	}
 
 	return QAbstractItemModel::flags(index);
@@ -209,9 +211,27 @@ QStringList LabelsTree::mimeTypes() const {
 
 	QStringList mimes;
 	mimes << EditableItemManager::RefMimeType;
+	mimes << LabelRefMimeType;
 
 	return mimes;
 
+}
+
+QMimeData* LabelsTree::mimeData(const QModelIndexList &indexes) const {
+	QMimeData *mimeData = new QMimeData();
+	QByteArray encodedData;
+
+	QDataStream stream(&encodedData, QIODevice::WriteOnly);
+
+	for (QModelIndex index : indexes) {
+		if (index.isValid()) {
+			QString text = data(index, LabelRefRole).toString();
+			stream << text;
+		}
+	}
+
+	mimeData->setData(LabelRefMimeType, encodedData);
+	return mimeData;
 }
 
 bool LabelsTree::dropMimeData(const QMimeData *data,
@@ -228,52 +248,75 @@ bool LabelsTree::dropMimeData(const QMimeData *data,
 		return false;
 	}
 
-	if (!data->hasFormat(EditableItemManager::RefMimeType)) { //only accept refs to editableitems.
+	if (!data->hasFormat(EditableItemManager::RefMimeType) && !data->hasFormat(LabelRefMimeType)) { //only accept refs to editableitems.
 		return false;
 	}
 
-	QModelIndex target = index(row, column, parent);
+	if (data->hasFormat(EditableItemManager::RefMimeType)) {
 
-	if (row == -1) {
-		target = parent;
-	}
+		QModelIndex target = index(row, column, parent);
 
-	if (!target.isValid()) {
-		return false;
-	}
-
-	QByteArray encodedData = data->data(EditableItemManager::RefMimeType);
-	QDataStream stream(&encodedData, QIODevice::ReadOnly);
-	QStringList newItems;
-	int rows = 0;
-
-	while (!stream.atEnd()) {
-		QString text;
-		stream >> text;
-		newItems << text;
-		++rows;
-	}
-
-	Label* label = reinterpret_cast<Label*> (target.internalPointer());
-
-	if (label == nullptr) {
-		return false;
-	}
-
-	for (QString ref : newItems) {
-
-		if (label->itemsRefs().contains(ref)) {
-			continue;
+		if (row == -1) {
+			target = parent;
 		}
 
-		EditableItem* item = _parentManager->loadItem(ref);
-
-		if (item != nullptr) {
-			label->markItem(item);
+		if (!target.isValid()) {
+			return false;
 		}
+
+		QByteArray encodedData = data->data(EditableItemManager::RefMimeType);
+		QDataStream stream(&encodedData, QIODevice::ReadOnly);
+		QStringList newItems;
+		int rows = 0;
+
+		while (!stream.atEnd()) {
+			QString text;
+			stream >> text;
+			newItems << text;
+			++rows;
+		}
+
+		Label* label = reinterpret_cast<Label*> (target.internalPointer());
+
+		if (label == nullptr) {
+			return false;
+		}
+
+		for (QString ref : newItems) {
+
+			if (label->itemsRefs().contains(ref)) {
+				continue;
+			}
+
+			EditableItem* item = _parentManager->loadItem(ref);
+
+			if (item != nullptr) {
+				label->markItem(item);
+			}
+		}
+
+		return true;
+
 	}
 
-	return true;
+	if (data->hasFormat(LabelRefMimeType)) {
+
+		QByteArray encodedData = data->data(LabelRefMimeType);
+		QDataStream stream(&encodedData, QIODevice::ReadOnly);
+		QStringList movedItems;
+		int rows = 0;
+
+		while (!stream.atEnd()) {
+			QString text;
+			stream >> text;
+			movedItems << text;
+			++rows;
+		}
+
+		return moveRefsToParent(movedItems, parent);
+	}
+
+	return false;
 
 }
 
@@ -451,6 +494,132 @@ void LabelsTree::insertRefs(const QStringList &refs) {
 	for (QString const& ref : refs) {
 		_labelsRefs.insert(ref);
 	}
+
+}
+
+int LabelsTree::getRowFromLabel(Label* label) {
+
+	if (label->parentLabel() == nullptr) {
+		return _labels.indexOf(label);
+	}
+
+	return label->parentLabel()->subLabels().indexOf(label);
+
+}
+bool LabelsTree::moveRefsToParent(QStringList refs, QModelIndex const& parent) {
+
+	QSet<QString> parentHierarchy;
+
+	QModelIndex next = parent;
+
+	while (next.isValid()) {
+		parentHierarchy.insert(next.data(LabelRefRole).toString());
+		next = next.parent();
+	}
+
+	for(QString ref : refs) {
+		if (parentHierarchy.contains(ref)) {
+			return false; //can't move one of the label as the target is a direct descendant of the ref to move.
+		}
+	}
+
+	for(QString ref : refs) {
+		moveRefToParent(ref, parent);
+	}
+
+	return true;
+
+}
+
+bool LabelsTree::moveRefToParent(QString ref, QModelIndex const& parent) {
+
+	Label* label = findLabelByRef(ref);
+	Label* oldParentLabel = label->parentLabel();
+
+	int sourceRow = (oldParentLabel != nullptr) ? oldParentLabel->subLabels().indexOf(label) : _labels.indexOf(label);
+
+	if (sourceRow < 0) {
+		return false;
+	}
+
+	if (parent.isValid()) {
+		Label* newParentLabel = reinterpret_cast<Label*>(parent.internalPointer());
+		if (oldParentLabel == newParentLabel ) {
+			return true; //label's parent is already the correct one.
+		}
+
+		int oldParentRow = getRowFromLabel(oldParentLabel);
+
+		if (oldParentRow < 0) {
+			return false;
+		}
+
+		QModelIndex oldParentIndex = createIndex(oldParentRow, 0, oldParentLabel);
+
+		if (newParentLabel != nullptr) {
+
+			beginMoveRows(oldParentIndex, sourceRow, sourceRow, parent, rowCount(parent));
+
+			oldParentLabel->removeChild(label);
+			newParentLabel->addChild(label);
+
+			endMoveRows();
+
+			return true;
+
+		}
+
+		beginMoveRows(oldParentIndex, sourceRow, sourceRow, QModelIndex(), rowCount());
+
+		oldParentLabel->removeChild(label);
+		label->setParentLabel(nullptr);
+		label->setParent(this);
+		_labels.push_back(label);
+
+		endMoveRows();
+
+		return true;
+	}
+
+	if (parent == QModelIndex()) {
+		return true; //label's parent is already the correct one.
+	}
+
+	beginMoveRows(QModelIndex(), sourceRow, sourceRow, parent, rowCount(parent));
+
+	_labels.removeOne(label);
+
+	Label* newParentLabel = reinterpret_cast<Label*>(parent.internalPointer());
+	newParentLabel->addChild(label);
+
+	endMoveRows();
+
+	return true;
+}
+
+Label* LabelsTree::findLabelByRef(QString const& ref, Label *parentLabel) {
+
+	QVector<Label*> const* searchSpace;
+
+	if (parentLabel == nullptr) {
+		searchSpace = &_labels;
+	} else {
+		searchSpace = &parentLabel->subLabels();
+	}
+
+	for (Label* l : *searchSpace) {
+		if (l->getRef() == ref) {
+			return l;
+		}
+
+		Label* located = findLabelByRef(ref, l);
+
+		if (located != nullptr) {
+			return located;
+		}
+	}
+
+	return nullptr;
 
 }
 

@@ -25,6 +25,7 @@ public:
 
 	QString getRef() const;
 	void setRef(QString ref);
+	void setParentLabel(Label* parent);
 
 	bool addChild(Label* child);
 	void removeChild(Label* child);

@@ -166,8 +166,10 @@ void ProjectTreeDockWidget::rebuildMenu(EditableItemManager* project) {
 
 	for (int i = 0; i < f->rowCount(); i++) {
 
-		EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(f->data(f->index(i),
-																								  EditableItemFactoryManager::ItemRefRole).toString(),
+		QString itemType = f->data(f->index(i), EditableItemFactoryManager::ItemRefRole).toString();
+
+		EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(itemType,
+																						  QIcon(f->itemIconUrl(itemType)),
 																						  f->data(f->index(i),
 																								  Qt::DisplayRole).toString(),
 																						  _newItemMenu);
@@ -248,8 +250,10 @@ void ProjectTreeDockWidget::buildTreeContextMenu(QPoint const& pos) {
 
 			for (int i = 0; i < f->rowCount(); i++) {
 
-				EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(f->data(f->index(i),
-																										  EditableItemFactoryManager::ItemRefRole).toString(),
+				QString itemType = f->data(f->index(i), EditableItemFactoryManager::ItemRefRole).toString();
+
+				EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(itemType,
+																								  QIcon(f->itemIconUrl(itemType)),
 																								  f->data(f->index(i),
 																										  Qt::DisplayRole).toString(),
 																								  _newItemMenu);
