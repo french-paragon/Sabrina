@@ -73,6 +73,9 @@ public:
 
 	virtual QStringList mimeTypes() const;
 	virtual QMimeData* mimeData(const QModelIndexList &indexes) const;
+	virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
+
+	virtual Qt::DropActions supportedDropActions() const;
 
 	EditableItem* activeItem() const;
 	EditableItem* loadItem(QString const& ref);
@@ -137,6 +140,8 @@ protected:
 	};
 
 	QModelIndex indexFromLeaf(treeStruct* leaf) const;
+	bool moveItemsToParent(QStringList items, QModelIndex const& index);
+	void moveItemToParent(QString item, treeStruct* leaf);
 
 	void itemVisibleStateChanged(QString ref);
 

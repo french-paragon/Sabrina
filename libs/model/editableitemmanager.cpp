@@ -174,7 +174,7 @@ Qt::ItemFlags EditableItemManager::flags(const QModelIndex &index) const {
 
 	if (index.isValid()) {
 
-		Qt::ItemFlags f = Qt::ItemIsDragEnabled | QAbstractItemModel::flags(index);
+		Qt::ItemFlags f = Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 
 		QString itemTypeRef = index.data(ItemTypeRefRole).toString();
 
@@ -229,6 +229,44 @@ QMimeData* EditableItemManager::mimeData(const QModelIndexList &indexes) const {
 	return mimeData;
 }
 
+bool EditableItemManager::dropMimeData(const QMimeData *data,
+										Qt::DropAction action,
+										int row,
+										int column,
+										const QModelIndex &parent) {
+
+	Q_UNUSED(row);
+	Q_UNUSED(column);
+
+	if (action == Qt::IgnoreAction) {
+		return true;
+	}
+
+	if (action != Qt::LinkAction && action != Qt::CopyAction) {
+		return false;
+	}
+
+	if (!data->hasFormat(RefMimeType)) { //only accept refs to editableitems.
+		return false;
+	}
+
+
+	QByteArray encodedData = data->data(EditableItemManager::RefMimeType);
+	QDataStream stream(&encodedData, QIODevice::ReadOnly);
+	QStringList newItems;
+
+	while (!stream.atEnd()) {
+		QString text;
+		stream >> text;
+		newItems << text;
+	}
+
+	return moveItemsToParent(newItems, parent);
+}
+
+Qt::DropActions EditableItemManager::supportedDropActions() const {
+	return Qt::LinkAction | Qt::CopyAction;
+}
 
 EditableItem* EditableItemManager::activeItem() const {
 	return _activeItem;
@@ -472,6 +510,64 @@ QModelIndex EditableItemManager::indexFromLeaf(treeStruct* leaf) const {
 	}
 
 	return QModelIndex();
+}
+
+bool EditableItemManager::moveItemsToParent(QStringList items, QModelIndex const& index) {
+
+	treeStruct* leaf = reinterpret_cast<treeStruct*>(index.internalPointer());
+
+	if (!leaf->_acceptChildrens) {
+		return false; //move items as childrens only if they are accepted.
+	}
+
+	if (index == QModelIndex()) {
+		leaf = nullptr;
+	}
+
+	QSet<QString> refsHierarchy;
+
+	treeStruct* next = leaf;
+
+	while(next != nullptr) {
+		refsHierarchy.insert(next->_ref);
+		next = next->_parent;
+	}
+
+	for (QString ref : items) {
+		if (refsHierarchy.contains(ref)) { //can't move item, or parent item on itself.
+			return false;
+		}
+	}
+
+	for (QString ref : items) {
+		moveItemToParent(ref, leaf);
+	}
+
+	return true;
+
+}
+
+void EditableItemManager::moveItemToParent(QString item, treeStruct *leaf) {
+
+	treeStruct* itemLeaf = _treeIndex.value(item, nullptr);
+
+	if (itemLeaf != nullptr) {
+
+		QModelIndex itemOldIndex = indexFromLeaf(itemLeaf);
+		QModelIndex itemOldParent = itemOldIndex.parent();
+
+		QModelIndex itemNewParent = indexFromLeaf(leaf);
+
+		beginMoveRows(itemOldParent, itemOldIndex.row(), itemOldIndex.row(), itemNewParent, leaf->_childrens.size());
+
+		itemLeaf->_parent->_childrens.removeOne(itemLeaf);
+
+		leaf->_childrens.push_back(itemLeaf);
+		itemLeaf->_parent = leaf;
+
+		endMoveRows();
+	}
+
 }
 
 void EditableItemManager::itemVisibleStateChanged(QString ref) {

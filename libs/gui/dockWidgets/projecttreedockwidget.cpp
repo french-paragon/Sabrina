@@ -39,8 +39,9 @@ ProjectTreeDockWidget::ProjectTreeDockWidget(MainWindow *parent) :
 			this, &ProjectTreeDockWidget::supprButtonClicked);
 
 	ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
-	ui->treeView->setDragDropMode(QAbstractItemView::DragOnly);
+	ui->treeView->setDragDropMode(QAbstractItemView::DragDrop);
 	ui->treeView->setDragEnabled(true);
+	ui->treeView->setAcceptDrops(true);
 	ui->treeView->setDropIndicatorShown(true);
 
 	ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -71,38 +72,7 @@ void ProjectTreeDockWidget::onItemCreationTriggered(QString itemTypeRef) {
 
 	QString parent_ref = "";
 
-	QModelIndexList selection = ui->treeView->selectionModel()->selectedIndexes();
-
-	if (selection.size() > 0) {
-
-		QVariant info = ui->treeView->model()->data(selection.first(), EditableItemManager::ItemAcceptChildrenRole);
-
-		if (info.userType() == QMetaType::Bool) { //a bool has been set.
-			if (info.toBool() == true) {
-				parent_ref = ui->treeView->model()->data(selection.first(), EditableItemManager::ItemRefRole).toString();
-			}
-		}
-
-	}
-
-	bool ok;
-
-	QString ref = QInputDialog::getText(_mw_parent,
-										tr("Saisir une référence"),
-										tr("référence"),
-										QLineEdit::Normal,
-										itemTypeRef,
-										&ok);
-
-	if (!ok) {
-		return;
-	}
-
-	emit itemCreationTriggered(itemTypeRef, ref, parent_ref);
-
-	if (selection.size() > 0) {
-		ui->treeView->expand(selection.first());
-	}
+	emit itemCreationTriggered(itemTypeRef, itemTypeRef, parent_ref);
 
 }
 
