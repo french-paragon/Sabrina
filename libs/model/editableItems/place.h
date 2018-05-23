@@ -4,16 +4,18 @@
 #include "model/editableitem.h"
 #include "model/editableitemfactory.h"
 
+#include "model/model_global.h"
+
 namespace Sabrina {
 
-class Place : public EditableItem
+class CATHIA_MODEL_EXPORT Place : public EditableItem
 {
 	Q_OBJECT
 public:
 
 	static const QString PLACE_TYPE_ID;
 
-	class PlaceFactory : public EditableItemFactory
+	class CATHIA_MODEL_EXPORT PlaceFactory : public EditableItemFactory
 	{
 	public:
 		explicit PlaceFactory(QObject *parent = nullptr);

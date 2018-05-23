@@ -3,6 +3,8 @@
 
 #include <QDockWidget>
 
+#include "gui/gui_global.h"
+
 namespace Sabrina {
 
 namespace Ui {
@@ -13,7 +15,7 @@ class MainWindow;
 class EditableItemManager;
 class LabelSelectionForItemProxyModel;
 
-class ProjectLabelsDockWidget : public QDockWidget
+class CATHIA_GUI_EXPORT ProjectLabelsDockWidget : public QDockWidget
 {
 	Q_OBJECT
 

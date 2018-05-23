@@ -3,11 +3,13 @@
 
 #include <QString>
 
+#include "utils/utils_global.h"
+
 namespace Sabrina {
 
 namespace StringUtils {
 
-QString simplifyRef(QString const& model);
+CATHIA_UTILS_EXPORT QString simplifyRef(QString const& model);
 
 } //namespace StringUtils
 

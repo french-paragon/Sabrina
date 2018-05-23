@@ -7,7 +7,7 @@
 
 namespace Sabrina {
 
-class EditableItemTypeSpecializedAction : public QAction
+class CATHIA_GUI_EXPORT EditableItemTypeSpecializedAction : public QAction
 {
 	Q_OBJECT
 

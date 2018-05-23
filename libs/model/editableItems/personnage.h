@@ -4,16 +4,18 @@
 #include "model/editableitem.h"
 #include "model/editableitemfactory.h"
 
+#include "model/model_global.h"
+
 namespace Sabrina {
 
-class Personnage : public EditableItem
+class CATHIA_MODEL_EXPORT Personnage : public EditableItem
 {
 	Q_OBJECT
 public:
 
 	static const QString PERSONNAGE_TYPE_ID;
 
-	class PersonnageFactory : public EditableItemFactory
+	class CATHIA_MODEL_EXPORT PersonnageFactory : public EditableItemFactory
 	{
 	public:
 		explicit PersonnageFactory(QObject *parent = nullptr);

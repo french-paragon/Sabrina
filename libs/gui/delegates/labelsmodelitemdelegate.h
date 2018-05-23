@@ -4,9 +4,11 @@
 #include <QStyledItemDelegate>
 #include <QTreeView>
 
+#include "gui/gui_global.h"
+
 namespace Sabrina {
 
-class LabelsModelItemDelegate : public QStyledItemDelegate
+class CATHIA_GUI_EXPORT LabelsModelItemDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT
 public:

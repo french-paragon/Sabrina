@@ -3,13 +3,15 @@
 
 #include <QDialog>
 
+#include "gui/gui_global.h"
+
 namespace Sabrina {
 
 namespace Ui {
 class AboutDialog;
 }
 
-class AboutDialog : public QDialog
+class CATHIA_GUI_EXPORT AboutDialog : public QDialog
 {
 	Q_OBJECT
 

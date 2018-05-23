@@ -5,6 +5,8 @@
 #include <aline/src/editorfactory.h>
 #include <QWidget>
 
+#include "gui/gui_global.h"
+
 namespace Sabrina {
 
 class Place;
@@ -13,7 +15,7 @@ namespace Ui {
 class PlaceEditor;
 }
 
-class PlaceEditor : public Aline::EditableItemEditor
+class CATHIA_GUI_EXPORT PlaceEditor : public Aline::EditableItemEditor
 {
 	Q_OBJECT
 
@@ -21,7 +23,7 @@ public:
 
 	static const QString PLACE_EDITOR_TYPE_ID;
 
-	class PlaceEditorFactory : public Aline::EditorFactory
+	class CATHIA_GUI_EXPORT PlaceEditorFactory : public Aline::EditorFactory
 	{
 		public :
 			explicit PlaceEditorFactory(QObject* parent = nullptr);

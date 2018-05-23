@@ -4,15 +4,17 @@
 #include "model/editableitem.h"
 #include "model/editableitemfactory.h"
 
+#include "model/model_global.h"
+
 namespace Sabrina {
 
-class Folder : public EditableItem
+class CATHIA_MODEL_EXPORT Folder : public EditableItem
 {
 public:
 
 	static const QString FOLDER_TYPE_ID;
 
-	class FolderFactory : public EditableItemFactory
+	class CATHIA_MODEL_EXPORT FolderFactory : public EditableItemFactory
 	{
 	public:
 		explicit FolderFactory(QObject *parent = nullptr);

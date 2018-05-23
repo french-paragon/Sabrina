@@ -3,11 +3,13 @@
 
 #include <QAbstractProxyModel>
 
+#include "model/model_global.h"
+
 namespace Sabrina {
 
 class LabelsTree;
 
-class ProjectFilterByLabelProxyModel : public QAbstractProxyModel
+class CATHIA_MODEL_EXPORT ProjectFilterByLabelProxyModel : public QAbstractProxyModel
 {
 	Q_OBJECT
 public:

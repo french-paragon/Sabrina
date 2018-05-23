@@ -3,6 +3,8 @@
 
 #include <QDockWidget>
 
+#include "gui/gui_global.h"
+
 namespace Sabrina {
 
 class MainWindow;
@@ -13,7 +15,7 @@ namespace Ui {
 class LabelItemsDockWidget;
 }
 
-class LabelItemsDockWidget : public QDockWidget
+class CATHIA_GUI_EXPORT LabelItemsDockWidget : public QDockWidget
 {
 	Q_OBJECT
 

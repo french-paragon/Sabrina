@@ -3,11 +3,13 @@
 
 #include <QIdentityProxyModel>
 
+#include "model/model_global.h"
+
 namespace Sabrina {
 
 class LabelsTree;
 
-class LabelSelectionForItemProxyModel : public QIdentityProxyModel
+class CATHIA_MODEL_EXPORT LabelSelectionForItemProxyModel : public QIdentityProxyModel
 {
 	Q_OBJECT
 public:

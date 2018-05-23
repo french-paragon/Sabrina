@@ -6,11 +6,13 @@
 
 #include <functional>
 
+#include "gui/gui_global.h"
+
 namespace Sabrina {
 
 class MainWindow;
 
-class MainWindowsFactory : public QObject
+class CATHIA_GUI_EXPORT MainWindowsFactory : public QObject
 {
 	Q_OBJECT
 public:

@@ -5,12 +5,14 @@
 #include <QMap>
 #include <QAbstractListModel>
 
+#include "model/model_global.h"
+
 namespace Sabrina {
 
 class EditableItem;
 class EditableItemManager;
 
-class EditableItemFactory : public QObject
+class CATHIA_MODEL_EXPORT EditableItemFactory : public QObject
 {
 	Q_OBJECT
 public:
@@ -32,7 +34,7 @@ protected:
 	mutable QString _typeIconUrl;
 };
 
-class EditableItemFactoryManager : public QAbstractListModel
+class CATHIA_MODEL_EXPORT EditableItemFactoryManager : public QAbstractListModel
 {
 	Q_OBJECT
 public:
