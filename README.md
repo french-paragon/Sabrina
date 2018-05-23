@@ -39,6 +39,7 @@ cd ../../build
 mkdir build_sabrina_release
 cd build_sabrina_release
 cmake ../../src/Sabrina -DCMAKE_BUILD_TYPE=Release
+make
 ```
 
 Note: you may need a recent version of Qt5 to build without errors. Personally, on ubuntu, I use the one from [Stephan Binner's ppa](https://launchpad.net/~beineri/+archive/ubuntu/opt-qt-5.10.1-xenial).
