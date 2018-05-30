@@ -16,6 +16,7 @@ class EditableItemManager;
 class EditableItemFactoryManager;
 class LabelsTree;
 class Label;
+class NotesList;
 
 class CATHIA_MODEL_EXPORT ItemIOException : public QException
 {
@@ -102,6 +103,8 @@ public:
 
 	bool makeRefUniq(QString &ref) const;
 
+	NotesList *noteList() const;
+
 signals:
 
 	void loadingItemSucessFull(QString ref);
@@ -175,6 +178,8 @@ protected:
 	LabelsTree* _labels;
 
 	EditableItem* _activeItem;
+
+	NotesList* _noteList;
 
 };
 

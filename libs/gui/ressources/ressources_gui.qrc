@@ -3,8 +3,13 @@
         <file>icons/save_simple.svg</file>
         <file>icons/new_simple.svg</file>
         <file>icons/delete_simple.svg</file>
+        <file>icons/add_simple.svg</file>
+        <file>icons/subtract_simple.svg</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/logo_paragon.png</file>
+    </qresource>
+    <qresource prefix="/qml">
+        <file>qml/noteseditorwidget.qml</file>
     </qresource>
 </RCC>

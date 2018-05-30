@@ -7,6 +7,7 @@
 #include "gui/dockWidgets/projecttreedockwidget.h"
 #include "gui/dockWidgets/projectlabelsdockwidget.h"
 #include "gui/dockWidgets/labelitemsdockwidget.h"
+#include "gui/dockWidgets/projectnotesdockwidget.h"
 
 #include <QUrl>
 
@@ -188,6 +189,11 @@ void App::addAppActionsToMainWindows(MainWindow* mw) {
 
 	connect(label_item_dock, &LabelItemsDockWidget::itemDoubleClicked,
 			mw, &MainWindow::editItem);
+
+	ProjectNotesDockWidget* notes_dock = new ProjectNotesDockWidget(mw);
+	mw->addDockWidget(Qt::RightDockWidgetArea, notes_dock);
+
+
 
 }
 

@@ -8,6 +8,7 @@
 namespace Sabrina {
 
 class Label;
+class NotesList;
 
 class CATHIA_MODEL_EXPORT JsonEditableItemManager : public EditableItemManager
 {
@@ -60,6 +61,9 @@ protected:
 	void extractJsonLabelDatas(QJsonValue const& val, Label* label);
 
 	QJsonObject encodeLabelAsJson(QModelIndex const& index);
+
+	bool extractNotesFromJson(NotesList* list, QJsonArray const& notesArray);
+	QJsonArray encodeNotesArray(NotesList* list);
 
 	bool _hasAProjectOpen;
 	QString _projectFileName;

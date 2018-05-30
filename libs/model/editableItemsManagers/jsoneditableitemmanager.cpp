@@ -5,12 +5,15 @@
 #include "labels/labelstree.h"
 #include "labels/label.h"
 
+#include "notes/noteslist.h"
+
 #include <QFile>
 #include <QMetaObject>
 #include <QMetaProperty>
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
+#include <QModelIndex>
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -101,6 +104,14 @@ bool JsonEditableItemManager::saveStruct() {
 
 	QJsonObject obj;
 	encapsulateTreeLeaf(_root, obj);
+
+	if (noteList()->rowCount() > 0) {
+
+		QJsonArray arr = encodeNotesArray(noteList());
+
+		obj.insert(EditableItem::NOTES_PROP_NAME, arr);
+
+	}
 
 	QJsonDocument doc(obj);
 	QByteArray datas = doc.toJson();
@@ -250,6 +261,14 @@ bool JsonEditableItemManager::loadStruct() {
 
 	extractTreeLeaf(_root, obj);
 
+	if (obj.contains(EditableItem::NOTES_PROP_NAME)) {
+
+		QJsonArray vals = obj.value(EditableItem::NOTES_PROP_NAME).toArray();
+
+		extractNotesFromJson(noteList(), vals);
+
+	}
+
 }
 void JsonEditableItemManager::extractTreeLeaf(treeStruct* leaf, QJsonObject &obj) {
 
@@ -369,6 +388,10 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 			continue;
 		}
 
+		if (prop == EditableItem::NOTES_PROP_NAME) {
+			continue;
+		}
+
 		item->setProperty(prop.toStdString().c_str(), obj.value(prop).toVariant()); //set all the properties.
 	}
 
@@ -389,6 +412,15 @@ EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const& ref) {
 			item->addOutRef(v.toString());
 		}
 	}
+
+	if (obj.contains(EditableItem::NOTES_PROP_NAME)) {
+
+		QJsonArray vals = obj.value(EditableItem::NOTES_PROP_NAME).toArray();
+
+		extractNotesFromJson(item->getNoteList(), vals);
+
+	}
+
 	item->blockSignals(false);
 
 
@@ -582,6 +614,14 @@ bool JsonEditableItemManager::effectivelySaveItem(const QString &ref) {
 
 	}
 
+	if (item->getNoteList()->rowCount() > 0) {
+
+		QJsonArray arr = encodeNotesArray(item->getNoteList());
+
+		obj.insert(EditableItem::NOTES_PROP_NAME, arr);
+
+	}
+
 	QJsonArray referentItems;
 	QJsonArray referedItems;
 
@@ -618,6 +658,76 @@ bool JsonEditableItemManager::effectivelySaveItem(const QString &ref) {
 	}
 
 	return true;
+
+}
+
+
+
+bool JsonEditableItemManager::extractNotesFromJson(NotesList* list, QJsonArray const& notesArray) {
+
+	QHash<int, QByteArray> roleNames = list->roleNames();
+	QHash<QByteArray, int> nameRoles;
+
+	for (int key : roleNames.keys()) {
+		nameRoles.insert(roleNames.value(key), key);
+	}
+
+	if (list->rowCount() != 0) {
+		list->removeRows(0, list->rowCount());
+	}
+
+	list->insertRows(0, notesArray.size());
+
+	int row = 0;
+	for(QJsonValue val : notesArray) {
+
+		QModelIndex index = list->index(row);
+
+		if (val.isObject()) {
+
+			QJsonObject obj = val.toObject();
+
+			for (QString key : obj.keys()) {
+
+				if (nameRoles.contains(key.toLatin1())) {
+					int role = nameRoles.value(key.toLatin1());
+					QVariant data = obj.value(key).toVariant();
+
+					list->setData(index, data, role);
+				}
+
+			}
+
+		}
+
+		row++;
+
+	}
+
+}
+
+QJsonArray JsonEditableItemManager::encodeNotesArray(NotesList* list) {
+
+	QHash<int, QByteArray> roleNames = list->roleNames();
+
+	QJsonArray ret;
+
+	for (int i = 0; i < list->rowCount(); i++) {
+
+		QModelIndex index = list->index(i);
+		QJsonObject note;
+
+		for (int role : NotesList::savableRoles()) {
+
+			QString name(roleNames.value(role));
+
+			note.insert(name, QJsonValue::fromVariant(index.data(role)));
+
+		}
+
+		ret.push_back(note);
+
+	}
 
 }
 

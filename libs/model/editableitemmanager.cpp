@@ -6,6 +6,8 @@
 #include "labels/labelstree.h"
 #include "labels/label.h"
 
+#include "notes/noteslist.h"
+
 #include "aline/src/editorfactorymanager.h"
 
 #include <QIcon>
@@ -24,6 +26,7 @@ EditableItemManager::EditableItemManager(QObject *parent) :
 	_labels(nullptr),
 	_activeItem(nullptr)
 {
+	_noteList = new NotesList(this);
 	cleanTreeStruct();
 }
 
@@ -495,6 +498,11 @@ bool EditableItemManager::insertItem(EditableItem* item, treeStruct* parent_bran
 
 	return true;
 
+}
+
+NotesList *EditableItemManager::noteList() const
+{
+    return _noteList;
 }
 
 QModelIndex EditableItemManager::indexFromLeaf(treeStruct* leaf) const {

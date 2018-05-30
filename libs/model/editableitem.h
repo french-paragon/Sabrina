@@ -12,6 +12,7 @@
 namespace Sabrina {
 
 class EditableItemManager;
+class NotesList;
 
 class CATHIA_MODEL_EXPORT EditableItem : public Aline::EditableItem
 {
@@ -32,6 +33,8 @@ public:
 	static const QString REF_IN_PROP_NAME;
 	static const QString REF_FROM_PROP_NAME;
 	static const QString CHILDREN_PROP_NAME;
+
+	static const QString NOTES_PROP_NAME;
 
 	Q_PROPERTY(QString ref READ getRef WRITE changeRef NOTIFY refChanged)
 	Q_PROPERTY(QString parentRef MEMBER _p_ref NOTIFY parentChanged)
@@ -73,6 +76,8 @@ public:
 
 	void addOutRef(QString const& ref);
 	virtual void addInRef(QString const& ref);
+
+	NotesList *getNoteList() const;
 
 signals:
 
@@ -141,6 +146,8 @@ protected:
 	QSet<QString> _referentItems;
 
 	EditableItemManager* _manager;
+
+	NotesList* _noteList;
 
 };
 

@@ -4,6 +4,8 @@
 
 #include "utils/stringutils.h"
 
+#include "notes/noteslist.h"
+
 #include <QDebug>
 
 namespace Sabrina {
@@ -16,11 +18,15 @@ const QString EditableItem::REF_IN_PROP_NAME = "ref_in_to_out";
 const QString EditableItem::REF_FROM_PROP_NAME = "ref_from_out";
 const QString EditableItem::CHILDREN_PROP_NAME = "ref_childrens";
 
+const QString EditableItem::NOTES_PROP_NAME = "notes";
+
 EditableItem::EditableItem(QString ref, EditableItemManager *parent) :
 	Aline::EditableItem(parent),
 	_ref(ref),
 	_manager(parent)
 {
+
+	_noteList = new NotesList(this);
 
 	connect(this, &EditableItem::objectNameChanged, this, &EditableItem::newUnsavedChanges);
 	connect(this, &EditableItem::objectNameChanged, this, &EditableItem::onVisibleStateChanged);
@@ -147,6 +153,11 @@ void EditableItem::clearHasUnsavedChanges() {
 		_hasUnsavedChanged = false;
 		emit unsavedStateChanged(false);
 	}
+}
+
+NotesList *EditableItem::getNoteList() const
+{
+	return _noteList;
 }
 
 void EditableItem::refferedItemAboutToBeDeleted(QString ref) {
