@@ -52,9 +52,9 @@ exec_program(
 configure_file(app_info.cpp.in app_info.cpp)
 
 set(LIB_NAME Utils)
-set(LIB_SRC stringutils.cpp
-            utils_global.h
+set(LIB_SRC utils_global.h
             app_info.h
+            settings_global_keys.h
             ${CMAKE_CURRENT_BINARY_DIR}/app_info.cpp)
 
 add_library(${LIB_NAME} ${LIB_SRC})

@@ -5,7 +5,7 @@ namespace Sabrina {
 
 const QString Personnage::PERSONNAGE_TYPE_ID = "sabrina_jdr_personnage";
 
-Personnage::Personnage(QString ref, EditableItemManager *parent) :
+Personnage::Personnage(QString ref, Aline::EditableItemManager *parent) :
 	EditableItem(ref, parent)
 {
 	connect(this, &Personnage::persoRaceChanged, this, &Personnage::newUnsavedChanges);
@@ -17,7 +17,7 @@ Personnage::PersonnageFactory::PersonnageFactory(QObject *parent) : EditableItem
 
 }
 
-EditableItem* Personnage::PersonnageFactory::createItem(QString ref, EditableItemManager* parent) const {
+Aline::EditableItem* Personnage::PersonnageFactory::createItem(QString ref, Aline::EditableItemManager* parent) const {
 	return new Personnage(ref, parent);
 }
 

@@ -2,7 +2,7 @@
 #define FOLDER_H
 
 #include "model/editableitem.h"
-#include "model/editableitemfactory.h"
+#include "aline/src/model/editableitemfactory.h"
 
 #include "model/model_global.h"
 
@@ -14,15 +14,15 @@ public:
 
 	static const QString FOLDER_TYPE_ID;
 
-	class CATHIA_MODEL_EXPORT FolderFactory : public EditableItemFactory
+	class CATHIA_MODEL_EXPORT FolderFactory : public Aline::EditableItemFactory
 	{
 	public:
 		explicit FolderFactory(QObject *parent = nullptr);
-		EditableItem* createItem(QString ref, EditableItemManager* parent) const;
+		Aline::EditableItem* createItem(QString ref, Aline::EditableItemManager* parent) const;
 
 	};
 
-	Folder(QString ref, EditableItemManager* parent = nullptr);
+	Folder(QString ref, Aline::EditableItemManager* parent = nullptr);
 
 	virtual QString getTypeId() const;
 	virtual QString getTypeName() const;

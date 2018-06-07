@@ -1,0 +1,255 @@
+#ifndef SABRINA_CARTOGRAPHYEDITOR_H
+#define SABRINA_CARTOGRAPHYEDITOR_H
+
+#include "gui/gui_global.h"
+
+#include <aline/src/view/editableitemeditor.h>
+#include <aline/src/view/editorfactory.h>
+
+#include <QPointF>
+#include <QColor>
+
+#include <QQuickImageProvider>
+
+class QQuickItem;
+class QSortFilterProxyModel;
+
+namespace Sabrina {
+
+class Cartography;
+class CartographyItem;
+class CartographyCategory;
+class CartographyEditor;
+
+namespace Ui {
+class CartographyEditor;
+}
+
+class CartographyItemProxy : public QObject {
+
+	Q_OBJECT
+
+	friend class CartographyEditor;
+
+public:
+
+	explicit CartographyItemProxy(CartographyEditor* parent, CartographyItem* item);
+
+	Q_PROPERTY(QString itemName READ itemName WRITE setItemName NOTIFY itemNameChanged)
+	Q_PROPERTY(QPointF position READ getPosition WRITE setPosition NOTIFY positionChanged)
+	Q_PROPERTY(QColor color READ getPointColor NOTIFY colorChanged)
+	Q_PROPERTY(qreal scale READ getScale WRITE setScale NOTIFY scaleChanged)
+	Q_PROPERTY(bool hasFocus READ hasFocus NOTIFY focusChanged)
+	Q_PROPERTY(bool isLinked READ isLinked NOTIFY linkedStatusChanged)
+
+	QString itemName() const;
+	void setItemName(QString const& name);
+
+	QPointF getPosition() const;
+	void setPosition(QPointF const& pos);
+
+	QColor getPointColor() const;
+
+	qreal getScale() const;
+	void setScale(qreal scale) const;
+
+	bool hasFocus() const;
+
+	bool isLinked() const;
+
+signals:
+
+	void itemNameChanged(QString name);
+	void positionChanged(QPointF pos);
+	void colorChanged(QColor col);
+	void scaleChanged(qreal scale);
+
+	void focusChanged(bool focus);
+	void linkedStatusChanged(bool link);
+
+	void refSwap(QString oldRef, QString newRef);
+	void receivedSelectionTrigger(QString ref);
+
+public slots:
+
+	void setAsCurrentItem();
+
+private:
+
+	void setFocus(bool focus);
+	void onCategoryChanged();
+
+	CartographyEditor* _editorParent;
+	CartographyItem* _item;
+
+	bool _hasFocus;
+
+};
+
+class CartographyMapProxy : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit CartographyMapProxy(CartographyEditor* parent, Cartography* carto);
+
+	Q_PROPERTY(QSizeF size READ getSize WRITE setSize NOTIFY sizeChanged)
+	Q_PROPERTY(qreal scale READ getScale WRITE setScale NOTIFY scaleChanged)
+	Q_PROPERTY(QString imageBackground READ getImageBackground NOTIFY imageBackgroundChanged)
+
+	QSizeF getSize() const;
+	void setSize(QSizeF size);
+
+	qreal getScale() const;
+	void setScale(qreal scale);
+
+	qreal getScalePercent() const;
+	void setScalePercent(qreal scale);
+
+	void increaseScale();
+	void decreaseScale();
+	void resetScale();
+
+	QString getImageBackground() const;
+	QString getImageBackgroundFile() const;
+
+	Cartography *getConnectedCartography() const;
+	void setConnectedCartography(Cartography *cartography);
+
+signals:
+
+	void sizeChanged(QSizeF size);
+	void scaleChanged(qreal scale);
+	void scalePercentChanged(qreal scale);
+
+	void imageBackgroundChanged(QString img);
+
+	void clearItemSelection();
+
+public slots:
+
+	void insertEditableItem(QString ref);
+
+protected:
+
+	void onBackgroundChanged();
+
+	Cartography* _connectedCartography;
+
+	qreal _scale;
+
+};
+
+class CartographyBackgroundLoader: public QQuickImageProvider {
+
+public:
+
+	explicit CartographyBackgroundLoader(CartographyMapProxy* proxy);
+
+	virtual QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
+
+	virtual QQmlImageProviderBase::ImageType imageType() const;
+
+protected:
+
+	QString _loadedFileName;
+	QImage _loadedImage;
+
+	CartographyMapProxy* _proxy;
+
+};
+
+class CATHIA_GUI_EXPORT CartographyEditor : public Aline::EditableItemEditor
+{
+	Q_OBJECT
+
+public:
+	static const QString CARTOGRAPHY_EDITOR_TYPE_ID;
+
+	class CATHIA_GUI_EXPORT CartographyEditorFactory : public Aline::EditorFactory
+	{
+		public :
+			explicit CartographyEditorFactory(QObject* parent = nullptr);
+			virtual Aline::Editor* createItem(QWidget* parent) const;
+	};
+
+	explicit CartographyEditor(QWidget *parent = 0);
+	~CartographyEditor();
+
+	virtual QString getTypeId() const;
+	virtual QString getTypeName() const;
+
+	virtual QStringList editableTypes() const;
+
+protected:
+
+	virtual bool effectivelySetEditedItem(Aline::EditableItem* item);
+
+	void connectItem(CartographyItem* item);
+	void onCartographyItemRemoved(QString oldRef);
+
+	void mapItemRefChanged(QString oldRef, QString newRef);
+
+	void onMapItemDeletionRequested();
+
+	void onBackgroundImageLoadingRequest();
+	void onNewBackgroundImageLoaded();
+
+	void widthSpinBoxesChange();
+	void heightSpinBoxesChange();
+	void onMapSizeChanged(QSizeF size);
+
+	//categories
+
+	void onCartoCategoryAdditionRequest();
+	void onCartoCategoryRemovalRequest();
+
+	void onCategorySelectionChange();
+
+	void onColorSelectionClicked();
+	void onSpinBoxScaleCategoryChange(qreal scalePercent);
+
+	void onCurrentCategoryScaleChange(qreal scale);
+	void onCurrentCategoryColorChange(QColor col);
+
+	//items
+	void clearSelectedItem();
+	void setSelectedItem(QString ref);
+	int categoryRow(QString categoryRef);
+
+	void onSelectCategoryComboxIndexChange(int index);
+	void onSpinBoxItemScaleChange(double scalePercent);
+
+	void onSelectedItemCategoryChange(QString ref);
+	void onSelectedItemScaleChange(qreal scale);
+
+private:
+
+	struct CartographyItemContext {
+		CartographyItem* _item;
+		CartographyItemProxy* _proxy;
+		QQuickItem* _associatedItem;
+	};
+
+	Ui::CartographyEditor *ui;
+
+	Cartography* _currentCartography;
+
+	CartographyBackgroundLoader* _loader;
+	CartographyItemProxy* _selectedItem;
+	CartographyMapProxy* _mapProxy;
+	CartographyCategory* _currentCategory;
+
+	QMap<QString, CartographyItemContext> _currentItems;
+
+	QQuickItem *_mapAreaItem;
+
+	QSortFilterProxyModel* _categoryListProxy;
+
+	QMetaObject::Connection _nameWatchConnection;
+};
+
+
+} // namespace Sabrina
+#endif // SABRINA_CARTOGRAPHYEDITOR_H

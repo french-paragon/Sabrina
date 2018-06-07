@@ -5,11 +5,17 @@
         <file>icons/delete_simple.svg</file>
         <file>icons/add_simple.svg</file>
         <file>icons/subtract_simple.svg</file>
+        <file>icons/zoom_one.svg</file>
+        <file>icons/zoom_plus.svg</file>
+        <file>icons/zoom_simple.svg</file>
+        <file>icons/zoom_minus.svg</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/logo_paragon.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>qml/noteseditorwidget.qml</file>
+        <file>qml/mapEditorPoint.qml</file>
+        <file>qml/mapEditorWidget.qml</file>
     </qresource>
 </RCC>

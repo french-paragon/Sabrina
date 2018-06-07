@@ -169,7 +169,7 @@ bool LabelsTree::setData(const QModelIndex &index, const QVariant &value, int ro
 	{
 		QString itemRef = value.toString();
 
-		EditableItem* item = _parentManager->loadItem(itemRef);
+		Aline::EditableItem* item = _parentManager->loadItem(itemRef);
 
 		if (item != nullptr) {
 			label->markItem(item);
@@ -186,7 +186,7 @@ bool LabelsTree::setData(const QModelIndex &index, const QVariant &value, int ro
 	{
 		QString itemRef = value.toString();
 
-		EditableItem* item = _parentManager->loadItem(itemRef);
+		Aline::EditableItem* item = _parentManager->loadItem(itemRef);
 
 		if (item != nullptr) {
 			label->unmarkItem(item);
@@ -288,7 +288,7 @@ bool LabelsTree::dropMimeData(const QMimeData *data,
 				continue;
 			}
 
-			EditableItem* item = _parentManager->loadItem(ref);
+			Aline::EditableItem* item = _parentManager->loadItem(ref);
 
 			if (item != nullptr) {
 				label->markItem(item);

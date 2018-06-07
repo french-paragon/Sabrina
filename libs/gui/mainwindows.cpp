@@ -4,8 +4,8 @@
 
 #include "model/editableitem.h"
 
-#include "aline/src/editorfactorymanager.h"
-#include "aline/src/editableitemeditor.h"
+#include "aline/src/view/editorfactorymanager.h"
+#include "aline/src/view/editableitemeditor.h"
 
 #include <QAction>
 #include <QMenu>
@@ -57,7 +57,7 @@ void MainWindow::editItem(QString const& itemRef) {
 		return;
 	}
 
-	EditableItem* item = _currentProject->loadItem(itemRef);
+	Aline::EditableItem* item = _currentProject->loadItem(itemRef);
 
 	Aline::Editor* editor = Aline::EditorFactoryManager::GlobalEditorFactoryManager.createItemForEditableItem(item, this);
 

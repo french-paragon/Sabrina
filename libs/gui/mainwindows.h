@@ -3,7 +3,7 @@
 
 #include "gui_global.h"
 
-#include "aline/src/mainwindow.h"
+#include "aline/src/view/mainwindow.h"
 #include "model/editableitemmanager.h"
 
 namespace Sabrina {

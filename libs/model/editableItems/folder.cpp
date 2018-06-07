@@ -4,7 +4,7 @@ namespace Sabrina {
 
 const QString Folder::FOLDER_TYPE_ID = "sabrina_general_folder";
 
-Folder::Folder(QString ref, EditableItemManager *parent) :
+Folder::Folder(QString ref, Aline::EditableItemManager *parent) :
 	EditableItem(ref, parent)
 {
 }
@@ -54,7 +54,7 @@ Folder::FolderFactory::FolderFactory(QObject *parent) :
 
 }
 
-EditableItem* Folder::FolderFactory::createItem(QString ref, EditableItemManager* parent) const {
+Aline::EditableItem* Folder::FolderFactory::createItem(QString ref, Aline::EditableItemManager* parent) const {
 	return new Folder(ref, parent);
 }
 

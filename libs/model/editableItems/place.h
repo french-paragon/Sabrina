@@ -2,7 +2,7 @@
 #define LIEU_H
 
 #include "model/editableitem.h"
-#include "model/editableitemfactory.h"
+#include "aline/src/model/editableitemfactory.h"
 
 #include "model/model_global.h"
 
@@ -15,15 +15,15 @@ public:
 
 	static const QString PLACE_TYPE_ID;
 
-	class CATHIA_MODEL_EXPORT PlaceFactory : public EditableItemFactory
+	class CATHIA_MODEL_EXPORT PlaceFactory : public Aline::EditableItemFactory
 	{
 	public:
 		explicit PlaceFactory(QObject *parent = nullptr);
-		EditableItem* createItem(QString ref, EditableItemManager* parent) const;
+		Aline::EditableItem* createItem(QString ref, Aline::EditableItemManager* parent) const;
 
 	};
 
-	Place(QString ref, EditableItemManager *parent = nullptr);
+	Place(QString ref, Aline::EditableItemManager *parent = nullptr);
 
 	Q_PROPERTY(QString placeDescription READ placeDescription WRITE setplaceDescription)
 

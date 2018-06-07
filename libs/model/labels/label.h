@@ -6,10 +6,13 @@
 #include <QObject>
 #include <QVector>
 
+namespace Aline {
+	class EditableItem;
+}
+
 namespace Sabrina {
 
 class LabelsTree;
-class EditableItem;
 
 class CATHIA_MODEL_EXPORT Label : public QObject
 {
@@ -35,8 +38,8 @@ public:
 	bool removeLabels(int row, int count);
 	QVector<Label*> const& subLabels() const;
 
-	bool markItem(EditableItem* item);
-	bool unmarkItem(EditableItem* item);
+	bool markItem(Aline::EditableItem* item);
+	bool unmarkItem(Aline::EditableItem* item);
 
 	bool markItem(QString const& itemRef);
 	bool unmarkItem(QString const& itemRef);

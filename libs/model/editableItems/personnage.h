@@ -2,7 +2,7 @@
 #define PERSONNAGE_H
 
 #include "model/editableitem.h"
-#include "model/editableitemfactory.h"
+#include "aline/src/model/editableitemfactory.h"
 
 #include "model/model_global.h"
 
@@ -15,15 +15,15 @@ public:
 
 	static const QString PERSONNAGE_TYPE_ID;
 
-	class CATHIA_MODEL_EXPORT PersonnageFactory : public EditableItemFactory
+	class CATHIA_MODEL_EXPORT PersonnageFactory : public Aline::EditableItemFactory
 	{
 	public:
 		explicit PersonnageFactory(QObject *parent = nullptr);
-		EditableItem* createItem(QString ref, EditableItemManager* parent) const;
+		Aline::EditableItem* createItem(QString ref, Aline::EditableItemManager* parent) const;
 
 	};
 
-	Personnage(QString ref, EditableItemManager *parent = nullptr);
+	Personnage(QString ref, Aline::EditableItemManager *parent = nullptr);
 
 	Q_PROPERTY(QString persoRace READ persoRace WRITE setPersoRace)
 	Q_PROPERTY(int age READ age WRITE setAge)

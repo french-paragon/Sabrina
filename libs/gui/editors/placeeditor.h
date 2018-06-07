@@ -1,8 +1,8 @@
 #ifndef SABRINA_PLACEEDITOR_H
 #define SABRINA_PLACEEDITOR_H
 
-#include <aline/src/editableitemeditor.h>
-#include <aline/src/editorfactory.h>
+#include <aline/src/view/editableitemeditor.h>
+#include <aline/src/view/editorfactory.h>
 #include <QWidget>
 
 #include "gui/gui_global.h"

@@ -1,6 +1,5 @@
 set(LIB_NAME Model)
 set(LIB_SRC editableitem.cpp
-            editableitemfactory.cpp
             editableitemmanager.cpp
             editableItemsManagers/jsoneditableitemmanager.cpp
             model_global.h
@@ -8,6 +7,7 @@ set(LIB_SRC editableitem.cpp
             editableItems/personnage.cpp
             editableItems/place.cpp
             editableItems/folder.cpp
+            editableItems/cartography.cpp
             labels/labelstree.cpp
             labels/label.cpp
             labels/labelselectionforitemproxymodel.cpp

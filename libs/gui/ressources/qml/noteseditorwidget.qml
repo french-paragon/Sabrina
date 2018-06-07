@@ -52,6 +52,8 @@ ListView {
                 onEditingFinished: {
                     title = titleTextEdit.text;
                 }
+
+                KeyNavigation.down: noteTextEdit
             }
 
             TextEdit {
@@ -69,6 +71,8 @@ ListView {
                 onEditingFinished: {
                     display = noteTextEdit.text;
                 }
+
+                KeyNavigation.up: titleTextEdit
             }
 
             Text {
@@ -99,12 +103,7 @@ ListView {
 
     delegate: notesDelegate
 
-    ScrollBar.vertical: ScrollBar {
-        parent: notesListView.parent
-        anchors.top: notesListView.top
-        anchors.left: notesListView.right
-        anchors.bottom: notesListView.bottom
-    }
+    ScrollBar.vertical: ScrollBar { }
 
     highlight: Rectangle { color: "lightsteelblue" }
     highlightFollowsCurrentItem: true

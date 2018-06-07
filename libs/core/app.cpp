@@ -24,17 +24,19 @@
 #include "model/editableItems/personnage.h"
 #include "model/editableItems/place.h"
 #include "model/editableItems/folder.h"
+#include "model/editableItems/cartography.h"
 
 #include "model/editableItemsManagers/jsoneditableitemmanager.h"
 
 #include "gui/editors/personnageeditor.h"
 #include "gui/editors/placeeditor.h"
+#include "gui/editors/cartographyeditor.h"
 
 #include "gui/utilsDialogs/aboutdialog.h"
 
-#include <aline/src/editor.h>
-#include <aline/src/editorfactory.h>
-#include <aline/src/editorfactorymanager.h>
+#include <aline/src/view/editor.h>
+#include <aline/src/view/editorfactory.h>
+#include <aline/src/view/editorfactorymanager.h>
 
 #include "utils/app_info.h"
 
@@ -216,14 +218,19 @@ void App::loadEditorsFactories() {
 
 	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new PersonnageEditor::PersonnageEditorFactory());
 	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new PlaceEditor::PlaceEditorFactory());
+	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new CartographyEditor::CartographyEditorFactory());
 
 }
 
 void App::loadEditableFactories() {
 
-	EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Personnage::PersonnageFactory());
-	EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Place::PlaceFactory());
-	EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Folder::FolderFactory());
+	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Personnage::PersonnageFactory());
+	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Place::PlaceFactory());
+	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Folder::FolderFactory());
+	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Cartography::CartographyFactory());
+
+	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installSubItemFactory(new CartographyItem::CartographyItemFactory());
+	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installSubItemFactory(new CartographyCategory::CartographyCategoryFactory());
 
 }
 

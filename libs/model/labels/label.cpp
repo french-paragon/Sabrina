@@ -4,7 +4,7 @@
 
 #include "editableitem.h"
 
-#include "utils/stringutils.h"
+#include "aline/src/utils/stringutils.h"
 
 #include <QDebug>
 
@@ -40,7 +40,7 @@ void Label::setRef(QString ref) {
 		return; //don't change ref when items refer to the label.
 	}
 
-	QString sref = StringUtils::simplifyRef(ref);
+	QString sref = Aline::StringUtils::simplifyRef(ref);
 
 	if (!_treeParent->makeRefUniq(sref)) {
 		return;
@@ -128,7 +128,7 @@ QVector<Label*> const& Label::subLabels() const {
 	return _childrens;
 }
 
-bool Label::markItem(EditableItem* item) {
+bool Label::markItem(Aline::EditableItem* item) {
 
 	if (!_hasBeenRefed) {
 		return false;
@@ -179,7 +179,7 @@ bool Label::markItem(EditableItem* item) {
 	return ok;
 }
 
-bool Label::unmarkItem(EditableItem* item) {
+bool Label::unmarkItem(Aline::EditableItem* item) {
 
 	if (!_hasBeenRefed) {
 		return false;

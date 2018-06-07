@@ -3,7 +3,7 @@
 
 #include "core_global.h"
 
-#include "aline/src/app.h"
+#include "aline/src/control/app.h"
 #include <QString>
 
 namespace Sabrina {

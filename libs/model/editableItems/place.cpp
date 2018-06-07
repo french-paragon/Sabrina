@@ -4,7 +4,7 @@ namespace Sabrina {
 
 const QString Place::PLACE_TYPE_ID = "sabrina_jdr_place";
 
-Place::Place(QString ref, EditableItemManager *parent) :
+Place::Place(QString ref, Aline::EditableItemManager *parent) :
 	EditableItem(ref, parent)
 {
 	connect(this, &Place::placeDescriptionChanged, this, &Place::newUnsavedChanges);
@@ -14,7 +14,7 @@ Place::PlaceFactory::PlaceFactory(QObject *parent) : EditableItemFactory(parent)
 
 }
 
-EditableItem* Place::PlaceFactory::createItem(QString ref, EditableItemManager* parent) const {
+Aline::EditableItem* Place::PlaceFactory::createItem(QString ref, Aline::EditableItemManager* parent) const {
 	return new Place(ref, parent);
 }
 

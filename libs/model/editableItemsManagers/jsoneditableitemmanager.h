@@ -5,6 +5,11 @@
 
 #include "model/editableitemmanager.h"
 
+namespace Aline {
+	class EditableItem;
+}
+
+
 namespace Sabrina {
 
 class Label;
@@ -29,6 +34,8 @@ public:
 	static const QString LABEL_ITEMS_REFS_ID;
 	static const QString LABEL_SUBLABELS_ID;
 
+	static const QString ITEM_SUBITEM_ID;
+
 	explicit JsonEditableItemManager(QObject *parent = nullptr);
 
 	virtual bool hasDataSource() const;
@@ -46,12 +53,15 @@ protected:
 	static const QString ITEM_FOLDER_NAME;
 	static const QString LABELS_FILE_NAME;
 
-	virtual EditableItem* effectivelyLoadItem(QString const& ref);
+	virtual Aline::EditableItem* effectivelyLoadItem(QString const& ref);
 
 	virtual bool clearItemData(QString itemRef);
 
 	virtual void effectivelyLoadLabels();
 	virtual bool effectivelySaveItem(QString const& ref);
+
+	void extractItemData(Aline::EditableItem* item, QJsonObject const& encapsulated);
+	QJsonObject encapsulateItemToJson(Aline::EditableItem* item, int level = 0) const;
 
 	void encapsulateTreeLeaf(treeStruct* leaf, QJsonObject &obj);
 	void extractTreeLeaf(treeStruct* leaf, QJsonObject &obj);
@@ -63,7 +73,10 @@ protected:
 	QJsonObject encodeLabelAsJson(QModelIndex const& index);
 
 	bool extractNotesFromJson(NotesList* list, QJsonArray const& notesArray);
-	QJsonArray encodeNotesArray(NotesList* list);
+	QJsonArray encodeNotesArray(const NotesList *list) const;
+
+	QJsonValue encodeVariantToJson(QVariant var) const;
+	QVariant decodeVariantFromJson(QJsonValue val, QVariant::Type type) const;
 
 	bool _hasAProjectOpen;
 	QString _projectFileName;

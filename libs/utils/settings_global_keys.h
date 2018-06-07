@@ -1,0 +1,6 @@
+#ifndef SETTINGS_GLOBAL_KEYS_H
+#define SETTINGS_GLOBAL_KEYS_H
+
+#define IMAGE_OPEN_DIR_KEY "image_open_dir"
+
+#endif // SETTINGS_GLOBAL_KEYS_H

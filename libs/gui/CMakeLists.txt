@@ -17,6 +17,8 @@ set(LIB_SRC mainwindows.cpp
             editors/personnageeditor.ui
             editors/placeeditor.cpp
             editors/placeeditor.ui
+            editors/cartographyeditor.cpp
+            editors/cartographyeditor.ui
             delegates/labelsmodelitemdelegate.cpp
             widgets/noteseditwidget.cpp
             widgets/noteseditwidget.ui

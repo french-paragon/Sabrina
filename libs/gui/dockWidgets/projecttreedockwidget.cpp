@@ -6,9 +6,8 @@
 
 #include "actions/editableitemtypespecializedaction.h"
 
-#include "model/editableitemfactory.h"
-
-#include <aline/src/editorfactorymanager.h>
+#include <aline/src/model/editableitemfactory.h>
+#include <aline/src/view/editorfactorymanager.h>
 
 namespace Sabrina {
 
@@ -100,7 +99,7 @@ void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
 	reselectProject(project);
 	rebuildMenu(project);
 
-	_newItemFactoryWatcher = connect(project->factoryManager(), &EditableItemFactoryManager::rowsInserted,
+	_newItemFactoryWatcher = connect(project->factoryManager(), &Aline::EditableItemFactoryManager::rowsInserted,
 									 this, &ProjectTreeDockWidget::rebuildMenuWithoutProject);
 
 	_itemCreationTrigger = connect(this, &ProjectTreeDockWidget::itemCreationTriggered,
@@ -132,11 +131,11 @@ void ProjectTreeDockWidget::rebuildMenu(EditableItemManager* project) {
 
 	_newItemMenu = new QMenu(this);
 
-	EditableItemFactoryManager* f = project->factoryManager();
+	Aline::EditableItemFactoryManager* f = project->factoryManager();
 
 	for (int i = 0; i < f->rowCount(); i++) {
 
-		QString itemType = f->data(f->index(i), EditableItemFactoryManager::ItemRefRole).toString();
+		QString itemType = f->data(f->index(i), Aline::EditableItemFactoryManager::ItemRefRole).toString();
 
 		EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(itemType,
 																						  QIcon(f->itemIconUrl(itemType)),
@@ -172,7 +171,7 @@ void ProjectTreeDockWidget::supprButtonClicked() {
 	QStringList selectedItems;
 
 	for (QModelIndex index : smod) {
-		selectedItems << _internalModel->data(index, EditableItemFactoryManager::ItemRefRole).toString();
+		selectedItems << _internalModel->data(index, Aline::EditableItemFactoryManager::ItemRefRole).toString();
 	}
 
 	emit itemSuppressionTriggered(selectedItems);
@@ -216,11 +215,11 @@ void ProjectTreeDockWidget::buildTreeContextMenu(QPoint const& pos) {
 
 			QMenu* section = menu.addMenu(tr("ajouter un:"));
 
-			EditableItemFactoryManager* f = _mw_parent->currentProject()->factoryManager();
+			Aline::EditableItemFactoryManager* f = _mw_parent->currentProject()->factoryManager();
 
 			for (int i = 0; i < f->rowCount(); i++) {
 
-				QString itemType = f->data(f->index(i), EditableItemFactoryManager::ItemRefRole).toString();
+				QString itemType = f->data(f->index(i), Aline::EditableItemFactoryManager::ItemRefRole).toString();
 
 				EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(itemType,
 																								  QIcon(f->itemIconUrl(itemType)),
