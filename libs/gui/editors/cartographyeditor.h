@@ -227,8 +227,6 @@ protected:
 
 private:
 
-	void printDebug() const;
-
 	struct CartographyItemContext {
 		CartographyItem* _item;
 		CartographyItemProxy* _proxy;

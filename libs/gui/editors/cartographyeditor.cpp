@@ -75,15 +75,6 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 	connect(ui->zoomOneButton, &QPushButton::clicked,
 			_mapProxy, &CartographyMapProxy::resetScale);
 
-	connect(ui->zoomPlusButton, &QPushButton::clicked,
-			this, &CartographyEditor::printDebug);
-
-	connect(ui->zoomMinusButton, &QPushButton::clicked,
-			this, &CartographyEditor::printDebug);
-
-	connect(ui->zoomOneButton, &QPushButton::clicked,
-			this, &CartographyEditor::printDebug);
-
 	ui->spinBoxScale->setValue(_mapProxy->getScalePercent());
 
 	connect(ui->spinBoxScale, static_cast<void (QDoubleSpinBox::*)(qreal) >(&QDoubleSpinBox::valueChanged),
@@ -620,10 +611,6 @@ void CartographyEditor::onSelectedItemScaleChange(qreal scale) {
 	ui->spinBoxItemScale->setValue(scale*100);
 	ui->spinBoxItemScale->blockSignals(false);
 
-}
-
-void CartographyEditor::printDebug() const {
-	qDebug() << _editor->size();
 }
 
 CartographyEditor::CartographyEditorFactory::CartographyEditorFactory(QObject* parent) :
