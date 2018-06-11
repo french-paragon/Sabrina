@@ -33,7 +33,7 @@ Item {
          width: 10
          height: 10
          color: mapItem.color
-         border.color: (mapItem.hasFocus) ? "#3195bb" : "black"
+         border.color: (mapItem.hasFocus) ? "white" : "black"
          border.width: 2
          radius: width*0.5
 
@@ -52,6 +52,7 @@ Item {
 
              drag.target: container
              drag.axis: Drag.XandYAxis
+             preventStealing: true
          }
     }
 

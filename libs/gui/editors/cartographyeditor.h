@@ -12,6 +12,7 @@
 #include <QQuickImageProvider>
 
 class QQuickItem;
+class QQuickWidget;
 class QSortFilterProxyModel;
 
 namespace Sabrina {
@@ -226,6 +227,8 @@ protected:
 
 private:
 
+	void printDebug() const;
+
 	struct CartographyItemContext {
 		CartographyItem* _item;
 		CartographyItemProxy* _proxy;
@@ -248,6 +251,8 @@ private:
 	QSortFilterProxyModel* _categoryListProxy;
 
 	QMetaObject::Connection _nameWatchConnection;
+
+	QQuickWidget* _editor;
 };
 
 

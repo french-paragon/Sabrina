@@ -3,14 +3,17 @@ import QtQuick.Controls 2.2
 
 Item {
 
+    width: flickArea.width
+    height: flickArea.height
+
     Flickable {
 
         id: flickArea
         contentWidth: mapArea.width*mapArea.scale
         contentHeight: mapArea.height*mapArea.scale
 
-        width: parent.width
-        height: parent.height
+        width: mapArea.width*mapArea.scale
+        height: mapArea.height*mapArea.scale
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
@@ -19,12 +22,14 @@ Item {
         ScrollBar.horizontal: ScrollBar { }
 
         clip: true
+        interactive: false
 
         Item {
 
             id: mapArea
             objectName: "mapArea"
 
+            transformOrigin: Item.TopLeft
             x: 0
             y: 0
 

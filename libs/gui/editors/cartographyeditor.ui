@@ -217,20 +217,23 @@
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="QQuickWidget" name="quickWidgetEditor">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
       </property>
-      <property name="styleSheet">
-       <string notr="true">border-color: rgb(0, 0, 0);
-border-width: 1px;</string>
+      <property name="widgetResizable">
+       <bool>true</bool>
       </property>
-      <property name="resizeMode">
-       <enum>QQuickWidget::SizeRootObjectToView</enum>
-      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents_3">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>68</width>
+         <height>529</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
@@ -585,13 +588,6 @@ background: transparent;
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QQuickWidget</class>
-   <extends>QWidget</extends>
-   <header>QtQuickWidgets/QQuickWidget</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="../ressources/ressources_gui.qrc"/>
  </resources>

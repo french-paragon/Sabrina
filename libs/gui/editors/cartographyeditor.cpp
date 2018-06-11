@@ -7,6 +7,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QQuickItem>
+#include <QQuickWidget>
 
 #include <QSettings>
 #include <QFileDialog>
@@ -43,13 +44,19 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 
 	_mapProxy = new CartographyMapProxy(this, nullptr);
 
+	_editor = new QQuickWidget(this);
+
 	_loader = new CartographyBackgroundLoader(_mapProxy);
-	ui->quickWidgetEditor->engine()->addImageProvider(QString("provider"), _loader);
-	ui->quickWidgetEditor->rootContext()->setContextProperty("mapProxy", _mapProxy);
+	_editor->engine()->addImageProvider(QString("provider"), _loader);
+	_editor->rootContext()->setContextProperty("mapProxy", _mapProxy);
 
-	ui->quickWidgetEditor->setSource(QUrl("qrc:/qml/qml/mapEditorWidget.qml"));
+	_editor->setResizeMode(QQuickWidget::SizeViewToRootObject);
+	_editor->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	_editor->setSource(QUrl("qrc:/qml/qml/mapEditorWidget.qml"));
 
-	QQuickItem* rootObj = ui->quickWidgetEditor->rootObject();
+	ui->scrollArea->setWidget(_editor);
+
+	QQuickItem* rootObj = _editor->rootObject();
 
 	_mapAreaItem = rootObj->findChild<QQuickItem *>("mapArea");
 
@@ -67,6 +74,15 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 
 	connect(ui->zoomOneButton, &QPushButton::clicked,
 			_mapProxy, &CartographyMapProxy::resetScale);
+
+	connect(ui->zoomPlusButton, &QPushButton::clicked,
+			this, &CartographyEditor::printDebug);
+
+	connect(ui->zoomMinusButton, &QPushButton::clicked,
+			this, &CartographyEditor::printDebug);
+
+	connect(ui->zoomOneButton, &QPushButton::clicked,
+			this, &CartographyEditor::printDebug);
 
 	ui->spinBoxScale->setValue(_mapProxy->getScalePercent());
 
@@ -204,12 +220,12 @@ void CartographyEditor::connectItem(CartographyItem* item) {
 
 	CartographyItemProxy* proxy = new CartographyItemProxy(this, item);
 
-	QQmlContext* rootContext = ui->quickWidgetEditor->rootContext();
+	QQmlContext* rootContext = _editor->rootContext();
 
 	QQmlContext* localContext = new QQmlContext(rootContext, proxy);
 	localContext->setContextProperty("mapItem", proxy);
 
-	QQmlComponent component(ui->quickWidgetEditor->engine(), QUrl("qrc:/qml/qml/mapEditorPoint.qml"));
+	QQmlComponent component(_editor->engine(), QUrl("qrc:/qml/qml/mapEditorPoint.qml"));
 	QObject* obj = component.create(localContext);
 	QQuickItem* itemPointItem = qobject_cast<QQuickItem*>(obj);
 
@@ -255,7 +271,10 @@ void CartographyEditor::onMapItemDeletionRequested() {
 
 	if (_selectedItem != nullptr) {
 		if (_currentCartography != nullptr) {
-			_currentCartography->removeCartoItem(_selectedItem->_item);
+			CartographyItem* target = _selectedItem->_item;
+			clearSelectedItem();
+
+			_currentCartography->removeCartoItem(target);
 		}
 	}
 
@@ -601,6 +620,10 @@ void CartographyEditor::onSelectedItemScaleChange(qreal scale) {
 	ui->spinBoxItemScale->setValue(scale*100);
 	ui->spinBoxItemScale->blockSignals(false);
 
+}
+
+void CartographyEditor::printDebug() const {
+	qDebug() << _editor->size();
 }
 
 CartographyEditor::CartographyEditorFactory::CartographyEditorFactory(QObject* parent) :
