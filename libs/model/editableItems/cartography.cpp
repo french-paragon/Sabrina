@@ -1,5 +1,7 @@
 #include "cartography.h"
 
+#include <QFileInfo>
+
 namespace Sabrina {
 
 const QString Cartography::CARTOGRAPHY_TYPE_ID = "sabrina_jdr_cartography";
@@ -202,6 +204,18 @@ CartographyCategroryListModel* Cartography::getCategoryListModel() {
 
 	return _categoryListModel;
 
+}
+
+QStringList Cartography::getFileReferencePropertiesName() const {
+
+	QFileInfo info(_background);
+
+
+	if (info.exists()) {
+		return {"background"};
+	}
+
+	return {};
 }
 
 CartographyCategory* Cartography::getDefaultCat() {

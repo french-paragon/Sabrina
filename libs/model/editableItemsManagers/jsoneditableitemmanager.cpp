@@ -274,6 +274,11 @@ bool JsonEditableItemManager::loadStruct() {
 	}
 
 }
+
+bool JsonEditableItemManager::isNetworkShared() const {
+	return false;
+}
+
 void JsonEditableItemManager::extractTreeLeaf(treeStruct* leaf, QJsonObject &obj) {
 
 	if (!obj.contains(TREE_REF_ID)) {

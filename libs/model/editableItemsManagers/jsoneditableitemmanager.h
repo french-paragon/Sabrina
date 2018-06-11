@@ -48,6 +48,8 @@ public:
 	virtual bool saveLabels();
 	virtual bool loadStruct();
 
+	virtual bool isNetworkShared() const;
+
 protected:
 
 	static const QString ITEM_FOLDER_NAME;

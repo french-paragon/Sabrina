@@ -213,6 +213,8 @@ public:
 
 	CartographyCategroryListModel* getCategoryListModel();
 
+	virtual QStringList getFileReferencePropertiesName() const;
+
 signals:
 
 	void backgroundChanged(QString bg);
