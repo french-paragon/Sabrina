@@ -1,4 +1,5 @@
 import QtQuick 2.9
+import SabrinaCartography 0.1
 
 Item {
 
@@ -57,6 +58,9 @@ Item {
     }
 
     TextEdit {
+
+        property int margin: parent.circleSize/2 + 2
+
         id: nameTextEdit
         color: (mapItem.hasFocus) ? "#ffffff" : "black"
         font.family: "Helvetica"
@@ -65,10 +69,19 @@ Item {
         font.pointSize: 10
         text: mapItem.itemName
 
-        anchors.bottom: parent.top
-        anchors.bottomMargin: parent.circleSize/2 + 2
+        x : (mapItem.legendPosition == SabrinaCartographyItem.TOP_LEFT ||
+             mapItem.legendPosition == SabrinaCartographyItem.MIDDLE_LEFT ||
+             mapItem.legendPosition == SabrinaCartographyItem.BOTTOM_LEFT) ? -width - margin :
+            (mapItem.legendPosition == SabrinaCartographyItem.TOP_MIDDLE ||
+             mapItem.legendPosition == SabrinaCartographyItem.BOTTOM_MIDDLE) ? -width/2 : margin
 
-        anchors.horizontalCenter: parent.left
+        y : (mapItem.legendPosition == SabrinaCartographyItem.TOP_LEFT ||
+              mapItem.legendPosition == SabrinaCartographyItem.TOP_MIDDLE ||
+              mapItem.legendPosition == SabrinaCartographyItem.TOP_RIGHT) ? -height - margin :
+            (mapItem.legendPosition == SabrinaCartographyItem.MIDDLE_LEFT ||
+             mapItem.legendPosition == SabrinaCartographyItem.MIDDLE_RIGHT) ? -height/2 : margin
+
+
 
         onEditingFinished: {
             mapItem.itemName = nameTextEdit.text;
@@ -88,6 +101,10 @@ Item {
            onDoubleClicked: mouse.accepted = false;
            onPositionChanged: mouse.accepted = false;
            onPressAndHold: mouse.accepted = false;
+        }
+
+        Component.onCompleted: {
+            console.log(mapItem.legendPosition)
         }
 
     }

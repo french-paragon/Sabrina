@@ -171,6 +171,9 @@
        </widget>
       </item>
       <item>
+       <widget class="QComboBox" name="legendPosComboBox"/>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -195,6 +198,7 @@
      <zorder>spinBoxScale</zorder>
      <zorder>line_2</zorder>
      <zorder>spinBoxItemScale</zorder>
+     <zorder>legendPosComboBox</zorder>
     </widget>
    </item>
    <item>

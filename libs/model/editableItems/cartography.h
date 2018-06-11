@@ -16,6 +16,20 @@ namespace Sabrina {
 class Cartography;
 class CartographyCategory;
 
+class CartographyItemLegendPosListModel : public QAbstractListModel {
+
+	Q_OBJECT
+
+public:
+
+	static CartographyItemLegendPosListModel GlobalLegendposModel;
+
+	explicit CartographyItemLegendPosListModel(QObject* parent = nullptr);
+
+	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+};
+
 class CATHIA_MODEL_EXPORT CartographyItem : public Aline::EditableItem
 {
 	Q_OBJECT
@@ -23,6 +37,18 @@ class CATHIA_MODEL_EXPORT CartographyItem : public Aline::EditableItem
 	friend class Cartography;
 
 public:
+
+	enum LegendPos {
+		TOP_LEFT = 0,
+		TOP_MIDDLE = 1,
+		TOP_RIGHT = 2,
+		MIDDLE_LEFT = 3,
+		MIDDLE_RIGHT = 4,
+		BOTTOM_LEFT = 5,
+		BOTTOM_MIDDLE = 6,
+		BOTTOM_RIGHT = 7
+	};
+	Q_ENUM(LegendPos)
 
 	static const QString CARTOGRAPHY_ITEM_TYPE_ID;
 
@@ -41,6 +67,7 @@ public:
 	Q_PROPERTY(QString category READ getCategoryRef WRITE setCategory)
 	Q_PROPERTY(QColor color READ getPointColor NOTIFY colorChanged STORED false)
 	Q_PROPERTY(qreal scale READ getScale WRITE setScale NOTIFY scaleChanged )
+	Q_PROPERTY(LegendPos legendPosition READ getLegendPosition WRITE setLegendPosition NOTIFY legendPositionChanged)
 
 	virtual QString getTypeId() const;
 	virtual QString getTypeName() const;
@@ -63,6 +90,9 @@ public:
 	qreal getScale() const;
 	void setScale(qreal scale);
 
+	LegendPos getLegendPosition() const;
+	void setLegendPosition(LegendPos pos);
+
 	bool isLinked() const;
 
 	Cartography *getCartographyParent() const;
@@ -78,6 +108,8 @@ signals:
 	void linkedStatusChanged(bool linked);
 
 	void categoryChanged(QString ref);
+
+	void legendPositionChanged(LegendPos pos);
 
 public slots:
 
@@ -97,6 +129,8 @@ protected:
 	mutable QMetaObject::Connection _colorPipeConnection;
 
 	qreal _scale;
+
+	LegendPos _legendPos;
 
 };
 

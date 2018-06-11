@@ -6,5 +6,13 @@
         <file>icons/editable_item_folder.svg</file>
         <file>icons/label_simple.svg</file>
         <file>icons/editable_item_map.svg</file>
+        <file>icons/legendAnchors/bottom_left.svg</file>
+        <file>icons/legendAnchors/bottom_middle.svg</file>
+        <file>icons/legendAnchors/bottom_right.svg</file>
+        <file>icons/legendAnchors/middle_left.svg</file>
+        <file>icons/legendAnchors/middle_right.svg</file>
+        <file>icons/legendAnchors/top_left.svg</file>
+        <file>icons/legendAnchors/top_middle.svg</file>
+        <file>icons/legendAnchors/top_right.svg</file>
     </qresource>
 </RCC>

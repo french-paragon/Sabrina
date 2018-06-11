@@ -17,6 +17,7 @@
 
 namespace Sabrina {
 
+bool CartographyEditor::qmlTypeRegistrationDone = false;
 const QString CartographyEditor::CARTOGRAPHY_EDITOR_TYPE_ID = "sabrina_jdr_cartography_editor";
 
 CartographyEditor::CartographyEditor(QWidget *parent) :
@@ -42,6 +43,9 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 	ui->categoryListView->setModel(_categoryListProxy);
 	ui->comboBoxSelectCategory->setModel(_categoryListProxy);
 
+	ui->legendPosComboBox->setModel(&CartographyItemLegendPosListModel::GlobalLegendposModel);
+	ui->legendPosComboBox->setEnabled(false);
+
 	_mapProxy = new CartographyMapProxy(this, nullptr);
 
 	_editor = new QQuickWidget(this);
@@ -49,6 +53,11 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 	_loader = new CartographyBackgroundLoader(_mapProxy);
 	_editor->engine()->addImageProvider(QString("provider"), _loader);
 	_editor->rootContext()->setContextProperty("mapProxy", _mapProxy);
+
+	if (!qmlTypeRegistrationDone) {
+		qmlRegisterUncreatableType<Sabrina::CartographyItem>("SabrinaCartography", 0, 1, "SabrinaCartographyItem", "Cartography items cannot be instanciated from qml.");
+		qmlTypeRegistrationDone = true;
+	}
 
 	_editor->setResizeMode(QQuickWidget::SizeViewToRootObject);
 	_editor->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -122,6 +131,9 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 
 	connect(ui->comboBoxSelectCategory, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 			this, &CartographyEditor::onSelectCategoryComboxIndexChange);
+
+	connect(ui->legendPosComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			this, &CartographyEditor::onSelectLegendPosComboxIndexChange);
 
 }
 
@@ -518,6 +530,10 @@ void CartographyEditor::setSelectedItem(QString ref) {
 
 		disconnect(_selectedItem->_item, &CartographyItem::categoryChanged,
 				   this, &CartographyEditor::onSelectedItemCategoryChange);
+
+		disconnect(_selectedItem, &CartographyItemProxy::legendPositionChanged,
+				   this, &CartographyEditor::onSelectedItemLegendPosChange);
+
 	}
 
 	_selectedItem = nullptr;
@@ -534,10 +550,18 @@ void CartographyEditor::setSelectedItem(QString ref) {
 		connect(_selectedItem->_item, &CartographyItem::categoryChanged,
 				this, &CartographyEditor::onSelectedItemCategoryChange);
 
+		connect(_selectedItem, &CartographyItemProxy::legendPositionChanged,
+				this, &CartographyEditor::onSelectedItemLegendPosChange);
+
 		QString catRef = _selectedItem->_item->getCategoryRef();
 		int row = categoryRow(catRef);
 
 		ui->comboBoxSelectCategory->setEnabled(true);
+		ui->legendPosComboBox->setEnabled(true);
+
+		ui->legendPosComboBox->blockSignals(true);
+		ui->legendPosComboBox->setCurrentIndex(_selectedItem->_item->getLegendPosition());
+		ui->legendPosComboBox->blockSignals(false);
 
 		ui->comboBoxSelectCategory->blockSignals(true);
 		ui->comboBoxSelectCategory->setCurrentIndex(row);
@@ -553,6 +577,7 @@ void CartographyEditor::setSelectedItem(QString ref) {
 
 		ui->comboBoxSelectCategory->setEnabled(false);
 		ui->spinBoxItemScale->setEnabled(false);
+		ui->legendPosComboBox->setEnabled(false);
 
 	}
 
@@ -591,6 +616,14 @@ void CartographyEditor::onSpinBoxItemScaleChange(double scalePercent) {
 	}
 }
 
+void CartographyEditor::onSelectLegendPosComboxIndexChange(int index) {
+
+	if (_selectedItem != nullptr) {
+		_selectedItem->setLegendPosition(index);
+	}
+
+}
+
 void CartographyEditor::onSelectedItemCategoryChange(QString ref) {
 
 	int row = categoryRow(ref);
@@ -610,6 +643,14 @@ void CartographyEditor::onSelectedItemScaleChange(qreal scale) {
 	ui->spinBoxItemScale->blockSignals(true);
 	ui->spinBoxItemScale->setValue(scale*100);
 	ui->spinBoxItemScale->blockSignals(false);
+
+}
+
+void CartographyEditor::onSelectedItemLegendPosChange(int pos) {
+
+	ui->legendPosComboBox->blockSignals(true);
+	ui->legendPosComboBox->setCurrentIndex(pos);
+	ui->legendPosComboBox->blockSignals(false);
 
 }
 
@@ -650,6 +691,9 @@ CartographyItemProxy::CartographyItemProxy(CartographyEditor* parent, Cartograph
 
 	connect(_item, &CartographyItem::categoryChanged,
 			this, &CartographyItemProxy::onCategoryChanged);
+
+	connect(_item, &CartographyItem::legendPositionChanged,
+			this, &CartographyItemProxy::legendPositionChanged);
 }
 
 QString CartographyItemProxy::itemName() const {
@@ -675,6 +719,14 @@ qreal CartographyItemProxy::getScale() const {
 }
 void CartographyItemProxy::setScale(qreal scale) const {
 	_item->setScale(scale);
+}
+
+int CartographyItemProxy::getLegendPosition() const {
+	return _item->getLegendPosition();
+}
+
+void CartographyItemProxy::setLegendPosition(int pos) {
+	_item->setLegendPosition((CartographyItem::LegendPos) pos);
 }
 
 bool CartographyItemProxy::hasFocus() const {

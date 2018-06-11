@@ -11,6 +11,8 @@
 
 #include <QQuickImageProvider>
 
+#include "model/editableItems/cartography.h"
+
 class QQuickItem;
 class QQuickWidget;
 class QSortFilterProxyModel;
@@ -42,6 +44,7 @@ public:
 	Q_PROPERTY(qreal scale READ getScale WRITE setScale NOTIFY scaleChanged)
 	Q_PROPERTY(bool hasFocus READ hasFocus NOTIFY focusChanged)
 	Q_PROPERTY(bool isLinked READ isLinked NOTIFY linkedStatusChanged)
+	Q_PROPERTY(int legendPosition READ getLegendPosition WRITE setLegendPosition NOTIFY legendPositionChanged)
 
 	QString itemName() const;
 	void setItemName(QString const& name);
@@ -53,6 +56,9 @@ public:
 
 	qreal getScale() const;
 	void setScale(qreal scale) const;
+
+	int getLegendPosition() const;
+	void setLegendPosition(int pos);
 
 	bool hasFocus() const;
 
@@ -70,6 +76,8 @@ signals:
 
 	void refSwap(QString oldRef, QString newRef);
 	void receivedSelectionTrigger(QString ref);
+
+	void legendPositionChanged(int pos);
 
 public slots:
 
@@ -221,11 +229,15 @@ protected:
 
 	void onSelectCategoryComboxIndexChange(int index);
 	void onSpinBoxItemScaleChange(double scalePercent);
+	void onSelectLegendPosComboxIndexChange(int index);
 
 	void onSelectedItemCategoryChange(QString ref);
 	void onSelectedItemScaleChange(qreal scale);
+	void onSelectedItemLegendPosChange(int pos);
 
 private:
+
+	static bool qmlTypeRegistrationDone;
 
 	struct CartographyItemContext {
 		CartographyItem* _item;

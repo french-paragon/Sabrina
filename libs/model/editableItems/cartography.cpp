@@ -1,6 +1,8 @@
 #include "cartography.h"
 
 #include <QFileInfo>
+#include <QMetaEnum>
+#include <QIcon>
 
 namespace Sabrina {
 
@@ -337,7 +339,8 @@ CartographyItem::CartographyItem(QString ref, Cartography *parent) :
 	_cartographyParent(parent),
 	_category(""),
 	_referedItem(QString()),
-	_scale(1.0)
+	_scale(1.0),
+	_legendPos(TOP_MIDDLE)
 {
 	setObjectName(EditableItem::simplifyRef(ref));
 
@@ -459,6 +462,19 @@ void CartographyItem::setScale(qreal scale) {
 	if (_scale != scale) {
 		_scale = scale;
 		emit scaleChanged(_scale);
+	}
+
+}
+
+CartographyItem::LegendPos CartographyItem::getLegendPosition() const {
+	return _legendPos;
+}
+
+void CartographyItem::setLegendPosition(LegendPos pos) {
+
+	if (pos != _legendPos) {
+		_legendPos = pos;
+		emit legendPositionChanged(pos);
 	}
 
 }
@@ -657,6 +673,54 @@ void CartographyCategroryListModel::onRefSwap(QString oldRef, QString newRef) {
 		}
 	}
 
+}
+
+
+CartographyItemLegendPosListModel CartographyItemLegendPosListModel::GlobalLegendposModel;
+
+CartographyItemLegendPosListModel::CartographyItemLegendPosListModel(QObject* parent):
+	QAbstractListModel(parent)
+{
+
+}
+
+int CartographyItemLegendPosListModel::rowCount(const QModelIndex &parent) const {
+	QMetaEnum metaEnum = QMetaEnum::fromType<CartographyItem::LegendPos>();
+	return metaEnum.keyCount();
+}
+QVariant CartographyItemLegendPosListModel::data(const QModelIndex &index, int role) const {
+
+	QMetaEnum metaEnum = QMetaEnum::fromType<CartographyItem::LegendPos>();
+
+	switch (role) {
+	case Qt::DisplayRole:
+		return QString(metaEnum.valueToKey(index.row()));
+	case Qt::DecorationRole:
+		switch (index.row()) {
+		case CartographyItem::TOP_LEFT:
+			return QIcon(":/icons/icons/legendAnchors/top_left.svg");
+		case CartographyItem::TOP_MIDDLE:
+			return QIcon(":/icons/icons/legendAnchors/top_middle.svg");
+		case CartographyItem::TOP_RIGHT:
+			return QIcon(":/icons/icons/legendAnchors/top_right.svg");
+		case CartographyItem::MIDDLE_LEFT:
+			return QIcon(":/icons/icons/legendAnchors/middle_left.svg");
+		case CartographyItem::MIDDLE_RIGHT:
+			return QIcon(":/icons/icons/legendAnchors/middle_right.svg");
+		case CartographyItem::BOTTOM_LEFT:
+			return QIcon(":/icons/icons/legendAnchors/bottom_left.svg");
+		case CartographyItem::BOTTOM_MIDDLE:
+			return QIcon(":/icons/icons/legendAnchors/bottom_middle.svg");
+		case CartographyItem::BOTTOM_RIGHT:
+			return QIcon(":/icons/icons/legendAnchors/bottom_right.svg");
+		default:
+			break;
+		}
+	default:
+		break;
+	}
+
+	return QVariant();
 }
 
 } // namespace Sabrina
