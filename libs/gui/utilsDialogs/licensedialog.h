@@ -1,5 +1,5 @@
-#ifndef GUI_GLOBAL_H
-#define GUI_GLOBAL_H
+#ifndef SABRINA_LICENSEDIALOG_H
+#define SABRINA_LICENSEDIALOG_H
 
 /*
 This file is part of the project Sabrina
@@ -19,10 +19,36 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#if defined(CATHIA_GUI_LIBRARY)
-#  define CATHIA_GUI_EXPORT Q_DECL_EXPORT
-#else
-#  define CATHIA_GUI_EXPORT Q_DECL_IMPORT
-#endif
+#include <QDialog>
 
-#endif // GUI_GLOBAL_H
+class QNetworkAccessManager;
+class QNetworkReply;
+
+namespace Sabrina {
+
+namespace Ui {
+class LicenseDialog;
+}
+
+class LicenseDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	explicit LicenseDialog(QWidget *parent = 0);
+	~LicenseDialog();
+
+private:
+
+	void startDownloadLicense();
+	void licenseDownloaded(QNetworkReply* pReply);
+
+	QNetworkAccessManager* _netWorkManager;
+
+
+	Ui::LicenseDialog *ui;
+};
+
+
+} // namespace Sabrina
+#endif // SABRINA_LICENSEDIALOG_H

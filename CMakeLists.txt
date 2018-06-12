@@ -27,6 +27,9 @@ set(CMAKE_AUTORCC ON)
 
 set(BUILD_SHARED_LIBS ON)
 
+#prog outputs
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 #include dirs
 
 include_directories(${CMAKE_SOURCE_DIR}/libs)
@@ -37,3 +40,7 @@ include_directories(${CMAKE_SOURCE_DIR}/modules)
 add_subdirectory(modules)
 add_subdirectory(libs)
 add_subdirectory(prog)
+
+#copy important files
+
+configure_file(${CMAKE_SOURCE_DIR}/LICENSE ${CMAKE_BINARY_DIR}/LICENSE COPYONLY)

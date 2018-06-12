@@ -5,6 +5,8 @@ set(LIB_SRC mainwindows.cpp
             actions/editableitemtypespecializedaction.cpp
             utilsDialogs/aboutdialog.cpp
             utilsDialogs/aboutdialog.ui
+            utilsDialogs/licensedialog.cpp
+            utilsDialogs/licensedialog.ui
             dockWidgets/projecttreedockwidget.cpp
             dockWidgets/projecttreedockwidget.ui
             dockWidgets/projectlabelsdockwidget.cpp
