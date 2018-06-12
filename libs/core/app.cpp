@@ -73,6 +73,8 @@ App::App(int &argc, char **argv) :
 	QCoreApplication::setApplicationVersion(appTag());
 
 	connect(this, &QApplication::aboutToQuit, this, &App::quitCathia);
+
+	setWindowIcon(QIcon(":/icons/icons/app_icon.svg"));
 }
 
 App::~App() {
@@ -88,6 +90,7 @@ App::~App() {
 }
 
 bool App::start(QString appCode) {
+
 	int code = Aline::App::start(appCode);
 
 	MainWindowsFactory::GlobalMainWindowsFactory.registerPreAction([this] (MainWindow* mw) {this->addAppActionsToMainWindows(mw);});

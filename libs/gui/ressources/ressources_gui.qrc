@@ -9,6 +9,7 @@
         <file>icons/zoom_plus.svg</file>
         <file>icons/zoom_simple.svg</file>
         <file>icons/zoom_minus.svg</file>
+        <file>icons/app_icon.svg</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/logo_paragon.png</file>
