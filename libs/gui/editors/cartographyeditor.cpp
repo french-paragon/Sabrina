@@ -32,6 +32,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <QColorDialog>
 #include <QImage>
 #include <QSortFilterProxyModel>
+#include <QFont>
 
 namespace Sabrina {
 
@@ -53,8 +54,7 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 	ui->spinBoxItemScale->setEnabled(false);
 	ui->comboBoxSelectCategory->setEnabled(false);
 
-	ui->selectColorButton->setEnabled(false);
-	ui->categoryScaleSpinBox->setEnabled(false);
+	setCategoryEditWidgetsEnabled(false);
 
 	_categoryListProxy = new QSortFilterProxyModel(this);
 
@@ -136,11 +136,20 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 	connect(ui->selectColorButton, &QPushButton::clicked, this,
 			&CartographyEditor::onColorSelectionClicked);
 
-	connect(ui->categoryScaleSpinBox, static_cast<void(QDoubleSpinBox::*)(qreal)>(&QDoubleSpinBox::valueChanged),
-			this, &CartographyEditor::onSpinBoxScaleCategoryChange);
+	connect(ui->categoryRadiusSpinBox, static_cast<void(QDoubleSpinBox::*)(qreal)>(&QDoubleSpinBox::valueChanged),
+			this, &CartographyEditor::onSpinBoxRadiusCategoryChange);
 
 	connect(ui->categoryListView->selectionModel(), &QItemSelectionModel::currentChanged,
 			this, &CartographyEditor::onCategorySelectionChange);
+
+	connect(ui->selectBorderColorPushButton, &QPushButton::clicked,
+			this, &CartographyEditor::onBorderColorSelectionClicked);
+
+	connect(ui->legendFontComboBox, &QFontComboBox::currentFontChanged,
+			this, &CartographyEditor::onLegendFontSelectionChanged);
+
+	connect(ui->legendColorPushButton, &QPushButton::clicked,
+			this, &CartographyEditor::onLegendColorSelectionClicked);
 
 	//item
 
@@ -462,8 +471,43 @@ void CartographyEditor::onCategorySelectionChange() {
 			disconnect(_currentCategory, &CartographyCategory::colorChanged,
 					   this, &CartographyEditor::onCurrentCategoryColorChange);
 
-			disconnect(_currentCategory, &CartographyCategory::scaleChanged,
-					   this, &CartographyEditor::onCurrentCategoryScaleChange);
+			disconnect(_currentCategory, &CartographyCategory::radiusChanged,
+					   this, &CartographyEditor::onCurrentCategoryRadiusChange);
+
+			disconnect(cat, &CartographyCategory::borderColorChanged,
+					   this, &CartographyEditor::onCurrentCategoryBorderColorChange);
+
+			disconnect(cat, &CartographyCategory::borderChanged,
+					   ui->categoryBorderSpinBox, &QDoubleSpinBox::setValue);
+			disconnect(ui->categoryBorderSpinBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+					   cat, &CartographyCategory::setBorder);
+
+
+			disconnect(cat, &CartographyCategory::legendFontChanged,
+					   this, &CartographyEditor::onCurrentCategoryFontChanges);
+
+			disconnect(cat, &CartographyCategory::legendSizeChanged,
+					   ui->legendSizeSinBox, &QSpinBox::setValue);
+			disconnect(ui->legendSizeSinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+					   cat, &CartographyCategory::setLegendSize);
+
+			disconnect(cat, &CartographyCategory::legendBoldChanged,
+					   ui->legendBoldButton, &QPushButton::setChecked);
+			disconnect(ui->legendBoldButton, &QPushButton::clicked,
+					   cat, &CartographyCategory::setLegendBold);
+
+			disconnect(cat, &CartographyCategory::legendItalicChanged,
+					   ui->legendItalicButton, &QPushButton::setChecked);
+			disconnect(ui->legendItalicButton, &QPushButton::clicked,
+					   cat, &CartographyCategory::setLegendItalic);
+
+			disconnect(cat, &CartographyCategory::legendUnderlinedChanged,
+					   ui->legendUnderlinedButton, &QPushButton::setChecked);
+			disconnect(ui->legendUnderlinedButton, &QPushButton::clicked,
+					   cat, &CartographyCategory::setLegendUnderlined);
+
+			disconnect(cat, &CartographyCategory::legendColorChanged,
+					   this, &CartographyEditor::onCurrentCategoryLegendColorChange);
 
 		}
 
@@ -471,25 +515,87 @@ void CartographyEditor::onCategorySelectionChange() {
 
 		if (cat != nullptr) {
 
-			ui->selectColorButton->setEnabled(true);
-			ui->categoryScaleSpinBox->setEnabled(true);
+			setCategoryEditWidgetsEnabled(true);
 
-			ui->selectColorButton->setStyleSheet(QString("background-color:%1;").arg(cat->getColor().name()));
+			ui->selectColorButton->setStyleSheet(QString("border: none;\nbackground-color:%1;").arg(cat->getColor().name()));
 
-			ui->categoryScaleSpinBox->blockSignals(true);
-			ui->categoryScaleSpinBox->setValue(cat->getScale()*100);
-			ui->categoryScaleSpinBox->blockSignals(false);
+			ui->categoryRadiusSpinBox->blockSignals(true);
+			ui->categoryRadiusSpinBox->setValue(cat->getRadius());
+			ui->categoryRadiusSpinBox->blockSignals(false);
+
+			ui->selectBorderColorPushButton->setStyleSheet(QString("border: none;\nbackground-color:%1;").arg(cat->getBorderColor().name()));
+
+			ui->categoryBorderSpinBox->blockSignals(true);
+			ui->categoryBorderSpinBox->setValue(cat->getBorder());
+			ui->categoryBorderSpinBox->blockSignals(false);
+
+
+			ui->legendFontComboBox->blockSignals(true);
+			ui->legendFontComboBox->setFont(QFont(cat->getLegendFont()));
+			ui->legendFontComboBox->blockSignals(false);
+
+			ui->legendSizeSinBox->blockSignals(true);
+			ui->legendSizeSinBox->setValue(cat->getLegendSize());
+			ui->legendSizeSinBox->blockSignals(false);
+
+			ui->legendBoldButton->blockSignals(true);
+			ui->legendBoldButton->setChecked(cat->getLegendBold());
+			ui->legendBoldButton->blockSignals(false);
+
+			ui->legendItalicButton->blockSignals(true);
+			ui->legendItalicButton->setChecked(cat->getLegendItalic());
+			ui->legendItalicButton->blockSignals(false);
+
+			ui->legendUnderlinedButton->blockSignals(true);
+			ui->legendUnderlinedButton->setChecked(cat->getLegendUnderlined());
+			ui->legendUnderlinedButton->blockSignals(false);
+
+			ui->legendColorPushButton->setStyleSheet(QString("border: none;\nbackground-color:%1;").arg(cat->getLegendColor().name()));
+
 
 			connect(cat, &CartographyCategory::colorChanged,
 					this, &CartographyEditor::onCurrentCategoryColorChange);
 
-			connect(cat, &CartographyCategory::scaleChanged,
-					this, &CartographyEditor::onCurrentCategoryScaleChange);
+			connect(cat, &CartographyCategory::radiusChanged,
+					this, &CartographyEditor::onCurrentCategoryRadiusChange);
+
+			connect(cat, &CartographyCategory::borderColorChanged, this,
+					&CartographyEditor::onCurrentCategoryBorderColorChange);
+
+			connect(cat, &CartographyCategory::borderChanged,
+					ui->categoryBorderSpinBox, &QDoubleSpinBox::setValue);
+			connect(ui->categoryBorderSpinBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+					cat, &CartographyCategory::setBorder);
+
+			connect(cat, &CartographyCategory::legendFontChanged,
+					this, &CartographyEditor::onCurrentCategoryFontChanges);
+
+			connect(cat, &CartographyCategory::legendSizeChanged,
+					ui->legendSizeSinBox, &QSpinBox::setValue);
+			connect(ui->legendSizeSinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+					cat, &CartographyCategory::setLegendSize);
+
+			connect(cat, &CartographyCategory::legendBoldChanged,
+					ui->legendBoldButton, &QPushButton::setChecked);
+			connect(ui->legendBoldButton, &QPushButton::clicked,
+					cat, &CartographyCategory::setLegendBold);
+
+			connect(cat, &CartographyCategory::legendItalicChanged,
+					ui->legendItalicButton, &QPushButton::setChecked);
+			connect(ui->legendItalicButton, &QPushButton::clicked,
+					cat, &CartographyCategory::setLegendItalic);
+
+			connect(cat, &CartographyCategory::legendUnderlinedChanged,
+					ui->legendUnderlinedButton, &QPushButton::setChecked);
+			connect(ui->legendUnderlinedButton, &QPushButton::clicked,
+					cat, &CartographyCategory::setLegendUnderlined);
+
+			connect(cat, &CartographyCategory::legendColorChanged,
+					this, &CartographyEditor::onCurrentCategoryLegendColorChange);
 
 		} else {
 
-			ui->selectColorButton->setEnabled(false);
-			ui->categoryScaleSpinBox->setEnabled(false);
+			setCategoryEditWidgetsEnabled(false);
 
 		}
 
@@ -512,25 +618,108 @@ void CartographyEditor::onColorSelectionClicked() {
 
 }
 
-void CartographyEditor::onSpinBoxScaleCategoryChange(qreal scalePercent) {
+void CartographyEditor::onSpinBoxRadiusCategoryChange(qreal radius) {
 
 	if (_currentCategory != nullptr) {
-		_currentCategory->setScale(scalePercent/100);
+		_currentCategory->setRadius(radius);
 	}
 
 }
 
-void CartographyEditor::onCurrentCategoryScaleChange(qreal scale) {
+void CartographyEditor::onBorderColorSelectionClicked() {
 
-	ui->categoryScaleSpinBox->blockSignals(true);
-	ui->categoryScaleSpinBox->setValue(scale*100);
-	ui->categoryScaleSpinBox->blockSignals(false);
+	if (_currentCategory != nullptr) {
+
+		QColor newSelection = QColorDialog::getColor(_currentCategory->getColor(), this, tr("Choisir une couleur"));
+
+		if (newSelection.isValid()) {
+			_currentCategory->setBorderColor(newSelection);
+		}
+
+	}
+
+}
+
+void CartographyEditor::onLegendFontSelectionChanged() {
+
+	if (_currentCartography != nullptr) {
+
+		QString fontName = ui->legendFontComboBox->currentFont().family();
+
+		_currentCategory->setLegendFont(fontName);
+
+	}
+
+}
+
+void CartographyEditor::onLegendColorSelectionClicked() {
+
+
+	if (_currentCategory != nullptr) {
+
+		QColor newSelection = QColorDialog::getColor(_currentCategory->getColor(), this, tr("Choisir une couleur"));
+
+		if (newSelection.isValid()) {
+			_currentCategory->setLegendColor(newSelection);
+		}
+	}
+
+}
+
+void CartographyEditor::onCurrentCategoryRadiusChange(qreal radius) {
+
+	ui->categoryRadiusSpinBox->blockSignals(true);
+	ui->categoryRadiusSpinBox->setValue(radius);
+	ui->categoryRadiusSpinBox->blockSignals(false);
 
 }
 
 void CartographyEditor::onCurrentCategoryColorChange(QColor col) {
 
-	ui->selectColorButton->setStyleSheet(QString("background-color:%1;").arg(col.name()));
+	ui->selectColorButton->setStyleSheet(QString("border: none;\nbackground-color:%1;").arg(col.name()));
+
+}
+
+void CartographyEditor::onCurrentCategoryBorderColorChange(QColor col) {
+
+	ui->selectBorderColorPushButton->setStyleSheet(QString("border: none;\nbackground-color:%1;").arg(col.name()));
+
+}
+
+void CartographyEditor::onCurrentCategoryFontChanges(QString fontName) {
+
+	ui->legendFontComboBox->setFont(QFont(fontName));
+
+}
+
+void CartographyEditor::onCurrentCategoryLegendColorChange(QColor col) {
+
+	ui->legendColorPushButton->setStyleSheet(QString("border: none;\nbackground-color:%1;").arg(col.name()));
+
+}
+
+void CartographyEditor::setCategoryEditWidgetsEnabled(bool enabled) {
+
+	ui->selectColorButton->setEnabled(enabled);
+	ui->categoryRadiusSpinBox->setEnabled(enabled);
+
+	ui->selectBorderColorPushButton->setEnabled(enabled);
+	ui->categoryBorderSpinBox->setEnabled(enabled);
+
+	ui->groupBoxPoint->setEnabled(enabled);
+
+
+	ui->legendFontComboBox->setEnabled(enabled);
+
+	ui->legendSizeSinBox->setEnabled(enabled);
+
+	ui->legendBoldButton->setEnabled(enabled);
+	ui->legendItalicButton->setEnabled(enabled);
+	ui->legendUnderlinedButton->setEnabled(enabled);
+
+	ui->legendColorPushButton->setEnabled(enabled);
+
+	ui->groupBoxLegend->setEnabled(enabled);
 
 }
 
@@ -696,10 +885,38 @@ CartographyItemProxy::CartographyItemProxy(CartographyEditor* parent, Cartograph
 	connect(_item, &CartographyItem::positionChanged,
 			this, &CartographyItemProxy::positionChanged);
 
+	connect(_item, &CartographyItem::scaleChanged,
+			this, &CartographyItemProxy::scaleChanged);
+
 	connect(_item, &CartographyItem::colorChanged,
 			this, &CartographyItemProxy::colorChanged);
 
-	connect(_item, &CartographyItem::scaleChanged, this, &CartographyItemProxy::scaleChanged);
+	connect(_item, &CartographyItem::radiusChanged,
+			this, &CartographyItemProxy::radiusChanged);
+
+	connect(_item, &CartographyItem::borderColorChanged,
+			this, &CartographyItemProxy::borderColorChanged);
+
+	connect(_item, &CartographyItem::borderChanged,
+			this, &CartographyItemProxy::borderChanged);
+
+	connect(_item, &CartographyItem::legendFontChanged,
+			this, &CartographyItemProxy::legendFontChanged);
+
+	connect(_item, &CartographyItem::legendSizeChanged,
+			this, &CartographyItemProxy::legendSizeChanged);
+
+	connect(_item, &CartographyItem::legendBoldChanged,
+			this, &CartographyItemProxy::legendBoldChanged);
+
+	connect(_item, &CartographyItem::legendItalicChanged,
+			this, &CartographyItemProxy::legendItalicChanged);
+
+	connect(_item, &CartographyItem::legendUnderlinedChanged,
+			this, &CartographyItemProxy::legendUnderlinedChanged);
+
+	connect(_item, &CartographyItem::legendColorChanged,
+			this, &CartographyItemProxy::legendColorChanged);
 
 	connect(_item, &CartographyItem::linkedStatusChanged,
 			this, &CartographyItemProxy::linkedStatusChanged);
@@ -728,15 +945,44 @@ void CartographyItemProxy::setPosition(QPointF const& pos) {
 	_item->setPosition(pos);
 }
 
-QColor CartographyItemProxy::getPointColor() const {
-	return _item->getPointColor();
-}
-
 qreal CartographyItemProxy::getScale() const {
 	return _item->getScale();
 }
 void CartographyItemProxy::setScale(qreal scale) const {
 	_item->setScale(scale);
+}
+
+QColor CartographyItemProxy::getPointColor() const {
+	return _item->getPointColor();
+}
+qreal CartographyItemProxy::getRadius() const {
+	return _item->getRadius();
+}
+
+QColor CartographyItemProxy::getBorderColor() const {
+	return _item->getBorderColor();
+}
+qreal CartographyItemProxy::getBorder() const {
+	return _item->getBorder();
+}
+
+QString CartographyItemProxy::getLegendFont() const {
+	return _item->getLegendFont();
+}
+bool CartographyItemProxy::getLegendUnderlined() const {
+	return _item->getLegendUnderlined();
+}
+bool CartographyItemProxy::getLegendBold() const {
+	return _item->getLegendBold();
+}
+bool CartographyItemProxy::getLegendItalic() const {
+	return _item->getLegendItalic();
+}
+int CartographyItemProxy::getLegendSize() const {
+	return _item->getLegendSize();
+}
+QColor CartographyItemProxy::getLegendColor() const {
+	return _item->getLegendColor();
 }
 
 int CartographyItemProxy::getLegendPosition() const {
@@ -771,6 +1017,17 @@ void CartographyItemProxy::setFocus(bool focus) {
 void CartographyItemProxy::onCategoryChanged() {
 
 	emit colorChanged(getPointColor());
+	emit radiusChanged(getRadius());
+
+	emit borderColorChanged(getBorderColor());
+	emit borderChanged(getBorder());
+
+	emit legendFontChanged(getLegendFont());
+	emit legendSizeChanged(getLegendSize());
+	emit legendBoldChanged(getLegendBold());
+	emit legendItalicChanged(getLegendItalic());
+	emit legendUnderlinedChanged(getLegendUnderlined());
+	emit legendColorChanged(getLegendColor());
 
 }
 

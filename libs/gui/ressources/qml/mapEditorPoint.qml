@@ -23,8 +23,6 @@ Item {
 
     id: container
 
-    property int circleSize : 10
-
     x: 0
     y: 0
     z: 2
@@ -49,12 +47,12 @@ Item {
 
     Rectangle {
 
-         width: 10
-         height: 10
+         width: mapItem.radius*2
+         height: mapItem.radius*2
          color: mapItem.color
-         border.color: (mapItem.hasFocus) ? "white" : "black"
-         border.width: 2
-         radius: width*0.5
+         border.color: (mapItem.hasFocus) ? "white" : mapItem.borderColor
+         border.width: mapItem.border
+         radius: mapItem.radius
 
          //center the circle.
          anchors.verticalCenter: parent.top
@@ -77,14 +75,16 @@ Item {
 
     TextEdit {
 
-        property int margin: parent.circleSize/2 + 2
+        property int margin: mapItem.radius + 2
 
         id: nameTextEdit
-        color: (mapItem.hasFocus) ? "#ffffff" : "black"
-        font.family: "Helvetica"
-        font.bold: true
+        color: (mapItem.hasFocus) ? "#ffffff" : mapItem.legendColor
+        font.family: mapItem.legendFont
+        font.bold: mapItem.legendBold
+        font.italic: mapItem.legendItalic
+        font.underline: mapItem.legendUnderlined
         horizontalAlignment: Text.AlignHCenter
-        font.pointSize: 10
+        font.pointSize: mapItem.legendSize
         text: mapItem.itemName
 
         x : (mapItem.legendPosition == SabrinaCartographyItem.TOP_LEFT ||

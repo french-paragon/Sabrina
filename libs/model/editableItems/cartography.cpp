@@ -291,7 +291,14 @@ CartographyCategory::CartographyCategory(QString ref, Cartography* parent) :
 	Aline::EditableItem(ref, parent),
 	_cartographyParent(parent),
 	_color(207, 85, 64),
-	_scale(1)
+	_radius(5),
+	_border_color(0, 0, 0),
+	_border(2),
+	_legend_font("sans"),
+	_legend_underlined(false),
+	_legend_bold(true),
+	_legend_italic(false),
+	_legend_size(10)
 {
 
 }
@@ -321,17 +328,121 @@ void CartographyCategory::setColor(const QColor &color)
 	}
 }
 
-qreal CartographyCategory::getScale() const {
-	return _scale;
+qreal CartographyCategory::getRadius() const {
+	return _radius;
 }
 
-void CartographyCategory::setScale(qreal scale) {
+void CartographyCategory::setRadius(qreal radius) {
 
-	if (scale != _scale) {
-		_scale = scale;
-		emit scaleChanged(scale);
+	if (radius != _radius) {
+		_radius = radius;
+		emit radiusChanged(radius);
 	}
 
+}
+
+QColor CartographyCategory::getBorderColor() const
+{
+	return _border_color;
+}
+
+void CartographyCategory::setBorderColor(const QColor &border_color)
+{
+	if (border_color != _border_color) {
+		_border_color = border_color;
+		emit borderColorChanged(border_color);
+	}
+}
+
+qreal CartographyCategory::getBorder() const
+{
+	return _border;
+}
+
+void CartographyCategory::setBorder(const qreal &border)
+{
+	if (border != _border) {
+		_border = border;
+		emit borderChanged(border);
+	}
+}
+
+QString CartographyCategory::getLegendFont() const
+{
+	return _legend_font;
+}
+
+void CartographyCategory::setLegendFont(const QString &legend_font)
+{
+	if (_legend_font != legend_font) {
+		_legend_font = legend_font;
+		emit legendFontChanged(legend_font);
+	}
+}
+
+bool CartographyCategory::getLegendUnderlined() const
+{
+	return _legend_underlined;
+}
+
+void CartographyCategory::setLegendUnderlined(bool legend_underlined)
+{
+	if (legend_underlined != _legend_underlined) {
+		_legend_underlined = legend_underlined;
+		emit legendUnderlinedChanged(legend_underlined);
+	}
+}
+
+bool CartographyCategory::getLegendBold() const
+{
+	return _legend_bold;
+}
+
+void CartographyCategory::setLegendBold(bool legend_bold)
+{
+	if (_legend_bold != legend_bold) {
+		_legend_bold = legend_bold;
+		emit legendBoldChanged(legend_bold);
+	}
+}
+
+bool CartographyCategory::getLegendItalic() const
+{
+	return _legend_italic;
+}
+
+void CartographyCategory::setLegendItalic(bool legend_italic)
+{
+	if (_legend_italic != legend_italic) {
+		_legend_italic = legend_italic;
+		emit legendItalicChanged(legend_italic);
+	}
+}
+
+int CartographyCategory::getLegendSize() const
+{
+	return _legend_size;
+}
+
+void CartographyCategory::setLegendSize(int legend_size)
+{
+	if (_legend_size != legend_size) {
+		_legend_size = legend_size;
+		emit legendSizeChanged(legend_size);
+	}
+}
+
+QColor CartographyCategory::getLegendColor() const
+{
+	return _legendColor;
+}
+
+void CartographyCategory::setLegendColor(const QColor &legendColor)
+{
+	if (_legendColor != legendColor) {
+		_legendColor = legendColor;
+		emit legendColorChanged(legendColor);
+	}
 }
 
 CartographyCategory::CartographyCategoryFactory::CartographyCategoryFactory(QObject *parent) :
@@ -381,18 +492,14 @@ QString CartographyItem::iconInternalUrl() const {
 
 void CartographyItem::setCategory(CartographyCategory* category) {
 
-	if (_colorPipeConnection) {
-		disconnect(_colorPipeConnection);
-	}
+	disconnectPipedSignals();
 
 	linkCategory(category);
 }
 
 void CartographyItem::setCategory(QString ref) {
 
-	if (_colorPipeConnection) {
-		disconnect(_colorPipeConnection);
-	}
+	disconnectPipedSignals();
 
 	_category = ref;
 	linkCategory(_cartographyParent->getCategoryByRef(_category, true));
@@ -470,6 +577,41 @@ QColor CartographyItem::getPointColor() const {
 	return _linkedCategory->getColor();
 
 }
+qreal CartographyItem::getRadius() const {
+	return _linkedCategory->getRadius();
+}
+
+QColor CartographyItem::getBorderColor() const {
+	return _linkedCategory->getBorderColor();
+}
+
+qreal CartographyItem::getBorder() const {
+	return _linkedCategory->getBorder();
+}
+
+QString CartographyItem::getLegendFont() const {
+	return _linkedCategory->getLegendFont();
+}
+
+bool CartographyItem::getLegendUnderlined() const {
+	return _linkedCategory->getLegendUnderlined();
+}
+
+bool CartographyItem::getLegendBold() const {
+	return _linkedCategory->getLegendBold();
+}
+
+bool CartographyItem::getLegendItalic() const {
+	return _linkedCategory->getLegendItalic();
+}
+
+int CartographyItem::getLegendSize() const {
+	return _linkedCategory->getLegendSize();
+}
+
+QColor CartographyItem::getLegendColor() const {
+	return _linkedCategory->getLegendColor();
+}
 
 qreal CartographyItem::getScale() const {
 	return _scale;
@@ -524,9 +666,85 @@ void CartographyItem::linkCategory(CartographyCategory* category) {
 	_category = category->getRef();
 	_linkedCategory = category;
 
-	_colorPipeConnection = connect(category, &CartographyCategory::colorChanged, this, &CartographyItem::colorChanged);
+	_colorPipeConnection = connect(category, &CartographyCategory::colorChanged,
+								   this, &CartographyItem::colorChanged);
+
+	_radiusPipeConnection = connect(category, &CartographyCategory::radiusChanged,
+									this, &CartographyItem::radiusChanged);
+
+
+	_borderColorPipeConnection = connect(category, &CartographyCategory::borderColorChanged,
+										 this, &CartographyItem::borderColorChanged);
+
+	_borderPipeConnection = connect(category, &CartographyCategory::borderChanged,
+									this, &CartographyItem::borderChanged);
+
+
+	_legendFontPipeConnection = connect(category, &CartographyCategory::legendFontChanged,
+										this, &CartographyItem::legendFontChanged);
+
+	_legendUnderlinedPipeConnection = connect(category, &CartographyCategory::legendUnderlinedChanged,
+											  this, &CartographyItem::legendUnderlinedChanged);
+
+	_legendBoldPipeConnection = connect(category, &CartographyCategory::legendBoldChanged,
+										this, &CartographyItem::legendBoldChanged);
+
+	_legendItalicPipeConnection = connect(category, &CartographyCategory::legendItalicChanged,
+										  this, &CartographyItem::legendItalicChanged);
+
+	_legendSizePipeConnection = connect(category, &CartographyCategory::legendSizeChanged,
+										this, &CartographyItem::legendSizeChanged);
+
+	_legendColorPipeConnection = connect(category, &CartographyCategory::legendColorChanged,
+										 this, &CartographyItem::legendColorChanged);
 
 	emit categoryChanged(category->getRef());
+
+}
+
+void CartographyItem::disconnectPipedSignals() {
+
+	if (_colorPipeConnection) {
+		disconnect(_colorPipeConnection);
+	}
+
+	if (_radiusPipeConnection) {
+		disconnect(_radiusPipeConnection);
+	}
+
+
+	if (_borderColorPipeConnection) {
+		disconnect(_borderColorPipeConnection);
+	}
+
+	if (_borderPipeConnection) {
+		disconnect(_borderPipeConnection);
+	}
+
+
+	if (_legendFontPipeConnection) {
+		disconnect(_legendFontPipeConnection);
+	}
+
+	if (_legendUnderlinedPipeConnection) {
+		disconnect(_legendUnderlinedPipeConnection);
+	}
+
+	if (_legendBoldPipeConnection) {
+		disconnect(_legendBoldPipeConnection);
+	}
+
+	if (_legendItalicPipeConnection) {
+		disconnect(_legendItalicPipeConnection);
+	}
+
+	if (_legendFontPipeConnection) {
+		disconnect(_legendItalicPipeConnection);
+	}
+
+	if (_legendColorPipeConnection) {
+		disconnect(_legendColorPipeConnection);
+	}
 
 }
 

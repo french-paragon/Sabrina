@@ -83,9 +83,21 @@ public:
 	Q_PROPERTY(QString referedItem READ getReferedItem WRITE setReferedItem NOTIFY referedItemChanged)
 	Q_PROPERTY(QPointF position READ getPosition WRITE setPosition NOTIFY positionChanged)
 	Q_PROPERTY(QString category READ getCategoryRef WRITE setCategory)
-	Q_PROPERTY(QColor color READ getPointColor NOTIFY colorChanged STORED false)
 	Q_PROPERTY(qreal scale READ getScale WRITE setScale NOTIFY scaleChanged )
 	Q_PROPERTY(LegendPos legendPosition READ getLegendPosition WRITE setLegendPosition NOTIFY legendPositionChanged)
+
+	Q_PROPERTY(QColor color READ getPointColor NOTIFY colorChanged STORED false)
+	Q_PROPERTY(qreal radius READ getRadius NOTIFY radiusChanged STORED false)
+
+	Q_PROPERTY(QColor borderColor READ getBorderColor NOTIFY borderColorChanged STORED false)
+	Q_PROPERTY(qreal border READ getBorder NOTIFY borderChanged STORED false)
+
+	Q_PROPERTY(QString legendFont READ getLegendFont NOTIFY legendFontChanged STORED false)
+	Q_PROPERTY(bool legendUnderlined READ getLegendUnderlined NOTIFY legendUnderlinedChanged STORED false)
+	Q_PROPERTY(bool legendBold READ getLegendBold NOTIFY legendBoldChanged STORED false)
+	Q_PROPERTY(bool legendItalic READ getLegendItalic NOTIFY legendItalicChanged STORED false)
+	Q_PROPERTY(int legendSize READ getLegendSize NOTIFY legendSizeChanged STORED false)
+	Q_PROPERTY(QColor legendColor READ getLegendColor NOTIFY legendColorChanged STORED false)
 
 	virtual QString getTypeId() const;
 	virtual QString getTypeName() const;
@@ -104,6 +116,17 @@ public:
 	QString getCategoryRef() const;
 
 	QColor getPointColor() const;
+	qreal getRadius() const;
+
+	QColor getBorderColor() const;
+	qreal getBorder() const;
+
+	QString getLegendFont() const;
+	bool getLegendUnderlined() const;
+	bool getLegendBold() const;
+	bool getLegendItalic() const;
+	int getLegendSize() const;
+	QColor getLegendColor() const;
 
 	qreal getScale() const;
 	void setScale(qreal scale);
@@ -119,7 +142,6 @@ signals:
 
 	void referedItemChanged(QString ref);
 	void positionChanged(QPointF position);
-	void colorChanged(QColor color);
 
 	void scaleChanged(qreal scale);
 
@@ -129,6 +151,19 @@ signals:
 
 	void legendPositionChanged(LegendPos pos);
 
+	void colorChanged(QColor color);
+	void radiusChanged(qreal radius);
+
+	void borderColorChanged(QColor col);
+	void borderChanged(qreal border);
+
+	void legendFontChanged(QString font);
+	void legendUnderlinedChanged(bool underlined);
+	void legendBoldChanged(bool bold);
+	void legendItalicChanged(bool italic);
+	void legendSizeChanged(int size);
+	void legendColorChanged(QColor col);
+
 public slots:
 
 protected:
@@ -136,6 +171,7 @@ protected:
 	void checkWithin(QSizeF const& mapSize);
 
 	void linkCategory(CartographyCategory* cat);
+	void disconnectPipedSignals();
 
 	Cartography* _cartographyParent;
 	mutable QString _category;
@@ -145,6 +181,17 @@ protected:
 	QPointF _position;
 
 	mutable QMetaObject::Connection _colorPipeConnection;
+	mutable QMetaObject::Connection _radiusPipeConnection;
+
+	mutable QMetaObject::Connection _borderColorPipeConnection;
+	mutable QMetaObject::Connection _borderPipeConnection;
+
+	mutable QMetaObject::Connection _legendFontPipeConnection;
+	mutable QMetaObject::Connection _legendUnderlinedPipeConnection;
+	mutable QMetaObject::Connection _legendBoldPipeConnection;
+	mutable QMetaObject::Connection _legendItalicPipeConnection;
+	mutable QMetaObject::Connection _legendSizePipeConnection;
+	mutable QMetaObject::Connection _legendColorPipeConnection;
 
 	qreal _scale;
 
@@ -171,7 +218,17 @@ public:
 	};
 
 	Q_PROPERTY(QColor color READ getColor WRITE setColor NOTIFY colorChanged)
-	Q_PROPERTY(qreal scale READ getScale WRITE setScale NOTIFY scaleChanged)
+	Q_PROPERTY(qreal radius READ getRadius WRITE setRadius NOTIFY radiusChanged)
+
+	Q_PROPERTY(QColor borderColor READ getBorderColor WRITE setBorderColor NOTIFY borderColorChanged)
+	Q_PROPERTY(qreal border READ getBorder WRITE setBorder NOTIFY borderChanged)
+
+	Q_PROPERTY(QString legendFont READ getLegendFont WRITE setLegendFont NOTIFY legendFontChanged)
+	Q_PROPERTY(bool legendUnderlined READ getLegendUnderlined WRITE setLegendUnderlined NOTIFY legendUnderlinedChanged)
+	Q_PROPERTY(bool legendBold READ getLegendBold WRITE setLegendBold NOTIFY legendBoldChanged)
+	Q_PROPERTY(bool legendItalic READ getLegendItalic WRITE setLegendItalic NOTIFY legendItalicChanged)
+	Q_PROPERTY(int legendSize READ getLegendSize WRITE setLegendSize NOTIFY legendSizeChanged)
+	Q_PROPERTY(QColor legendColor READ getLegendColor WRITE setLegendColor NOTIFY legendColorChanged)
 
 	explicit CartographyCategory(QString ref, Cartography* parent);
 
@@ -183,13 +240,47 @@ public:
 	QColor getColor() const;
 	void setColor(const QColor &color);
 
-	qreal getScale() const;
-	void setScale(qreal scale);
+	qreal getRadius() const;
+	void setRadius(qreal radius);
+
+	QColor getBorderColor() const;
+	void setBorderColor(const QColor &border_color);
+
+	qreal getBorder() const;
+	void setBorder(const qreal &border);
+
+	QString getLegendFont() const;
+	void setLegendFont(const QString &legend_font);
+
+	bool getLegendUnderlined() const;
+	void setLegendUnderlined(bool legend_underlined);
+
+	bool getLegendBold() const;
+	void setLegendBold(bool legend_bold);
+
+	bool getLegendItalic() const;
+	void setLegendItalic(bool legend_italic);
+
+	int getLegendSize() const;
+	void setLegendSize(int legend_size);
+
+	QColor getLegendColor() const;
+	void setLegendColor(const QColor &legendColor);
 
 signals:
 
 	void colorChanged(QColor col);
-	void scaleChanged(qreal scale);
+	void radiusChanged(qreal radius);
+
+	void borderColorChanged(QColor col);
+	void borderChanged(qreal border);
+
+	void legendFontChanged(QString fontName);
+	void legendUnderlinedChanged(bool underlined);
+	void legendBoldChanged(bool bold);
+	void legendItalicChanged(bool italic);
+	void legendSizeChanged(int size);
+	void legendColorChanged(QColor col);
 
 public slots:
 
@@ -198,7 +289,18 @@ protected:
 	Cartography* _cartographyParent;
 
 	QColor _color;
-	qreal _scale;
+	qreal _radius;
+
+	QColor _border_color;
+	qreal _border;
+
+	QString _legend_font;
+	bool _legend_underlined;
+	bool _legend_bold;
+	bool _legend_italic;
+	int _legend_size;
+	QColor _legendColor;
+
 };
 
 class CATHIA_MODEL_EXPORT CartographyCategroryListModel : public QAbstractListModel

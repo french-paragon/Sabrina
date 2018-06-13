@@ -58,8 +58,21 @@ public:
 
 	Q_PROPERTY(QString itemName READ itemName WRITE setItemName NOTIFY itemNameChanged)
 	Q_PROPERTY(QPointF position READ getPosition WRITE setPosition NOTIFY positionChanged)
-	Q_PROPERTY(QColor color READ getPointColor NOTIFY colorChanged)
 	Q_PROPERTY(qreal scale READ getScale WRITE setScale NOTIFY scaleChanged)
+
+	Q_PROPERTY(QColor color READ getPointColor NOTIFY colorChanged)
+	Q_PROPERTY(qreal radius READ getRadius NOTIFY radiusChanged)
+
+	Q_PROPERTY(QColor borderColor READ getBorderColor NOTIFY borderColorChanged)
+	Q_PROPERTY(qreal border READ getBorder NOTIFY borderChanged)
+
+	Q_PROPERTY(QString legendFont READ getLegendFont NOTIFY legendFontChanged)
+	Q_PROPERTY(bool legendUnderlined READ getLegendUnderlined NOTIFY legendUnderlinedChanged)
+	Q_PROPERTY(bool legendBold READ getLegendBold NOTIFY legendBoldChanged)
+	Q_PROPERTY(bool legendItalic READ getLegendItalic NOTIFY legendItalicChanged)
+	Q_PROPERTY(int legendSize READ getLegendSize NOTIFY legendSizeChanged)
+	Q_PROPERTY(QColor legendColor READ getLegendColor NOTIFY legendColorChanged)
+
 	Q_PROPERTY(bool hasFocus READ hasFocus NOTIFY focusChanged)
 	Q_PROPERTY(bool isLinked READ isLinked NOTIFY linkedStatusChanged)
 	Q_PROPERTY(int legendPosition READ getLegendPosition WRITE setLegendPosition NOTIFY legendPositionChanged)
@@ -70,10 +83,21 @@ public:
 	QPointF getPosition() const;
 	void setPosition(QPointF const& pos);
 
-	QColor getPointColor() const;
-
 	qreal getScale() const;
 	void setScale(qreal scale) const;
+
+	QColor getPointColor() const;
+	qreal getRadius() const;
+
+	QColor getBorderColor() const;
+	qreal getBorder() const;
+
+	QString getLegendFont() const;
+	bool getLegendUnderlined() const;
+	bool getLegendBold() const;
+	bool getLegendItalic() const;
+	int getLegendSize() const;
+	QColor getLegendColor() const;
 
 	int getLegendPosition() const;
 	void setLegendPosition(int pos);
@@ -86,8 +110,20 @@ signals:
 
 	void itemNameChanged(QString name);
 	void positionChanged(QPointF pos);
-	void colorChanged(QColor col);
 	void scaleChanged(qreal scale);
+
+	void colorChanged(QColor col);
+	void radiusChanged(qreal radius);
+
+	void borderColorChanged(QColor col);
+	void borderChanged(qreal border);
+
+	void legendFontChanged(QString name);
+	void legendUnderlinedChanged(bool underlined);
+	void legendBoldChanged(bool bold);
+	void legendItalicChanged(bool italic);
+	void legendSizeChanged(int size);
+	void legendColorChanged(QColor col);
 
 	void focusChanged(bool focus);
 	void linkedStatusChanged(bool link);
@@ -235,10 +271,18 @@ protected:
 	void onCategorySelectionChange();
 
 	void onColorSelectionClicked();
-	void onSpinBoxScaleCategoryChange(qreal scalePercent);
+	void onSpinBoxRadiusCategoryChange(qreal radius);
+	void onBorderColorSelectionClicked();
+	void onLegendFontSelectionChanged();
+	void onLegendColorSelectionClicked();
 
-	void onCurrentCategoryScaleChange(qreal scale);
+	void onCurrentCategoryRadiusChange(qreal radius);
 	void onCurrentCategoryColorChange(QColor col);
+	void onCurrentCategoryBorderColorChange(QColor col);
+	void onCurrentCategoryFontChanges(QString fontName);
+	void onCurrentCategoryLegendColorChange(QColor col);
+
+	void setCategoryEditWidgetsEnabled(bool enabled);
 
 	//items
 	void clearSelectedItem();

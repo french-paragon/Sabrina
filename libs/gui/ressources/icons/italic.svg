@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   width="16px"
+   height="16px"
+   viewBox="0 0 16 16"
+   version="1.1"
+   id="SVGRoot">
+  <defs
+     id="defs8417" />
+  <metadata
+     id="metadata8420">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="text4750"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:439.99212646px;font-family:sans-serif;letter-spacing:7.80999994px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     aria-label="I">
+    <path
+       id="path4774"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.33333397px;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif Italic'"
+       d="M 7.9166666,14.151042 9.6458333,14.432292 9.5625,14.984375 H 3.9895832 L 4.0729165,14.432292 5.9062499,14.151042 8.0625,1.8385413 6.3333332,1.5677079 6.4166666,1.0156246 h 5.5937504 l -0.08333,0.5520833 -1.854166,0.2708334 z" />
+  </g>
+</svg>
