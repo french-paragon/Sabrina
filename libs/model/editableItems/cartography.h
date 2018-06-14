@@ -34,7 +34,7 @@ namespace Sabrina {
 class Cartography;
 class CartographyCategory;
 
-class CartographyItemLegendPosListModel : public QAbstractListModel {
+class CATHIA_MODEL_EXPORT CartographyItemLegendPosListModel : public QAbstractListModel {
 
 	Q_OBJECT
 

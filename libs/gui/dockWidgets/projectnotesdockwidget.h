@@ -21,6 +21,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <QDockWidget>
 
+#include "../gui_global.h"
+
 namespace Sabrina {
 
 namespace Ui {
@@ -30,7 +32,7 @@ class ProjectNotesDockWidget;
 class MainWindow;
 class EditableItemManager;
 
-class ProjectNotesDockWidget : public QDockWidget
+class CATHIA_GUI_EXPORT ProjectNotesDockWidget : public QDockWidget
 {
 	Q_OBJECT
 

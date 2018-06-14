@@ -21,6 +21,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <QDialog>
 
+#include "../gui_global.h"
+
 class QNetworkAccessManager;
 class QNetworkReply;
 
@@ -30,7 +32,7 @@ namespace Ui {
 class LicenseDialog;
 }
 
-class LicenseDialog : public QDialog
+class CATHIA_GUI_EXPORT LicenseDialog : public QDialog
 {
 	Q_OBJECT
 

@@ -24,13 +24,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <QSortFilterProxyModel>
 #include "model/notes/noteslist.h"
 
+#include "../gui_global.h"
+
 namespace Sabrina {
 
 namespace Ui {
 class NotesEditWidget;
 }
 
-class NotesEditWidget : public QWidget
+class CATHIA_GUI_EXPORT NotesEditWidget : public QWidget
 {
 	Q_OBJECT
 

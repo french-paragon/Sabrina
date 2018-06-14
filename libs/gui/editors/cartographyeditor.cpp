@@ -34,6 +34,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <QSortFilterProxyModel>
 #include <QFont>
 
+#include <cmath>
+
 namespace Sabrina {
 
 bool CartographyEditor::qmlTypeRegistrationDone = false;
