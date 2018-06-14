@@ -192,7 +192,7 @@ signals:
 
 public slots:
 
-	void insertEditableItem(QString ref);
+	void insertEditableItem(QByteArray refDatas);
 
 protected:
 
@@ -325,6 +325,8 @@ private:
 	QMetaObject::Connection _nameWatchConnection;
 
 	QQuickWidget* _editor;
+
+	bool _resizeMapOnNewBackground;
 };
 
 

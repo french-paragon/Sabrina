@@ -75,7 +75,7 @@ Item {
 
                 onDropped: {
                     if (drop.formats.indexOf("text/editableitemref") >= 0) {
-                        mapProxy.insertEditableItem(drop.getDataAsString("text/editableitemref"));
+                        mapProxy.insertEditableItem(drop.getDataAsArrayBuffer("text/editableitemref"));
                     }
                 }
             }

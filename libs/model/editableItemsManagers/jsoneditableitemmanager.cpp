@@ -38,6 +38,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <QJsonDocument>
 
 #include <QPointF>
+#include <QSizeF>
 
 namespace Sabrina {
 
@@ -432,6 +433,10 @@ void JsonEditableItemManager::extractItemData(Aline::EditableItem* item, QJsonOb
 		const QMetaObject* meta = item->metaObject();
 		int prop_index = meta->indexOfProperty(prop.toStdString().c_str());
 		QVariant var = decodeVariantFromJson(obj.value(prop), meta->property(prop_index).type());
+
+		if (var.type() != meta->property(prop_index).type()) {
+			var.convert(meta->property(prop_index).type());
+		}
 
 		item->setProperty(prop.toStdString().c_str(), var); //set all the properties.
 	}
@@ -863,6 +868,15 @@ QJsonValue JsonEditableItemManager::encodeVariantToJson(QVariant var) const {
 		QString rep(QString("%1,%2").arg(data.x()).arg(data.y()));
 
 		return QJsonValue(rep);
+
+	} else if (var.type() == QVariant::SizeF) {
+
+		QSizeF data = var.toSizeF();
+
+		QString rep(QString("%1,%2").arg(data.width()).arg(data.height()));
+
+		return QJsonValue(rep);
+
 	} else if (var.type() == QVariant::Color) {
 
 		QColor col = var.value<QColor>();
@@ -904,6 +918,36 @@ QVariant JsonEditableItemManager::decodeVariantFromJson(QJsonValue val, QVariant
 		pt.setY(y);
 
 		return QVariant(pt);
+
+	} else if (type == QVariant::SizeF) {
+
+		QString rep = val.toString();
+
+		QStringList reps = rep.split(",");
+
+		if (reps.size() != 2) {
+			return QVariant();
+		}
+
+		QSizeF s;
+
+		bool ok;
+		qreal w = QVariant(reps[0]).toReal(&ok);
+
+		if (!ok) {
+			return QVariant();
+		}
+
+		qreal h = QVariant(reps[1]).toReal(&ok);
+
+		if (!ok) {
+			return QVariant();
+		}
+
+		s.setWidth(w);
+		s.setHeight(h);
+
+		return QVariant(s);
 
 	} else if (type == QVariant::Color) {
 

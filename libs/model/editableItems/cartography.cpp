@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "cartography.h"
+#include "model/editableitemmanager.h"
 
 #include <QFileInfo>
 #include <QMetaEnum>
@@ -33,7 +34,20 @@ Cartography::Cartography(QString ref, Aline::EditableItemManager *parent) :
 	_background(""),
 	_categoryListModel(nullptr)
 {
+	connect(this, &Cartography::backgroundChanged,
+			this, &Cartography::newUnsavedChanges);
+	connect(this, &Cartography::sizeChanged,
+			this, &Cartography::newUnsavedChanges);
 
+	connect(this, &Cartography::cartographyCategoryInserted,
+			this, &Cartography::newUnsavedChanges);
+	connect(this, &Cartography::cartographyCategoryRemoved,
+			this, &Cartography::newUnsavedChanges);
+
+	connect(this, &Cartography::cartographyItemInserted,
+			this, &Cartography::newUnsavedChanges);
+	connect(this, &Cartography::cartographyItemRemoved,
+			this, &Cartography::newUnsavedChanges);
 }
 
 QString Cartography::getTypeId() const {
@@ -51,7 +65,7 @@ QString Cartography::background() const {
 	return _background;
 }
 
-void Cartography::insertSubItem(EditableItem* item) {
+void Cartography::insertSubItem(Aline::EditableItem* item) {
 
 	CartographyItem* cartoItem = qobject_cast<CartographyItem*>(item);
 	CartographyCategory* cartoCat = qobject_cast<CartographyCategory*>(item);
@@ -75,7 +89,15 @@ void Cartography::setBackground(QString url) {
 
 void Cartography::addCartoItem(QString const& referedItemRef) {
 
-	Sabrina::EditableItem* referedItem = qobject_cast<Sabrina::EditableItem*>(getManager()->loadItem(referedItemRef));
+	Sabrina::EditableItem* referedItem;
+
+	try {
+
+		referedItem = qobject_cast<Sabrina::EditableItem*>(getManager()->loadItem(referedItemRef));
+
+	} catch (ItemIOException const& e) {
+		return;
+	}
 
 	if (referedItem == nullptr) {
 		return;
@@ -168,7 +190,7 @@ void Cartography::removeCartoCategory(CartographyCategory* item) {
 	if (item->_cartographyParent == this) {
 
 		_categories.remove(item->getRef());
-		emit cartographyItemRemoved(item->getRef());
+		emit cartographyCategoryRemoved(item->getRef());
 
 		item->deleteLater();
 
@@ -277,8 +299,13 @@ void Cartography::treatChangedRef(QString oldRef, QString newRef) {
 	}
 }
 
+QVector<CartographyItem *> const& Cartography::getItems() const
+{
+    return _items;
+}
+
 Cartography::CartographyFactory::CartographyFactory(QObject *parent) :
-	Aline::EditableItemFactory(parent)
+    Aline::EditableItemFactory(parent)
 {
 
 }
@@ -300,7 +327,28 @@ CartographyCategory::CartographyCategory(QString ref, Cartography* parent) :
 	_legend_italic(false),
 	_legend_size(10)
 {
+	connect(this, &CartographyCategory::colorChanged,
+			this, &CartographyCategory::newUnsavedChanges);
+	connect(this, &CartographyCategory::radiusChanged,
+			this, &CartographyCategory::newUnsavedChanges);
 
+	connect(this, &CartographyCategory::borderColorChanged,
+			this, &CartographyCategory::newUnsavedChanges);
+	connect(this, &CartographyCategory::borderChanged,
+			this, &CartographyCategory::newUnsavedChanges);
+
+	connect(this, &CartographyCategory::legendFontChanged,
+			this, &CartographyCategory::newUnsavedChanges);
+	connect(this, &CartographyCategory::legendUnderlinedChanged,
+			this, &CartographyCategory::newUnsavedChanges);
+	connect(this, &CartographyCategory::legendBoldChanged,
+			this, &CartographyCategory::newUnsavedChanges);
+	connect(this, &CartographyCategory::legendItalicChanged,
+			this, &CartographyCategory::newUnsavedChanges);
+	connect(this, &CartographyCategory::legendSizeChanged,
+			this, &CartographyCategory::newUnsavedChanges);
+	connect(this, &CartographyCategory::legendColorChanged,
+			this, &CartographyCategory::newUnsavedChanges);
 }
 
 QString CartographyCategory::getTypeId() const {
@@ -471,11 +519,24 @@ CartographyItem::CartographyItem(QString ref, Cartography *parent) :
 	_scale(1.0),
 	_legendPos(TOP_MIDDLE)
 {
+	this->blockSignals(true);
 	setObjectName(EditableItem::simplifyRef(ref));
+	this->blockSignals(false);
 
 	if (_cartographyParent != nullptr) {
 		connect(_cartographyParent, &Cartography::sizeChanged, this, &CartographyItem::checkWithin);
 	}
+
+	connect(this, &CartographyItem::referedItemChanged,
+			this, &CartographyItem::newUnsavedChanges);
+	connect(this, &CartographyItem::positionChanged,
+			this, &CartographyItem::newUnsavedChanges);
+	connect(this, &CartographyItem::categoryChanged,
+			this, &CartographyItem::newUnsavedChanges);
+	connect(this, &CartographyItem::scaleChanged,
+			this, &CartographyItem::newUnsavedChanges);
+	connect(this, &CartographyItem::legendPositionChanged,
+			this, &CartographyItem::newUnsavedChanges);
 }
 
 QString CartographyItem::getTypeId() const {

@@ -44,7 +44,8 @@ CartographyEditor::CartographyEditor(QWidget *parent) :
 	ui(new Ui::CartographyEditor),
 	_currentCartography(nullptr),
 	_selectedItem(nullptr),
-	_currentCategory(nullptr)
+	_currentCategory(nullptr),
+	_resizeMapOnNewBackground(true)
 {
 	ui->setupUi(this);
 
@@ -210,7 +211,13 @@ bool CartographyEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 
 	_currentCartography = carto;
 
+	_resizeMapOnNewBackground = false;
 	_mapProxy->setConnectedCartography(carto);
+	_resizeMapOnNewBackground = true;
+
+	for (CartographyItem* it : carto->getItems()) {
+		connectItem(it);
+	}
 
 	if (carto != nullptr) {
 
@@ -221,6 +228,9 @@ bool CartographyEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 
 		connect(ui->addItemButton, &QPushButton::clicked,
 				carto, static_cast<void (Cartography::*)()>(&Cartography::addCartoPoint));
+
+		ui->nameLineEdit->setText(carto->objectName());
+		ui->backgroundDisplayEdit->setText(carto->background());
 
 		connect(ui->nameLineEdit, &QLineEdit::textEdited,
 				carto, &Cartography::setObjectName);
@@ -356,10 +366,14 @@ void CartographyEditor::onNewBackgroundImageLoaded() {
 
 	if (_currentCartography != nullptr) {
 
-		QSize imSize;
-		_loader->requestImage(_mapProxy->getImageBackground(), &imSize, imSize);
+		if (_resizeMapOnNewBackground) {
 
-		_currentCartography->setSize(imSize);
+			QSize imSize;
+			_loader->requestImage(_mapProxy->getImageBackground(), &imSize, imSize);
+
+			_currentCartography->setSize(imSize);
+
+		}
 
 	}
 
@@ -474,39 +488,39 @@ void CartographyEditor::onCategorySelectionChange() {
 			disconnect(_currentCategory, &CartographyCategory::radiusChanged,
 					   this, &CartographyEditor::onCurrentCategoryRadiusChange);
 
-			disconnect(cat, &CartographyCategory::borderColorChanged,
+			disconnect(_currentCategory, &CartographyCategory::borderColorChanged,
 					   this, &CartographyEditor::onCurrentCategoryBorderColorChange);
 
-			disconnect(cat, &CartographyCategory::borderChanged,
+			disconnect(_currentCategory, &CartographyCategory::borderChanged,
 					   ui->categoryBorderSpinBox, &QDoubleSpinBox::setValue);
 			disconnect(ui->categoryBorderSpinBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-					   cat, &CartographyCategory::setBorder);
+					   _currentCategory, &CartographyCategory::setBorder);
 
 
-			disconnect(cat, &CartographyCategory::legendFontChanged,
+			disconnect(_currentCategory, &CartographyCategory::legendFontChanged,
 					   this, &CartographyEditor::onCurrentCategoryFontChanges);
 
-			disconnect(cat, &CartographyCategory::legendSizeChanged,
+			disconnect(_currentCategory, &CartographyCategory::legendSizeChanged,
 					   ui->legendSizeSinBox, &QSpinBox::setValue);
 			disconnect(ui->legendSizeSinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-					   cat, &CartographyCategory::setLegendSize);
+					   _currentCategory, &CartographyCategory::setLegendSize);
 
-			disconnect(cat, &CartographyCategory::legendBoldChanged,
+			disconnect(_currentCategory, &CartographyCategory::legendBoldChanged,
 					   ui->legendBoldButton, &QPushButton::setChecked);
 			disconnect(ui->legendBoldButton, &QPushButton::clicked,
-					   cat, &CartographyCategory::setLegendBold);
+					   _currentCategory, &CartographyCategory::setLegendBold);
 
-			disconnect(cat, &CartographyCategory::legendItalicChanged,
+			disconnect(_currentCategory, &CartographyCategory::legendItalicChanged,
 					   ui->legendItalicButton, &QPushButton::setChecked);
 			disconnect(ui->legendItalicButton, &QPushButton::clicked,
-					   cat, &CartographyCategory::setLegendItalic);
+					   _currentCategory, &CartographyCategory::setLegendItalic);
 
-			disconnect(cat, &CartographyCategory::legendUnderlinedChanged,
+			disconnect(_currentCategory, &CartographyCategory::legendUnderlinedChanged,
 					   ui->legendUnderlinedButton, &QPushButton::setChecked);
 			disconnect(ui->legendUnderlinedButton, &QPushButton::clicked,
-					   cat, &CartographyCategory::setLegendUnderlined);
+					   _currentCategory, &CartographyCategory::setLegendUnderlined);
 
-			disconnect(cat, &CartographyCategory::legendColorChanged,
+			disconnect(_currentCategory, &CartographyCategory::legendColorChanged,
 					   this, &CartographyEditor::onCurrentCategoryLegendColorChange);
 
 		}
@@ -630,7 +644,7 @@ void CartographyEditor::onBorderColorSelectionClicked() {
 
 	if (_currentCategory != nullptr) {
 
-		QColor newSelection = QColorDialog::getColor(_currentCategory->getColor(), this, tr("Choisir une couleur"));
+		QColor newSelection = QColorDialog::getColor(_currentCategory->getBorderColor(), this, tr("Choisir une couleur"));
 
 		if (newSelection.isValid()) {
 			_currentCategory->setBorderColor(newSelection);
@@ -657,7 +671,7 @@ void CartographyEditor::onLegendColorSelectionClicked() {
 
 	if (_currentCategory != nullptr) {
 
-		QColor newSelection = QColorDialog::getColor(_currentCategory->getColor(), this, tr("Choisir une couleur"));
+		QColor newSelection = QColorDialog::getColor(_currentCategory->getLegendColor(), this, tr("Choisir une couleur"));
 
 		if (newSelection.isValid()) {
 			_currentCategory->setLegendColor(newSelection);
@@ -1135,10 +1149,27 @@ void CartographyMapProxy::setConnectedCartography(Cartography *cartography)
 	}
 }
 
-void CartographyMapProxy::insertEditableItem(QString ref) {
+void CartographyMapProxy::insertEditableItem(QByteArray refDatas) {
 
 	if (_connectedCartography != nullptr) {
-		_connectedCartography->addCartoItem(ref);
+
+		QDataStream stream(&refDatas, QIODevice::ReadOnly);
+		QStringList newItems;
+		int rows = 0;
+
+		while (!stream.atEnd()) {
+			QString text;
+			stream >> text;
+			newItems << text;
+			++rows;
+		}
+
+
+		for (QString ref : newItems) {
+
+			_connectedCartography->addCartoItem(ref);
+
+		}
 	}
 
 }

@@ -357,7 +357,7 @@ public:
 
 	QString background() const;
 
-	virtual void insertSubItem(EditableItem* item);
+	virtual void insertSubItem(Aline::EditableItem* item);
 
 	QSizeF getSize() const;
 	void setSize(const QSizeF &size);
@@ -368,6 +368,8 @@ public:
 	CartographyCategroryListModel* getCategoryListModel();
 
 	virtual QStringList getFileReferencePropertiesName() const;
+
+	const QVector<CartographyItem *> &getItems() const;
 
 signals:
 

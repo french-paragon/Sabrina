@@ -36,7 +36,7 @@ Item {
     }
     onYChanged: {
         if (mouseArea.drag.active) {
-          mapItem.position.x = y
+          mapItem.position.y = y
         }
     }
 
@@ -119,10 +119,6 @@ Item {
            onDoubleClicked: mouse.accepted = false;
            onPositionChanged: mouse.accepted = false;
            onPressAndHold: mouse.accepted = false;
-        }
-
-        Component.onCompleted: {
-            console.log(mapItem.legendPosition)
         }
 
     }
