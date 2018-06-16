@@ -27,8 +27,44 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QSettings>
 
 namespace Sabrina {
+
+const QString LicenseDialog::LICENSE_ACCEPTED_KEY = "license_accepted";
+
+bool LicenseDialog::triggerAcceptLicense(QWidget* parent) {
+
+	QSettings settings;
+	QVariant vaccepted = settings.value(LICENSE_ACCEPTED_KEY, QVariant(false));
+
+	if (vaccepted.toBool()) {
+		return true;
+	}
+
+	LicenseDialog d(parent);
+
+	d.ui->explainLabel->setVisible(true);
+	d.ui->explainLabel->setText(tr("Il semble que vous n'ayiez pas encore pris connaissance et accepté la license de %1.").arg(APP_NAME));
+
+	d.ui->acceptLicenseCheckBox->setVisible(true);
+	d.ui->acceptLicenseCheckBox->setChecked(false);
+
+	d.exec();
+
+	if (d.ui->acceptLicenseCheckBox->isChecked()) {
+
+		settings.setValue(LICENSE_ACCEPTED_KEY, QVariant(true));
+
+		return true;
+	}
+
+	settings.setValue(LICENSE_ACCEPTED_KEY, QVariant(false));
+
+	return false;
+
+
+}
 
 LicenseDialog::LicenseDialog(QWidget *parent) :
 	QDialog(parent),
@@ -59,6 +95,8 @@ LicenseDialog::LicenseDialog(QWidget *parent) :
 				this, &LicenseDialog::startDownloadLicense);
 
 	}
+	ui->explainLabel->setVisible(false);
+	ui->acceptLicenseCheckBox->setVisible(false);
 
 	ui->plainTextEdit->setReadOnly(true);
 }

@@ -33,7 +33,9 @@ int main(int argc, char** argv) {
 
 	const QStringList args = parser.positionalArguments();
 
-	app.start();
+	if(!app.start()) {
+		return 1;
+	}
 
 	if (args.size() >= 1) {
 		app.openProject(args.first());

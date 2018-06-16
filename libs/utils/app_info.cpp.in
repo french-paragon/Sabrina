@@ -18,6 +18,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "app_info.h"
 
+#include <QString>
+#include <QRegExp>
+
 namespace Sabrina {
 
 const char* appTag() {
@@ -33,6 +36,39 @@ const char* compileDateFull() {
 }
 const char* compileDate() {
     return "@COMPILE_DATE@";
+}
+
+
+bool appIsAlpha() {
+
+	QString tag(appTag());
+
+	return tag.indexOf(QRegExp("v[0-9]+.[0-9]+.[0-9]+a")) == 0;
+
+}
+
+bool appIsBeta() {
+
+	QString tag(appTag());
+
+	return tag.indexOf(QRegExp("v[0-9]+.[0-9]+.[0-9]+b")) == 0;
+
+}
+
+bool appIsRc() {
+
+	QString tag(appTag());
+
+	return tag.indexOf(QRegExp("v[0-9]+.[0-9]+.[0-9]+rc")) == 0;
+
+}
+
+bool appIsStable() {
+
+	QString tag(appTag());
+
+	return !appIsAlpha() && !appIsBeta() && !appIsRc();
+
 }
 
 } //namespace Sabrina

@@ -33,6 +33,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <QMenuBar>
 #include <QToolBar>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include <QDebug>
 #include <QSettings>
@@ -90,6 +91,24 @@ App::~App() {
 }
 
 bool App::start(QString appCode) {
+
+#ifdef VERSION_WARNINGS_ON
+
+	if (appIsAlpha()) {
+		QMessageBox::warning(nullptr, tr("Version de %1").arg(APP_NAME), tr("Vous utilisez une version alpha de %1 (%2)!\nIl est recommandé de ne pas traiter des projets de production avec cette version du programme.").arg(APP_NAME).arg(appTag()));
+	} else if (appIsBeta()) {
+		QMessageBox::warning(nullptr, tr("Version de %1").arg(APP_NAME), tr("Vous utilisez une version beta de %1 (%2)!\nIl est recommandé de ne pas traiter des projets de production avec cette version du programme.").arg(APP_NAME).arg(appTag()));
+	}
+
+#endif
+
+#ifdef LICENSE_WARNINGS_ON
+
+	if (!LicenseDialog::triggerAcceptLicense()) {
+		return false;
+	}
+
+#endif
 
 	int code = Aline::App::start(appCode);
 

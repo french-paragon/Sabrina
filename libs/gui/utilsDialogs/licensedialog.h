@@ -37,6 +37,10 @@ class CATHIA_GUI_EXPORT LicenseDialog : public QDialog
 	Q_OBJECT
 
 public:
+
+	static bool triggerAcceptLicense(QWidget* parent = nullptr);
+	static const QString LICENSE_ACCEPTED_KEY;
+
 	explicit LicenseDialog(QWidget *parent = 0);
 	~LicenseDialog();
 

@@ -1,6 +1,19 @@
 cmake_minimum_required(VERSION 2.8.9)
 project(Sabrina)
 
+#global options
+
+option(VERSION_WARNINGS "display warnings to the user when the app is tagged alpha or beta." OFF)
+option(LICENSE_WARNINGS "trigger the user to accept the license if it hasn't already." OFF)
+
+if(VERSION_WARNINGS)
+    add_definitions(-DVERSION_WARNINGS_ON)
+endif(VERSION_WARNINGS)
+
+if(LICENSE_WARNINGS)
+    add_definitions(-DLICENSE_WARNINGS_ON)
+endif(LICENSE_WARNINGS)
+
 #cross compilation
 unset(MXE_CROSS_COMPILE)
 if (CMAKE_CROSS_COMPILING AND CMAKE_SYSTEM_NAME STREQUAL Windows)

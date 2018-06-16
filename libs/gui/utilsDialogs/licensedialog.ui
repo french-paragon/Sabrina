@@ -15,7 +15,24 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QLabel" name="explainLabel">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPlainTextEdit" name="plainTextEdit"/>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="acceptLicenseCheckBox">
+     <property name="text">
+      <string>J'ai pris connaisance de et accepte les thermes de la license</string>
+     </property>
+     <property name="tristate">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QPushButton" name="getLicenseButton">

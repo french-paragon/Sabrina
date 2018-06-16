@@ -33,5 +33,10 @@ extern "C" CATHIA_UTILS_EXPORT const char* appHash();
 extern "C" CATHIA_UTILS_EXPORT const char* compileDateFull();
 extern "C" CATHIA_UTILS_EXPORT const char* compileDate();
 
+extern "C" CATHIA_UTILS_EXPORT bool appIsAlpha();
+extern "C" CATHIA_UTILS_EXPORT bool appIsBeta();
+extern "C" CATHIA_UTILS_EXPORT bool appIsRc();
+extern "C" CATHIA_UTILS_EXPORT bool appIsStable();
+
 } //namespace Sabrina
 #endif // APP_INFO_H
