@@ -21,7 +21,6 @@ set(LIB_SRC mainwindows.cpp
             editors/placeeditor.ui
             editors/cartographyeditor.cpp
             editors/cartographyeditor.ui
-            delegates/labelsmodelitemdelegate.cpp
             widgets/noteseditwidget.cpp
             widgets/noteseditwidget.ui
             ressources/ressources_gui.qrc)

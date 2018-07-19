@@ -44,7 +44,7 @@ public:
 
 signals:
 
-	void itemCreationTriggered(QString itemTypeRef, QString ref, QString parent_ref);
+	void itemCreationTriggered(QString itemTypeRef, QString ref);
 	void itemDoubleClicked(QString itemRef);
 	void itemSuppressionTriggered(QStringList itemRef);
 

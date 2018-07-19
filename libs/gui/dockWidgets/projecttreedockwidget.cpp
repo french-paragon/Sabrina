@@ -86,10 +86,7 @@ void ProjectTreeDockWidget::selectionChanged() {
 
 void ProjectTreeDockWidget::onItemCreationTriggered(QString itemTypeRef) {
 
-
-	QString parent_ref = "";
-
-	emit itemCreationTriggered(itemTypeRef, itemTypeRef, parent_ref);
+	emit itemCreationTriggered(itemTypeRef, itemTypeRef);
 
 }
 
@@ -121,7 +118,7 @@ void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
 									 this, &ProjectTreeDockWidget::rebuildMenuWithoutProject);
 
 	_itemCreationTrigger = connect(this, &ProjectTreeDockWidget::itemCreationTriggered,
-								   project, &EditableItemManager::createItem);
+								   project, static_cast<bool(EditableItemManager::*)(QString, QString)>(&EditableItemManager::createItem));
 
 	_itemSuppresionTrigger = connect(this, &ProjectTreeDockWidget::itemSuppressionTriggered,
 									 project, &EditableItemManager::clearItems);
@@ -207,11 +204,17 @@ void ProjectTreeDockWidget::buildTreeContextMenu(QPoint const& pos) {
 		QVariant data  = index.data(EditableItemManager::ItemTypeRefRole);
 		QString itemTypeRef = data.toString();
 
-		if (Aline::EditorFactoryManager::GlobalEditorFactoryManager.hasFactoryInstalledForItem(itemTypeRef)) {
+		if (Aline::EditorFactoryManager::GlobalEditorFactoryManager.hasFactoryInstalledForItem(itemTypeRef) && index.parent() != QModelIndex()) {
 			QAction* editAction = menu.addAction(tr("éditer"));
 
 			connect(editAction, &QAction::triggered, [this, &index] () {
 				emit itemDoubleClicked(index.data(EditableItemManager::ItemRefRole).toString());
+			});
+
+			QAction* actionRemove = menu.addAction(tr("supprimer"));
+
+			connect(actionRemove, &QAction::triggered, [&index, this] () {
+				itemSuppressionTriggered({index.data(EditableItemManager::ItemRefRole).toString()});
 			});
 
 			menu.addSeparator();
@@ -227,45 +230,23 @@ void ProjectTreeDockWidget::buildTreeContextMenu(QPoint const& pos) {
 
 		}
 
-		data = index.data(EditableItemManager::ItemAcceptChildrenRole);
+		Aline::EditableItemFactoryManager* f = _mw_parent->currentProject()->factoryManager();
 
-		if (data.toBool()) {
+		QString typeName = f->itemTypeName(itemTypeRef);
 
-			QMenu* section = menu.addMenu(tr("ajouter un:"));
+		EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(itemTypeRef,
+																						  QIcon(f->itemIconUrl(itemTypeRef)),
+																						  QString("ajouter une instance de %1").arg(typeName),
+																						  &menu);
 
-			Aline::EditableItemFactoryManager* f = _mw_parent->currentProject()->factoryManager();
+		connect(action, &EditableItemTypeSpecializedAction::triggered,
+				this, [&index, this] (QString type_id) {
 
-			for (int i = 0; i < f->rowCount(); i++) {
+					emit itemCreationTriggered(type_id, type_id);
 
-				QString itemType = f->data(f->index(i), Aline::EditableItemFactoryManager::ItemRefRole).toString();
-
-				EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(itemType,
-																								  QIcon(f->itemIconUrl(itemType)),
-																								  f->data(f->index(i),
-																										  Qt::DisplayRole).toString(),
-																								  _newItemMenu);
-
-				connect(action, &EditableItemTypeSpecializedAction::triggered,
-						this, [&index, this] (QString type_id) {
-
-					QString parentRef = index.data(EditableItemManager::ItemRefRole).toString();
-					emit itemCreationTriggered(type_id, type_id, parentRef);
-
-				});
-
-				section->addAction(action);
-
-			}
-
-			menu.addSeparator();
-
-		}
-
-		QAction* actionRemove = menu.addAction(tr("supprimer"));
-
-		connect(actionRemove, &QAction::triggered, [&index, this] () {
-			itemSuppressionTriggered({index.data(EditableItemManager::ItemRefRole).toString()});
 		});
+
+		menu.addAction(action);
 
 		menu.exec(ui->treeView->viewport()->mapToGlobal(pos));
 

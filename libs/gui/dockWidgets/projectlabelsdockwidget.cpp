@@ -21,10 +21,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindows.h"
 #include "model/editableitemmanager.h"
+#include "aline/src/model/editableitemfactory.h"
 #include "aline/src/model/labels/labelstree.h"
 #include "aline/src/model/labels/labelselectionforitemproxymodel.h"
 
+#include "actions/editableitemtypespecializedaction.h"
+
 #include "delegates/labelsmodelitemdelegate.h"
+
+#include <QMenu>
 
 namespace Sabrina {
 
@@ -57,7 +62,10 @@ ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
 	ui->treeView->setAcceptDrops(true);
 	ui->treeView->setDropIndicatorShown(true);
 
-	ui->treeView->setItemDelegate(new LabelsModelItemDelegate(ui->treeView));
+	ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(ui->treeView, &QTreeView::customContextMenuRequested,
+			this, &ProjectLabelsDockWidget::buildTreeContextMenu);
 
 	ui->treeView->setModel(_proxy);
 
@@ -103,6 +111,56 @@ void ProjectLabelsDockWidget::labelDeletionButtonClicked() {
 		_currentProject->labelsTree()->removeRow(index.row(), index.parent());
 	}
 
+}
+
+void ProjectLabelsDockWidget::buildTreeContextMenu(QPoint const& pos) {
+
+	QMenu menu;
+
+	QModelIndex index = ui->treeView->indexAt(pos);
+
+	QAction createSubAction(QIcon(":/icons/icons/new_simple.svg"), tr("nouveau sous-label"), &menu);
+	auto callBackAdd = [this, &index] () {_proxy->insertRow(_proxy->rowCount(index), index); };
+	connect(&createSubAction, &QAction::triggered, callBackAdd);
+
+	QAction removeLabelAction(QIcon(":/icons/icons/delete_simple.svg"), tr("supprimer le label"), &menu);
+	auto callBackRemove = [this, &index] () {_proxy->removeRow(index.row(), index.parent()); };
+	connect(&removeLabelAction, &QAction::triggered, callBackRemove);
+
+	menu.addAction(&createSubAction);
+	menu.addAction(&removeLabelAction);
+	menu.addSeparator();
+
+	QMenu section(tr("ajouter un:"), &menu);
+
+	Aline::EditableItemFactoryManager* f = _currentProject->factoryManager();
+
+	for (QString typeRef : f->installedFactoriesKeys()) {
+
+		QString typeName = f->itemTypeName(typeRef);
+
+		EditableItemTypeSpecializedAction* action = new EditableItemTypeSpecializedAction(typeRef,
+																						  QIcon(f->itemIconUrl(typeRef)),
+																						  QString("%1").arg(typeName),
+																						  &section);
+		connect(action, &EditableItemTypeSpecializedAction::triggered,
+				this, [&index, this] (QString type_id) {
+
+					QString createdRef;
+					bool done = _currentProject->createItem(type_id, type_id, &createdRef);
+
+					if (done) {
+						_proxy->setData(index, createdRef, Aline::LabelsTree::MarkLabelForItem);
+					}
+
+		});
+
+		section.addAction(action);
+	}
+
+	menu.addMenu(&section);
+
+	menu.exec(ui->treeView->viewport()->mapToGlobal(pos));
 }
 
 void ProjectLabelsDockWidget::selectionChanged() {

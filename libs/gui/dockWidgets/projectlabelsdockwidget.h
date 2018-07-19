@@ -51,6 +51,8 @@ private:
 	void labelAdditionButtonClicked();
 	void labelDeletionButtonClicked();
 
+	void buildTreeContextMenu(QPoint const& pos);
+
 	void selectionChanged();
 
 	Ui::ProjectLabelsDockWidget *ui;
