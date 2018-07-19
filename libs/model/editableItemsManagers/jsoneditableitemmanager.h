@@ -25,12 +25,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Aline {
 	class EditableItem;
+	class Label;
 }
 
 
 namespace Sabrina {
 
-class Label;
 class NotesList;
 
 class CATHIA_MODEL_EXPORT JsonEditableItemManager : public EditableItemManager
@@ -86,9 +86,9 @@ protected:
 	void encapsulateTreeLeaf(QJsonObject &obj);
 	void extractTreeLeaf(QJsonObject &obj);
 
-	Label* extractJsonLabel(QJsonValue const& val, LabelsTree* parent);
-	Label* extractJsonLabel(QJsonValue const& val, Label* parent);
-	void extractJsonLabelDatas(QJsonValue const& val, Label* label);
+	Aline::Label* extractJsonLabel(QJsonValue const& val, Aline::LabelsTree* parent);
+	Aline::Label* extractJsonLabel(QJsonValue const& val, Aline::Label* parent);
+	void extractJsonLabelDatas(QJsonValue const& val, Aline::Label* label);
 
 	QJsonObject encodeLabelAsJson(QModelIndex const& index);
 

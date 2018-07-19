@@ -21,8 +21,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindows.h"
 #include "model/editableitemmanager.h"
-#include "model/labels/labelstree.h"
-#include "model/labels/labelselectionforitemproxymodel.h"
+#include "aline/src/model/labels/labelstree.h"
+#include "aline/src/model/labels/labelselectionforitemproxymodel.h"
 
 #include "delegates/labelsmodelitemdelegate.h"
 
@@ -35,7 +35,7 @@ ProjectLabelsDockWidget::ProjectLabelsDockWidget(MainWindow *parent) :
 {
 	ui->setupUi(this);
 
-	_proxy = new LabelSelectionForItemProxyModel(this);
+	_proxy = new Aline::LabelSelectionForItemProxyModel(this);
 
 	projectChanged(_mw_parent->currentProject());
 
@@ -78,7 +78,7 @@ void ProjectLabelsDockWidget::projectChanged(EditableItemManager* project) {
 		_proxy->setSourceModel(project->labelsTree());
 		setEnabled(true);
 	} else {
-		_proxy->setSourceModel((LabelsTree*) nullptr);
+		_proxy->setSourceModel((Aline::LabelsTree*) nullptr);
 		setEnabled(false);
 	}
 

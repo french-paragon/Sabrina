@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "ui_labelitemsdockwidget.h"
 
 #include "mainwindows.h"
-#include "model/labels/projectfilterbylabelproxymodel.h"
+#include "aline/src/model/labels/projectfilterbylabelproxymodel.h"
 
 namespace Sabrina {
 
@@ -31,7 +31,7 @@ LabelItemsDockWidget::LabelItemsDockWidget(MainWindow *parent) :
 {
 	ui->setupUi(this);
 
-	_proxy = new ProjectFilterByLabelProxyModel(ui->treeView);
+	_proxy = new Aline::ProjectFilterByLabelProxyModel(ui->treeView);
 
 	projectChanged(parent->currentProject());
 

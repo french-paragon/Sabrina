@@ -23,6 +23,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gui/gui_global.h"
 
+namespace Aline {
+	class LabelSelectionForItemProxyModel;
+}
+
 namespace Sabrina {
 
 namespace Ui {
@@ -31,7 +35,6 @@ class ProjectLabelsDockWidget;
 
 class MainWindow;
 class EditableItemManager;
-class LabelSelectionForItemProxyModel;
 
 class CATHIA_GUI_EXPORT ProjectLabelsDockWidget : public QDockWidget
 {
@@ -53,7 +56,7 @@ private:
 	Ui::ProjectLabelsDockWidget *ui;
 
 	EditableItemManager* _currentProject;
-	LabelSelectionForItemProxyModel* _proxy;
+	Aline::LabelSelectionForItemProxyModel* _proxy;
 
 	MainWindow* _mw_parent;
 };

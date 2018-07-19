@@ -23,10 +23,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gui/gui_global.h"
 
+namespace Aline {
+	class ProjectFilterByLabelProxyModel;
+}
+
 namespace Sabrina {
 
 class MainWindow;
-class ProjectFilterByLabelProxyModel;
 class EditableItemManager;
 
 namespace Ui {
@@ -57,7 +60,7 @@ private:
 
 	Ui::LabelItemsDockWidget *ui;
 
-	ProjectFilterByLabelProxyModel* _proxy;
+	Aline::ProjectFilterByLabelProxyModel* _proxy;
 
 	EditableItemManager* _currentProject;
 };

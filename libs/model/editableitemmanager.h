@@ -72,30 +72,13 @@ public:
 
 	explicit EditableItemManager(QObject *parent = nullptr);
 
-	EditableItem* activeItem() const;
-
-	LabelsTree* labelsTree();
-
 	NotesList *noteList() const;
 
 signals:
 
-	void activeItemChanged();
-
 public slots:
 
-	void setActiveItem(QString ref);
-
 protected:
-
-	/*!
-	 * \brief effectivelyLoadLabels load the labels from the datasource.
-	 */
-	virtual void effectivelyLoadLabels() = 0;
-
-	LabelsTree* _labels;
-
-	EditableItem* _activeItem;
 
 	NotesList* _noteList;
 

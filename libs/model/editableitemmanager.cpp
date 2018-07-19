@@ -21,55 +21,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "editableitem.h"
 #include "aline/src/model/editableitemfactory.h"
 
-#include "labels/labelstree.h"
-#include "labels/label.h"
-
 #include "notes/noteslist.h"
 
 namespace Sabrina {
 
 EditableItemManager::EditableItemManager(QObject *parent) :
-	Aline::EditableItemManager(parent),
-	_labels(nullptr),
-	_activeItem(nullptr)
+	Aline::EditableItemManager(parent)
 {
 	_noteList = new NotesList(this);
-}
-
-EditableItem* EditableItemManager::activeItem() const {
-	return _activeItem;
-}
-
-LabelsTree* EditableItemManager::labelsTree() {
-
-	if (!hasDataSource()) {
-		return nullptr;
-	}
-
-	if (_labels == nullptr) {
-		effectivelyLoadLabels();
-	}
-
-	return _labels;
-
 }
 
 NotesList *EditableItemManager::noteList() const
 {
     return _noteList;
-}
-
-void EditableItemManager::setActiveItem(QString ref) {
-
-	if (_activeItem == nullptr || _activeItem->getRef() != ref) {
-
-		EditableItem* potential = qobject_cast<EditableItem*>(loadItem(ref));
-
-		_activeItem = potential;
-		emit activeItemChanged();
-
-	}
-
 }
 
 ItemIOException::ItemIOException (QString ref,

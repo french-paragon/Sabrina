@@ -20,8 +20,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "editableitem.h"
 #include "aline/src/model/editableitemfactory.h"
-#include "labels/labelstree.h"
-#include "labels/label.h"
+#include "aline/src/model/labels/labelstree.h"
+#include "aline/src/model/labels/label.h"
 
 #include "notes/noteslist.h"
 
@@ -203,12 +203,12 @@ QJsonObject JsonEditableItemManager::encodeLabelAsJson(QModelIndex const& index)
 	QJsonObject obj;
 
 	QVariant name = _labels->data(index, Qt::DisplayRole);
-	QVariant ref = _labels->data(index, LabelsTree::LabelRefRole);
+	QVariant ref = _labels->data(index, Aline::LabelsTree::LabelRefRole);
 
 	obj.insert(LABEL_NAME_ID, QJsonValue::fromVariant(name));
 	obj.insert(LABEL_REF_ID, QJsonValue::fromVariant(ref));
 
-	QVariant items_refs = _labels->data(index, LabelsTree::LabelItemsRefsRole);
+	QVariant items_refs = _labels->data(index, Aline::LabelsTree::LabelItemsRefsRole);
 
 	if (items_refs != QVariant()) {
 		obj.insert(LABEL_ITEMS_REFS_ID, QJsonValue::fromVariant(items_refs));
@@ -588,7 +588,7 @@ bool JsonEditableItemManager::clearItemData(QString itemRef) {
 
 void JsonEditableItemManager::effectivelyLoadLabels() {
 
-	_labels = new LabelsTree(this);
+	_labels = new Aline::LabelsTree(this);
 
 
 	QString fileName = _projectFolder + LABELS_FILE_NAME;
@@ -618,12 +618,12 @@ void JsonEditableItemManager::effectivelyLoadLabels() {
 	}
 	QJsonArray array = doc.array(); //should be a list of labels
 
-	QVector<Label*> labels;
+	QVector<Aline::Label*> labels;
 	labels.reserve(array.size());
 
 	for (QJsonValue val : array) {
 
-		Label* l;
+		Aline::Label* l;
 
 		try {
 			l = extractJsonLabel(val, _labels);
@@ -639,9 +639,9 @@ void JsonEditableItemManager::effectivelyLoadLabels() {
 	_labels->insertRows(0, labels);
 }
 
-Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, LabelsTree* parent) {
+Aline::Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, Aline::LabelsTree* parent) {
 
-	Label* l = new Label(parent);
+	Aline::Label* l = new Aline::Label(parent);
 
 	try {
 		extractJsonLabelDatas(val, l);
@@ -656,9 +656,9 @@ Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, LabelsTr
 
 }
 
-Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, Label* parent) {
+Aline::Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, Aline::Label* parent) {
 
-	Label* l = new Label(parent);
+	Aline::Label* l = new Aline::Label(parent);
 
 	try {
 		extractJsonLabelDatas(val, l);
@@ -671,7 +671,7 @@ Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, Label* p
 	return l;
 }
 
-void JsonEditableItemManager::extractJsonLabelDatas(QJsonValue const& val, Label* label) {
+void JsonEditableItemManager::extractJsonLabelDatas(QJsonValue const& val, Aline::Label* label) {
 
 	if (!val.isObject()) {
 		throw ItemIOException(LABEL_REF, "Error while extracting labels", this);
@@ -714,7 +714,7 @@ void JsonEditableItemManager::extractJsonLabelDatas(QJsonValue const& val, Label
 		if (sublabels.isArray()) {
 
 			for (QJsonValue val : sublabels.toArray()) {
-				Label* sublabel = extractJsonLabel(val, label);
+				Aline::Label* sublabel = extractJsonLabel(val, label);
 
 				if (sublabel != nullptr) {
 					label->addChild(sublabel);
