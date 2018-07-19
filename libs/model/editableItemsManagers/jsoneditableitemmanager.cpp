@@ -434,11 +434,11 @@ void JsonEditableItemManager::extractItemData(Aline::EditableItem* item, QJsonOb
 		int prop_index = meta->indexOfProperty(prop.toStdString().c_str());
 		QVariant var = decodeVariantFromJson(obj.value(prop), meta->property(prop_index).type());
 
-		if (var.type() != meta->property(prop_index).type()) {
+		if (var.type() != meta->property(prop_index).type() && meta->property(prop_index).type() != QVariant::Invalid) {
 			var.convert(meta->property(prop_index).type());
 		}
 
-		item->setProperty(prop.toStdString().c_str(), var); //set all the properties.
+		item->setProperty(prop.toStdString().c_str(), var, true); //set all the properties.
 	}
 
 	if (obj.contains(EditableItem::REF_IN_PROP_NAME)) {
