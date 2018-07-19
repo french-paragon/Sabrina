@@ -275,7 +275,6 @@ void App::loadEditableFactories() {
 
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Personnage::PersonnageFactory());
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Place::PlaceFactory());
-	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Folder::FolderFactory());
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Cartography::CartographyFactory());
 
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installSubItemFactory(new CartographyItem::CartographyItemFactory());

@@ -126,7 +126,7 @@ void JsonEditableItemManager::connectProject(QString projectFile) {
 bool JsonEditableItemManager::saveStruct() {
 
 	QJsonObject obj;
-	encapsulateTreeLeaf(_root, obj);
+	encapsulateTreeLeaf(obj);
 
 	if (noteList()->rowCount() > 0) {
 
@@ -231,22 +231,36 @@ QJsonObject JsonEditableItemManager::encodeLabelAsJson(QModelIndex const& index)
 
 }
 
-void JsonEditableItemManager::encapsulateTreeLeaf(treeStruct* branch, QJsonObject & obj) {
+void JsonEditableItemManager::encapsulateTreeLeaf(QJsonObject & obj) {
 
-	obj.insert(TREE_REF_ID, branch->_ref);
-	obj.insert(TREE_TYPE_ID, branch->_type_ref);
-	obj.insert(TREE_NAME_ID, branch->_name);
-	obj.insert(TREE_ACCEPT_CHILDRENS_ID, branch->_acceptChildrens);
+	QJsonArray arrTypes;
 
-	QJsonArray childrens;
+	for (QString typeRef : _itemsByTypes.keys()) {
 
-	for (treeStruct* leaf : branch->_childrens) {
-		QJsonObject obj;
-		encapsulateTreeLeaf(leaf, obj);
-		childrens.append(obj);
+		QJsonObject collection;
+		collection.insert(TREE_TYPE_ID, typeRef);
+
+		QJsonArray items;
+
+		for (treeStruct* branch : _itemsByTypes.value(typeRef)) {
+
+			QJsonObject treeLeaf;
+
+			treeLeaf.insert(TREE_REF_ID, branch->_ref);
+			treeLeaf.insert(TREE_NAME_ID, branch->_name);
+			treeLeaf.insert(TREE_ACCEPT_CHILDRENS_ID, branch->_acceptChildrens);
+
+			items.push_back(treeLeaf);
+
+		}
+
+		collection.insert(TREE_CHILDRENS_ID, items);
+
+		arrTypes.push_back(collection);
+
 	}
 
-	obj.insert(TREE_CHILDRENS_ID, childrens);
+	obj.insert(TREE_CHILDRENS_ID, arrTypes);
 
 }
 
@@ -282,7 +296,7 @@ bool JsonEditableItemManager::loadStruct() {
 
 	QJsonObject obj = doc.object();
 
-	extractTreeLeaf(_root, obj);
+	extractTreeLeaf(obj);
 
 	if (obj.contains(EditableItem::NOTES_PROP_NAME)) {
 
@@ -298,50 +312,86 @@ bool JsonEditableItemManager::isNetworkShared() const {
 	return false;
 }
 
-void JsonEditableItemManager::extractTreeLeaf(treeStruct* leaf, QJsonObject &obj) {
+void JsonEditableItemManager::extractTreeLeaf(QJsonObject &obj) {
 
-	if (!obj.contains(TREE_REF_ID)) {
+	if (!obj.contains(TREE_CHILDRENS_ID)) {
 
-		if (leaf->_parent != nullptr) {
-			throw ItemIOException(leaf->_parent->_ref, QString("Error while parsing JSON data in object %1, missing reference for children.").arg(leaf->_parent->_ref), this);
-		}
+		throw ItemIOException("", QString("Error while parsing JSON data, missing reference for childrens."), this);
 
 	}
 
-	leaf->_ref = obj.value(TREE_REF_ID).toString();
+	QJsonValue val = obj.value(TREE_CHILDRENS_ID);
 
-	if (!obj.contains(TREE_TYPE_ID)) {
-		throw ItemIOException(leaf->_ref, QString("Error while parsing JSON data in object %1, missing type id.").arg(leaf->_ref), this);
+	if (!val.isArray()) {
+		throw ItemIOException("", QString("Error while parsing JSON data, childrens reference point to a non array."), this);
 	}
 
-	leaf->_type_ref = obj.value(TREE_TYPE_ID).toString();
-	leaf->_name = (obj.contains(TREE_NAME_ID)) ? obj.value(TREE_NAME_ID).toString() : leaf->_ref;
-	leaf->_acceptChildrens = (obj.contains(TREE_ACCEPT_CHILDRENS_ID)) ? obj.value(TREE_ACCEPT_CHILDRENS_ID).toBool() : false;
+	beginResetModel();
 
-	if (leaf->_acceptChildrens) {
+	QJsonArray arr = val.toArray();
 
-		if (obj.contains(TREE_CHILDRENS_ID)) {
+	for (QJsonValue v : arr) {
 
-			QJsonValue val = obj.value(TREE_CHILDRENS_ID);
+		if (v.isObject()) {
 
-			if (val.isArray()) {
+			QJsonObject o = v.toObject();
 
-				QJsonArray array = val.toArray();
+			if (o.contains(TREE_TYPE_ID) && o.contains(TREE_CHILDRENS_ID)) {
 
-				for (QJsonValue v : array) {
+				QJsonValue typeV = o.value(TREE_TYPE_ID);
 
-					if (v.isObject()) {
-						QJsonObject sub_obj = v.toObject();
+				if (!typeV.isString()) {
+					continue;
+				}
 
-						treeStruct* sub_leaf = new treeStruct();
+				QString typeId = typeV.toString();
 
-						sub_leaf->_parent = leaf;
+				if (!_itemsByTypes.contains(typeId)) {
+					_itemsByTypes.insert(typeId, QVector<treeStruct*>());
+				}
 
-						extractTreeLeaf(sub_leaf, sub_obj);
+				QJsonValue childrensV = o.value(TREE_CHILDRENS_ID);
 
-						leaf->_childrens.append(sub_leaf);
-						_treeIndex.insert(sub_leaf->_ref, sub_leaf);
+				if (!childrensV.isArray()) {
+					continue;
+				}
 
+				for (QJsonValue c : childrensV.toArray()) {
+
+					if (c.isObject()) {
+						QJsonObject leafO = c.toObject();
+
+						if (leafO.contains(TREE_REF_ID) && leafO.contains(TREE_NAME_ID)) {
+
+							QJsonValue refV = leafO.value(TREE_REF_ID);
+							QJsonValue nameV = leafO.value(TREE_NAME_ID);
+
+							if (refV.isString() && nameV.isString()) {
+
+								treeStruct* leaf = new treeStruct();
+
+								leaf->_ref = refV.toString();
+								leaf->_name = nameV.toString();
+
+								if (leafO.contains(TREE_ACCEPT_CHILDRENS_ID)) {
+									QJsonValue ac = leafO.value(TREE_ACCEPT_CHILDRENS_ID);
+
+									if (ac.isBool()) {
+										leaf->_acceptChildrens = ac.toBool();
+									} else {
+										leaf->_acceptChildrens = false;
+									}
+								} else {
+									leaf->_acceptChildrens = false;
+								}
+
+								leaf->_type_ref = typeId;
+
+								_treeIndex.insert(leaf->_ref, leaf);
+								_itemsByTypes[typeId].push_back(leaf);
+
+							}
+						}
 					}
 
 				}
@@ -351,6 +401,8 @@ void JsonEditableItemManager::extractTreeLeaf(treeStruct* leaf, QJsonObject &obj
 		}
 
 	}
+
+	endResetModel();
 
 }
 

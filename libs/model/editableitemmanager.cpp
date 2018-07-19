@@ -65,10 +65,8 @@ void EditableItemManager::setActiveItem(QString ref) {
 
 		EditableItem* potential = qobject_cast<EditableItem*>(loadItem(ref));
 
-		if (potential != nullptr) {
-			_activeItem = potential;
-			emit activeItemChanged();
-		}
+		_activeItem = potential;
+		emit activeItemChanged();
 
 	}
 

@@ -83,8 +83,8 @@ protected:
 	void extractItemData(Aline::EditableItem* item, QJsonObject const& encapsulated);
 	QJsonObject encapsulateItemToJson(Aline::EditableItem* item, int level = 0) const;
 
-	void encapsulateTreeLeaf(treeStruct* leaf, QJsonObject &obj);
-	void extractTreeLeaf(treeStruct* leaf, QJsonObject &obj);
+	void encapsulateTreeLeaf(QJsonObject &obj);
+	void extractTreeLeaf(QJsonObject &obj);
 
 	Label* extractJsonLabel(QJsonValue const& val, LabelsTree* parent);
 	Label* extractJsonLabel(QJsonValue const& val, Label* parent);
