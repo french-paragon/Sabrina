@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "aline/src/model/editableitemfactory.h"
 #include "aline/src/model/labels/labelstree.h"
 #include "aline/src/model/labels/label.h"
+#include "aline/src/utils/jsonutils.h"
 
 #include "notes/noteslist.h"
 
@@ -126,7 +127,7 @@ void JsonEditableItemManager::connectProject(QString projectFile) {
 bool JsonEditableItemManager::saveStruct() {
 
 	QJsonObject obj;
-	encapsulateTreeLeaf(obj);
+	encapsulateTreeLeafs(obj);
 
 	if (noteList()->rowCount() > 0) {
 
@@ -231,7 +232,7 @@ QJsonObject JsonEditableItemManager::encodeLabelAsJson(QModelIndex const& index)
 
 }
 
-void JsonEditableItemManager::encapsulateTreeLeaf(QJsonObject & obj) {
+void JsonEditableItemManager::encapsulateTreeLeafs(QJsonObject & obj) {
 
 	QJsonArray arrTypes;
 
@@ -296,7 +297,7 @@ bool JsonEditableItemManager::loadStruct() {
 
 	QJsonObject obj = doc.object();
 
-	extractTreeLeaf(obj);
+	extractTreeLeafs(obj);
 
 	if (obj.contains(EditableItem::NOTES_PROP_NAME)) {
 
@@ -312,7 +313,7 @@ bool JsonEditableItemManager::isNetworkShared() const {
 	return false;
 }
 
-void JsonEditableItemManager::extractTreeLeaf(QJsonObject &obj) {
+void JsonEditableItemManager::extractTreeLeafs(QJsonObject &obj) {
 
 	if (!obj.contains(TREE_CHILDRENS_ID)) {
 
@@ -450,74 +451,9 @@ Aline::EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const&
 
 void JsonEditableItemManager::extractItemData(Aline::EditableItem* item, QJsonObject const& obj) {
 
+	Aline::JsonUtils::extractItemData(item, obj, _factoryManager, { EditableItem::NOTES_PROP_NAME}, true);
+
 	item->blockSignals(true);
-
-	for (QString prop : obj.keys()) {
-
-		if (prop == Aline::EditableItem::TYPE_ID_NAME) {
-			continue;
-		}
-
-		if (prop == EditableItem::REF_IN_PROP_NAME) {
-			continue;
-		}
-
-		if (prop == EditableItem::REF_FROM_PROP_NAME) {
-			continue;
-		}
-
-		if (prop == Aline::EditableItem::CHILDREN_PROP_NAME) {
-			continue;
-		}
-
-		if (prop == Aline::EditableItem::REF_PROP_NAME) {
-			continue;
-		}
-
-		if (prop == EditableItem::NOTES_PROP_NAME) {
-			continue;
-		}
-
-		if (prop == ITEM_SUBITEM_ID) {
-			continue;
-		}
-
-		const QMetaObject* meta = item->metaObject();
-		int prop_index = meta->indexOfProperty(prop.toStdString().c_str());
-		QVariant var = decodeVariantFromJson(obj.value(prop), meta->property(prop_index).type());
-
-		if (var.type() != meta->property(prop_index).type() && meta->property(prop_index).type() != QVariant::Invalid) {
-			var.convert(meta->property(prop_index).type());
-		}
-
-		item->setProperty(prop.toStdString().c_str(), var, true); //set all the properties.
-	}
-
-	if (obj.contains(EditableItem::REF_IN_PROP_NAME)) {
-
-		EditableItem* sab_item = qobject_cast<EditableItem*>(item);
-
-		if (sab_item != nullptr) {
-			QJsonArray vals = obj.value(EditableItem::REF_IN_PROP_NAME).toArray();
-
-			for (QJsonValue v : vals) {
-				sab_item->addInRef(v.toString());
-			}
-		}
-	}
-
-	if (obj.contains(EditableItem::REF_FROM_PROP_NAME)) {
-
-		EditableItem* sab_item = qobject_cast<EditableItem*>(item);
-
-		if (sab_item != nullptr) {
-			QJsonArray vals = obj.value(EditableItem::REF_FROM_PROP_NAME).toArray();
-
-			for (QJsonValue v : vals) {
-				sab_item->addOutRef(v.toString());
-			}
-		}
-	}
 
 	if (obj.contains(EditableItem::NOTES_PROP_NAME)) {
 
@@ -527,45 +463,6 @@ void JsonEditableItemManager::extractItemData(Aline::EditableItem* item, QJsonOb
 			QJsonArray vals = obj.value(EditableItem::NOTES_PROP_NAME).toArray();
 
 			extractNotesFromJson(sab_item->getNoteList(), vals);
-		}
-
-	}
-
-	if (obj.contains(ITEM_SUBITEM_ID)) {
-
-		QJsonValue subItems_val = obj.value(ITEM_SUBITEM_ID);
-
-		if (subItems_val.isArray()) {
-			QJsonArray arr = subItems_val.toArray();
-
-			for (QJsonValue v : arr) {
-
-				if (v.isObject()) {
-					QJsonObject subObj = v.toObject();
-
-					QString ref;
-					QString type;
-
-					if (subObj.contains(EditableItem::REF_PROP_NAME) &&
-							subObj.contains(EditableItem::TYPE_ID_NAME)) {
-
-						ref = subObj.value(EditableItem::REF_PROP_NAME).toString();
-						type = subObj.value(EditableItem::TYPE_ID_NAME).toString();
-
-						if (_factoryManager->hasSubItemFactoryInstalled(type)) {
-							Aline::EditableItem* subItem = _factoryManager->createSubItem(type, ref, item);
-
-							extractItemData(subItem, subObj);
-
-							if (subItem != nullptr) {
-								item->insertSubItem(subItem);
-							}
-						}
-
-					}
-				}
-
-			}
 		}
 
 	}
@@ -626,7 +523,7 @@ void JsonEditableItemManager::effectivelyLoadLabels() {
 		Aline::Label* l;
 
 		try {
-			l = extractJsonLabel(val, _labels);
+			l = Aline::JsonUtils::extractJsonLabel(val, _labels);
 		} catch (ItemIOException const& e) {
 			Q_UNUSED(e);
 			qDebug() << "Unexpected object while parsing data in " << fileName << "! Skip it for the moment."; //TODO: do we want some other kind of error ?
@@ -637,94 +534,6 @@ void JsonEditableItemManager::effectivelyLoadLabels() {
 	}
 
 	_labels->insertRows(0, labels);
-}
-
-Aline::Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, Aline::LabelsTree* parent) {
-
-	Aline::Label* l = new Aline::Label(parent);
-
-	try {
-		extractJsonLabelDatas(val, l);
-	} catch (ItemIOException const& e) {
-		Q_UNUSED(e);
-		delete l;
-		return nullptr;
-	}
-
-
-	return l;
-
-}
-
-Aline::Label* JsonEditableItemManager::extractJsonLabel(QJsonValue const& val, Aline::Label* parent) {
-
-	Aline::Label* l = new Aline::Label(parent);
-
-	try {
-		extractJsonLabelDatas(val, l);
-	} catch (ItemIOException const& e) {
-		Q_UNUSED(e);
-		delete l;
-		return nullptr;
-	}
-
-	return l;
-}
-
-void JsonEditableItemManager::extractJsonLabelDatas(QJsonValue const& val, Aline::Label* label) {
-
-	if (!val.isObject()) {
-		throw ItemIOException(LABEL_REF, "Error while extracting labels", this);
-	}
-
-	QJsonObject obj = val.toObject();
-
-	if (!obj.contains(LABEL_REF_ID) || !obj.contains(LABEL_NAME_ID)) {
-		throw ItemIOException(LABEL_REF, "Missing label name or reference.", this);
-	}
-
-	QJsonValue ref = obj.value(LABEL_REF_ID);
-	QJsonValue name = obj.value(LABEL_NAME_ID);
-
-
-	if (!ref.isString() || !name.isString()) {
-		throw ItemIOException(LABEL_REF, "Label name or reference can't be converted to string.", this);
-	}
-
-	label->setRef(ref.toString());
-	label->setObjectName(name.toString());
-
-	if (obj.contains(LABEL_ITEMS_REFS_ID)) {
-		QJsonValue items = obj.value(LABEL_ITEMS_REFS_ID);
-
-		if (items.isArray()) {
-			for (QJsonValue value : items.toArray()) {
-
-				if (value.isString()) {
-					label->markItem(value.toString());
-				}
-
-			}
-		}
-	}
-
-	if (obj.contains(LABEL_SUBLABELS_ID)) {
-		QJsonValue sublabels = obj.value(LABEL_SUBLABELS_ID);
-
-		if (sublabels.isArray()) {
-
-			for (QJsonValue val : sublabels.toArray()) {
-				Aline::Label* sublabel = extractJsonLabel(val, label);
-
-				if (sublabel != nullptr) {
-					label->addChild(sublabel);
-				}
-			}
-
-		}
-	}
-
-
 }
 
 bool JsonEditableItemManager::effectivelySaveItem(const QString &ref) {
@@ -760,41 +569,11 @@ bool JsonEditableItemManager::effectivelySaveItem(const QString &ref) {
 }
 
 
-QJsonObject JsonEditableItemManager::encapsulateItemToJson(Aline::EditableItem* item, int level) const {
+QJsonObject JsonEditableItemManager::encapsulateItemToJson(Aline::EditableItem* item) const {
+
+	QJsonObject obj = Aline::JsonUtils::encapsulateItemToJson(item);
 
 	EditableItem* sab_item = qobject_cast<EditableItem*>(item);
-
-	QJsonObject obj;
-
-	const QMetaObject* mobj = item->metaObject();
-
-	for (int i = 0; i < mobj->propertyCount(); i++) {
-
-		if (!mobj->property(i).isStored(item)) {
-			continue;
-		}
-
-		const char* prop = mobj->property(i).name();
-		QString sprop(prop);
-
-		if (level == 0) {
-			if (sprop == Aline::EditableItem::REF_PROP_NAME) {
-				continue; //skip the ref, as it is stored in the file name.
-			}
-		}
-
-		obj.insert(sprop, encodeVariantToJson(item->property(prop)) ); // insert the property.
-	}
-
-	QList<QByteArray> dynamicProperties = item->dynamicPropertyNames();
-
-	for (QByteArray cpropName : dynamicProperties) {
-
-		QString sprop(cpropName);
-
-		obj.insert(sprop, encodeVariantToJson(item->property(cpropName.constData())));
-
-	}
 
 	if (sab_item != nullptr) {
 
@@ -806,39 +585,7 @@ QJsonObject JsonEditableItemManager::encapsulateItemToJson(Aline::EditableItem* 
 
 		}
 
-		QJsonArray referentItems;
-		QJsonArray referedItems;
-
-		const QSet<QString> & referentItemsSet = sab_item->getReferentItemRefs();
-		const QSet<QString> & referedItemsSet = sab_item->getLinkedItemsRefs();
-
-		for (QString s : referentItemsSet) {
-			referentItems.push_back(QJsonValue(s));
-		}
-
-		for (QString s : referedItemsSet) {
-			referedItems.push_back(QJsonValue(s));
-		}
-
-		obj.insert(EditableItem::REF_FROM_PROP_NAME, QJsonValue(referentItems));
-		obj.insert(EditableItem::REF_IN_PROP_NAME, QJsonValue(referedItems));
-
 	}
-
-	QJsonArray internal_items_array;
-
-	for (Aline::EditableItem* internal_item : item->getSubItems()) {
-		QJsonObject sub_obj = encapsulateItemToJson(internal_item, level+1);
-
-		internal_items_array.append(sub_obj);
-
-	}
-
-	if (internal_items_array.size() > 0) {
-		obj.insert(ITEM_SUBITEM_ID, internal_items_array);
-	}
-
-	return obj;
 }
 
 
@@ -912,106 +659,5 @@ QJsonArray JsonEditableItemManager::encodeNotesArray(NotesList const* list) cons
 
 }
 
-QJsonValue JsonEditableItemManager::encodeVariantToJson(QVariant var) const {
-
-	if (var.type() == QVariant::PointF) {
-		QPointF data = var.toPointF();
-
-		QString rep(QString("%1,%2").arg(data.x()).arg(data.y()));
-
-		return QJsonValue(rep);
-
-	} else if (var.type() == QVariant::SizeF) {
-
-		QSizeF data = var.toSizeF();
-
-		QString rep(QString("%1,%2").arg(data.width()).arg(data.height()));
-
-		return QJsonValue(rep);
-
-	} else if (var.type() == QVariant::Color) {
-
-		QColor col = var.value<QColor>();
-
-		return QJsonValue(col.name(QColor::HexArgb));
-	}
-
-	return QJsonValue::fromVariant(var);
-}
-
-QVariant JsonEditableItemManager::decodeVariantFromJson(QJsonValue val, QVariant::Type type) const {
-
-	if (type == QVariant::PointF) {
-
-		QString rep = val.toString();
-
-		QStringList reps = rep.split(",");
-
-		if (reps.size() != 2) {
-			return QVariant();
-		}
-
-		QPointF pt;
-
-		bool ok;
-		qreal x = QVariant(reps[0]).toReal(&ok);
-
-		if (!ok) {
-			return QVariant();
-		}
-
-		qreal y = QVariant(reps[1]).toReal(&ok);
-
-		if (!ok) {
-			return QVariant();
-		}
-
-		pt.setX(x);
-		pt.setY(y);
-
-		return QVariant(pt);
-
-	} else if (type == QVariant::SizeF) {
-
-		QString rep = val.toString();
-
-		QStringList reps = rep.split(",");
-
-		if (reps.size() != 2) {
-			return QVariant();
-		}
-
-		QSizeF s;
-
-		bool ok;
-		qreal w = QVariant(reps[0]).toReal(&ok);
-
-		if (!ok) {
-			return QVariant();
-		}
-
-		qreal h = QVariant(reps[1]).toReal(&ok);
-
-		if (!ok) {
-			return QVariant();
-		}
-
-		s.setWidth(w);
-		s.setHeight(h);
-
-		return QVariant(s);
-
-	} else if (type == QVariant::Color) {
-
-		QString colorName = val.toString();
-
-		QColor col(colorName);
-
-		return QVariant(col);
-	}
-
-	return val.toVariant();
-
-}
 
 } // namespace Cathia

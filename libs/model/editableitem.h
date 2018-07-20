@@ -48,17 +48,32 @@ public:
 
 	static const QString NOTES_PROP_NAME;
 
+	Q_PROPERTY(QStringList ref_in_to_out READ getLinkedItemsRefsList WRITE setLinkedItemsRefsList)
+	Q_PROPERTY(QStringList ref_from_out READ getReferentItemsRefsList WRITE setReferentItemsRefsList)
+
 	/*!
 	 * \brief getLinkedItemsRefs get the list of reference of item refered in the current item.
 	 * \return the list of references.
 	 */
 	const QSet<QString> & getLinkedItemsRefs() const;
+	QStringList getLinkedItemsRefsList() const;
+	/*!
+	 * \brief setLinkedItemsRefsList set the list of refered items if the object has its signals blocked.
+	 * \param list the list of references.
+	 */
+	void setLinkedItemsRefsList(QStringList const& list);
 
 	/*!
 	 * \brief getReferentItemRefs allow to acess the list of items which refer to this item.
 	 * \return the list of refs of the refering items.
 	 */
-	const QSet<QString> & getReferentItemRefs() const;
+	const QSet<QString> & getReferentItemsRefs() const;
+	QStringList getReferentItemsRefsList() const;
+	/*!
+	 * \brief setLinkedItemsRefsList set the list of referent items if the object has its signals blocked.
+	 * \param list the list of references.
+	 */
+	void setReferentItemsRefsList(QStringList const& list);
 
 	/*!
 	 * \brief iconInternalUrl indicate a path to a url representing the item.

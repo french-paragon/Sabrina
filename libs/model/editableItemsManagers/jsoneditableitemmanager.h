@@ -81,22 +81,15 @@ protected:
 	virtual bool effectivelySaveItem(QString const& ref);
 
 	void extractItemData(Aline::EditableItem* item, QJsonObject const& encapsulated);
-	QJsonObject encapsulateItemToJson(Aline::EditableItem* item, int level = 0) const;
+	QJsonObject encapsulateItemToJson(Aline::EditableItem* item) const;
 
-	void encapsulateTreeLeaf(QJsonObject &obj);
-	void extractTreeLeaf(QJsonObject &obj);
-
-	Aline::Label* extractJsonLabel(QJsonValue const& val, Aline::LabelsTree* parent);
-	Aline::Label* extractJsonLabel(QJsonValue const& val, Aline::Label* parent);
-	void extractJsonLabelDatas(QJsonValue const& val, Aline::Label* label);
+	void encapsulateTreeLeafs(QJsonObject &obj);
+	void extractTreeLeafs(QJsonObject &obj);
 
 	QJsonObject encodeLabelAsJson(QModelIndex const& index);
 
 	bool extractNotesFromJson(NotesList* list, QJsonArray const& notesArray);
 	QJsonArray encodeNotesArray(const NotesList *list) const;
-
-	QJsonValue encodeVariantToJson(QVariant var) const;
-	QVariant decodeVariantFromJson(QJsonValue val, QVariant::Type type) const;
 
 	bool _hasAProjectOpen;
 	QString _projectFileName;

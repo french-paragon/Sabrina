@@ -45,8 +45,33 @@ const QSet<QString> & EditableItem::getLinkedItemsRefs() const {
 	return _referencedItems;
 }
 
-const QSet<QString> & EditableItem::getReferentItemRefs() const {
+QStringList EditableItem::getLinkedItemsRefsList() const {
+	return _referencedItems.values();
+}
+
+void EditableItem::setLinkedItemsRefsList(QStringList const& list) {
+
+	if (signalsBlocked()) {
+		_referencedItems.clear();
+		_referencedItems = QSet<QString>::fromList(list);
+	}
+
+}
+
+const QSet<QString> & EditableItem::getReferentItemsRefs() const {
 	return _referentItems;
+}
+
+QStringList EditableItem::getReferentItemsRefsList() const {
+	return _referentItems.values();
+}
+void EditableItem::setReferentItemsRefsList(QStringList const& list) {
+
+	if (signalsBlocked()) {
+		_referentItems.clear();
+		_referentItems = QSet<QString>::fromList(list);
+	}
+
 }
 
 QString EditableItem::iconInternalUrl() const {
