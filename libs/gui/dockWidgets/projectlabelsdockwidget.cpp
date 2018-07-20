@@ -27,8 +27,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "actions/editableitemtypespecializedaction.h"
 
-#include "delegates/labelsmodelitemdelegate.h"
-
 #include <QMenu>
 
 namespace Sabrina {
