@@ -586,6 +586,8 @@ QJsonObject JsonEditableItemManager::encapsulateItemToJson(Aline::EditableItem* 
 		}
 
 	}
+
+	return obj;
 }
 
 
