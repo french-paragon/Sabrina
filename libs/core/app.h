@@ -34,6 +34,9 @@ class CATHIA_CORE_EXPORT App : public Aline::App
 	Q_OBJECT
 
 public:
+	static void loadEditorsFactories();
+	static void loadEditableFactories();
+
 	explicit App(int & argc, char** argv);
 	~App();
 
@@ -50,8 +53,6 @@ protected:
 	void buildMainWindow();
 	void addAppActionsToMainWindows(MainWindow* mw);
 	void addAboutActionsToMainWindows(MainWindow* mw);
-	void loadEditorsFactories();
-	void loadEditableFactories();
 
 	void quitCathia();
 

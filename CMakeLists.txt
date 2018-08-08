@@ -30,6 +30,7 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5QuickWidgets REQUIRED)
+find_package(Qt5Test REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -48,11 +49,17 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libs)
 include_directories(${CMAKE_SOURCE_DIR}/modules)
 
+#libs directory
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/libs)
+link_directories(${CMAKE_BINARY_DIR}/libs)
+
 #sub dirs
 
 add_subdirectory(modules)
 add_subdirectory(libs)
 add_subdirectory(prog)
+add_subdirectory(tests)
 
 #copy important files
 
