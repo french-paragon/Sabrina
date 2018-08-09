@@ -170,6 +170,62 @@ void Cartography::addCategory(QString const& cat_name) {
 
 }
 
+void Cartography::clearCartographyItems() {
+
+	QVector<CartographyItem*> items = _items;
+
+	for (CartographyItem* item : items) {
+		removeCartoItem(item);
+	}
+
+}
+
+void Cartography::loadCartographyItems(QList<Aline::EditableItem*> const& items) {
+
+	if (_items.count() > 0) {
+		clearCartographyItems();
+	}
+
+	for (Aline::EditableItem* item : items) {
+
+		CartographyItem* cartoItem = qobject_cast<CartographyItem*>(item);
+
+		if (cartoItem != nullptr) {
+			insertCartoItem(cartoItem);
+		}
+
+	}
+
+}
+
+void Cartography::clearCartographyCategories() {
+
+	QList<CartographyCategory*> categories = _categories.values();
+
+	for (CartographyCategory* category : categories) {
+		removeCartoCategory(category);
+	}
+
+}
+
+void Cartography::loadCartographyCategories(QList<Aline::EditableItem*> const& items) {
+
+	if (_categories.count() > 0) {
+		clearCartographyCategories();
+	}
+
+	for (Aline::EditableItem* item : items) {
+
+		CartographyCategory* cat = qobject_cast<CartographyCategory*>(item);
+
+		if (cat != nullptr) {
+			insertCartoCat(cat);
+		}
+
+	}
+
+}
+
 void Cartography::removeCartoItem(CartographyItem* item) {
 
 	if (item->_cartographyParent == this) {
@@ -220,6 +276,19 @@ void Cartography::setSize(const QSizeF &size)
 		_size = size;
 		emit sizeChanged(_size);
 	}
+}
+
+QList<Aline::EditableItem *> Cartography::cartographyCategories() const {
+
+	QList<Aline::EditableItem *> ret;
+	ret.reserve(_categories.size());
+
+	for (CartographyCategory* cat : _categories.values()) {
+		ret << cat;
+	}
+
+	return ret;
+
 }
 
 QList<QString> Cartography::getCurrentCategoriesRefs() const {
@@ -297,6 +366,18 @@ void Cartography::treatChangedRef(QString oldRef, QString newRef) {
 		}
 
 	}
+}
+
+QList<Aline::EditableItem*> Cartography::cartographyItems() const {
+
+	QList<Aline::EditableItem*> ret;
+	ret.reserve(_items.size());
+
+	for (CartographyItem * item : _items) {
+		ret << item;
+	}
+
+	return ret;
 }
 
 QVector<CartographyItem *> const& Cartography::getItems() const

@@ -350,6 +350,9 @@ public:
 	Q_PROPERTY(QString background READ background WRITE setBackground NOTIFY backgroundChanged)
 	Q_PROPERTY(QSizeF size READ getSize WRITE setSize NOTIFY sizeChanged)
 
+	Q_PROPERTY(QList<Aline::EditableItem*> cartographyCategories READ cartographyCategories WRITE loadCartographyCategories)
+	Q_PROPERTY(QList<Aline::EditableItem*> cartographyItems READ cartographyItems WRITE loadCartographyItems)
+
 	virtual QString getTypeId() const;
 	virtual QString getTypeName() const;
 
@@ -362,6 +365,7 @@ public:
 	QSizeF getSize() const;
 	void setSize(const QSizeF &size);
 
+	QList<Aline::EditableItem *> cartographyCategories() const;
 	QList<QString> getCurrentCategoriesRefs() const;
 	CartographyCategory* getCategoryByRef(QString ref, bool returnDefaultIfNotFound = false);
 
@@ -369,6 +373,7 @@ public:
 
 	virtual QStringList getFileReferencePropertiesName() const;
 
+	QList<Aline::EditableItem *> cartographyItems() const;
 	const QVector<CartographyItem *> &getItems() const;
 
 signals:
@@ -390,6 +395,12 @@ public slots:
 	void addCartoPoint(QString const& name);
 	void addCartoPoint();
 	void addCategory(QString const& cat_name);
+
+	void clearCartographyItems();
+	void loadCartographyItems(QList<Aline::EditableItem*> const& items);
+
+	void clearCartographyCategories();
+	void loadCartographyCategories(QList<Aline::EditableItem*> const& items);
 
 	void removeCartoItem(CartographyItem* item);
 	void removeCartoCategory(CartographyCategory* item);
