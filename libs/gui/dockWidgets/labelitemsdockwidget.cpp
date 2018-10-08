@@ -73,7 +73,7 @@ void LabelItemsDockWidget::selectionChanged() {
 
 }
 
-void LabelItemsDockWidget::projectChanged(EditableItemManager* project) {
+void LabelItemsDockWidget::projectChanged(Aline::EditableItemManager* project) {
 
 	_currentProject = project;
 

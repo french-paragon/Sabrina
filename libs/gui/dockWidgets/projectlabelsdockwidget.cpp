@@ -76,7 +76,7 @@ ProjectLabelsDockWidget::~ProjectLabelsDockWidget()
 	delete ui;
 }
 
-void ProjectLabelsDockWidget::projectChanged(EditableItemManager* project) {
+void ProjectLabelsDockWidget::projectChanged(Aline::EditableItemManager* project) {
 
 	_currentProject = project;
 

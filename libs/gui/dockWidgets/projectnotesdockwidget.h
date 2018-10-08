@@ -23,6 +23,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../gui_global.h"
 
+namespace Aline {
+	class EditableItemManager;
+}
+
 namespace Sabrina {
 
 namespace Ui {
@@ -42,7 +46,7 @@ public:
 
 private:
 
-	void projectChanged(EditableItemManager* project);
+	void projectChanged(Aline::EditableItemManager* project);
 	void projectCleared();
 
 

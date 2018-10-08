@@ -90,7 +90,7 @@ void ProjectTreeDockWidget::onItemCreationTriggered(QString itemTypeRef) {
 
 }
 
-void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
+void ProjectTreeDockWidget::projectChanged(Aline::EditableItemManager* project) {
 
 	if(_newItemFactoryWatcher) {
 		disconnect(_newItemFactoryWatcher);
@@ -118,13 +118,13 @@ void ProjectTreeDockWidget::projectChanged(EditableItemManager* project) {
 									 this, &ProjectTreeDockWidget::rebuildMenuWithoutProject);
 
 	_itemCreationTrigger = connect(this, &ProjectTreeDockWidget::itemCreationTriggered,
-								   project, static_cast<bool(EditableItemManager::*)(QString, QString)>(&EditableItemManager::createItem));
+								   project, static_cast<bool(Aline::EditableItemManager::*)(QString, QString)>(&Aline::EditableItemManager::createItem));
 
 	_itemSuppresionTrigger = connect(this, &ProjectTreeDockWidget::itemSuppressionTriggered,
-									 project, &EditableItemManager::clearItems);
+									 project, &Aline::EditableItemManager::clearItems);
 }
 
-void ProjectTreeDockWidget::reselectProject(EditableItemManager *project) {
+void ProjectTreeDockWidget::reselectProject(Aline::EditableItemManager *project) {
 
 	_internalModel->setSourceModel(project);
 
@@ -134,7 +134,7 @@ void ProjectTreeDockWidget::rebuildMenuWithoutProject() {
 	rebuildMenu(_mw_parent->currentProject());
 }
 
-void ProjectTreeDockWidget::rebuildMenu(EditableItemManager* project) {
+void ProjectTreeDockWidget::rebuildMenu(Aline::EditableItemManager* project) {
 
 	if (_newItemMenu != nullptr) {
 		_newItemMenu->deleteLater();

@@ -25,6 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Aline {
 	class LabelSelectionForItemProxyModel;
+	class EditableItemManager;
 }
 
 namespace Sabrina {
@@ -46,7 +47,7 @@ public:
 
 private:
 
-	void projectChanged(EditableItemManager* project);
+	void projectChanged(Aline::EditableItemManager* project);
 
 	void labelAdditionButtonClicked();
 	void labelDeletionButtonClicked();
@@ -57,7 +58,7 @@ private:
 
 	Ui::ProjectLabelsDockWidget *ui;
 
-	EditableItemManager* _currentProject;
+	Aline::EditableItemManager* _currentProject;
 	Aline::LabelSelectionForItemProxyModel* _proxy;
 
 	MainWindow* _mw_parent;

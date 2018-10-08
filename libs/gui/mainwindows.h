@@ -34,39 +34,15 @@ public:
 	static const QString GEOMETRY_CONFIG_KEY;
 	static const QString STATE_CONFIG_KEY;
 
-	static const QString MENU_FILE_NAME;
-	static const QString MENU_DISPLAY_NAME;
-
 	explicit MainWindow(QWidget* parent = nullptr);
-
-	EditableItemManager *currentProject() const;
-	void setCurrentProject(EditableItemManager *currentProject);
-
-	QMenu* findMenuByName(QString const& name, bool createIfNotExist = false);
-
-	void addDockWidget(Qt::DockWidgetArea area, QDockWidget * dockwidget);
-	void addDockWidget(Qt::DockWidgetArea area, QDockWidget * dockwidget, Qt::Orientation orientation);
-
-signals:
-
-	void currentProjectChanged(EditableItemManager*);
 
 public slots:
 
 	void displayAboutWindows();
 
-	void editItem(QString const& itemRef);
-	void saveAll();
-
 protected:
 
 	void onEditorAboutToBeRemoved(Aline::Editor* editor);
-
-	EditableItemManager* _currentProject;
-
-	QMap<QString, Aline::Editor*> _openedEditors;
-
-	QMenu* _submenuDock;
 
 };
 

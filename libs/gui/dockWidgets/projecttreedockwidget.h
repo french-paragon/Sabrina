@@ -54,11 +54,11 @@ private:
 
 	void onItemCreationTriggered(QString itemTypeRef);
 
-	void projectChanged(EditableItemManager* project);
+	void projectChanged(Aline::EditableItemManager* project);
 
-	void reselectProject(EditableItemManager* project);
+	void reselectProject(Aline::EditableItemManager* project);
 	void rebuildMenuWithoutProject();
-	void rebuildMenu(EditableItemManager *project);
+	void rebuildMenu(Aline::EditableItemManager *project);
 
 	void receiveDoubleClick(const QModelIndex &index);
 	void supprButtonClicked();

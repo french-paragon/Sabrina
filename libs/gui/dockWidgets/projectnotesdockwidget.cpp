@@ -43,7 +43,9 @@ ProjectNotesDockWidget::~ProjectNotesDockWidget()
 }
 
 
-void ProjectNotesDockWidget::projectChanged(EditableItemManager* project) {
+void ProjectNotesDockWidget::projectChanged(Aline::EditableItemManager* aproject) {
+
+	EditableItemManager* project = qobject_cast<EditableItemManager*>(aproject);
 
 	if (_projectDeletedConnection) {
 		disconnect(_projectDeletedConnection);

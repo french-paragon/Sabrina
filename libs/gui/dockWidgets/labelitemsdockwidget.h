@@ -25,6 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Aline {
 	class ProjectFilterByLabelProxyModel;
+	class EditableItemManager;
 }
 
 namespace Sabrina {
@@ -52,7 +53,7 @@ private:
 
 	void selectionChanged();
 
-	void projectChanged(EditableItemManager* project);
+	void projectChanged(Aline::EditableItemManager* project);
 
 	void receiveDoubleClick(const QModelIndex &index);
 
@@ -62,7 +63,7 @@ private:
 
 	Aline::ProjectFilterByLabelProxyModel* _proxy;
 
-	EditableItemManager* _currentProject;
+	Aline::EditableItemManager* _currentProject;
 };
 
 
