@@ -22,9 +22,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gui/mainwindows.h"
 #include "gui/mainwindowsfactory.h"
-#include "gui/dockWidgets/projecttreedockwidget.h"
-#include "gui/dockWidgets/projectlabelsdockwidget.h"
-#include "gui/dockWidgets/labelitemsdockwidget.h"
+#include "aline/src/view/projecttreedockwidget.h"
+#include "aline/src/view/projectlabelsdockwidget.h"
+#include "aline/src/view/labelitemsdockwidget.h"
 #include "gui/dockWidgets/projectnotesdockwidget.h"
 
 #include <QUrl>
@@ -218,19 +218,19 @@ void App::addAppActionsToMainWindows(MainWindow* mw) {
 
 	//Dock widgets.
 
-	ProjectTreeDockWidget* project_dock = new ProjectTreeDockWidget(mw);
+	Aline::ProjectTreeDockWidget* project_dock = new Aline::ProjectTreeDockWidget(mw);
 	mw->addDockWidget(Qt::LeftDockWidgetArea, project_dock);
 
-	connect(project_dock, &ProjectTreeDockWidget::itemDoubleClicked,
+	connect(project_dock, &Aline::ProjectTreeDockWidget::itemDoubleClicked,
 			mw, &MainWindow::editItem);
 
-	ProjectLabelsDockWidget* labels_dock = new ProjectLabelsDockWidget(mw);
+	Aline::ProjectLabelsDockWidget* labels_dock = new Aline::ProjectLabelsDockWidget(mw);
 	mw->addDockWidget(Qt::LeftDockWidgetArea, labels_dock);
 
-	LabelItemsDockWidget* label_item_dock = new LabelItemsDockWidget(mw);
+	Aline::LabelItemsDockWidget* label_item_dock = new Aline::LabelItemsDockWidget(mw);
 	mw->addDockWidget(Qt::RightDockWidgetArea, label_item_dock);
 
-	connect(label_item_dock, &LabelItemsDockWidget::itemDoubleClicked,
+	connect(label_item_dock, &Aline::LabelItemsDockWidget::itemDoubleClicked,
 			mw, &MainWindow::editItem);
 
 	ProjectNotesDockWidget* notes_dock = new ProjectNotesDockWidget(mw);

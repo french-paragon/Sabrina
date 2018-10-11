@@ -20,9 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindows.h"
 
-#include "dockWidgets/projecttreedockwidget.h"
-#include "dockWidgets/projectlabelsdockwidget.h"
-
 #include "utils/app_info.h"
 
 namespace Sabrina {

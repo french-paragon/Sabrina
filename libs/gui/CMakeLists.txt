@@ -2,17 +2,10 @@ set(LIB_NAME Gui)
 set(LIB_SRC mainwindows.cpp
             mainwindowsfactory.cpp
             gui_global.h
-            actions/editableitemtypespecializedaction.cpp
             utilsDialogs/aboutdialog.cpp
             utilsDialogs/aboutdialog.ui
             utilsDialogs/licensedialog.cpp
             utilsDialogs/licensedialog.ui
-            dockWidgets/projecttreedockwidget.cpp
-            dockWidgets/projecttreedockwidget.ui
-            dockWidgets/projectlabelsdockwidget.cpp
-            dockWidgets/projectlabelsdockwidget.ui
-            dockWidgets/labelitemsdockwidget.cpp
-            dockWidgets/labelitemsdockwidget.ui
             dockWidgets/projectnotesdockwidget.cpp
             dockWidgets/projectnotesdockwidget.ui
             editors/personnageeditor.cpp
