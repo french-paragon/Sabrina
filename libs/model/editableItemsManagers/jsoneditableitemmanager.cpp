@@ -127,7 +127,7 @@ void JsonEditableItemManager::connectProject(QString projectFile) {
 bool JsonEditableItemManager::saveStruct() {
 
 	QJsonObject obj;
-	encapsulateTreeLeafs(obj);
+	Aline::JsonUtils::encapsulateTreeLeafsToJson(obj, _itemsByTypes);
 
 	if (noteList()->rowCount() > 0) {
 
