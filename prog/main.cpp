@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
 
 	Sabrina::App app(argc, argv);
 
+	Q_INIT_RESOURCE(aline_ressources);
+
 	QCommandLineParser parser;
 	parser.addHelpOption();
 	parser.addVersionOption();
