@@ -44,12 +44,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "model/editableItems/place.h"
 #include "model/editableItems/folder.h"
 #include "model/editableItems/cartography.h"
+#include "model/editableItems/comicscript.h"
 
 #include "model/editableItemsManagers/jsoneditableitemmanager.h"
 
 #include "gui/editors/personnageeditor.h"
 #include "gui/editors/placeeditor.h"
 #include "gui/editors/cartographyeditor.h"
+#include "gui/editors/comicscripteditor.h"
 
 #include "gui/utilsDialogs/aboutdialog.h"
 #include "gui/utilsDialogs/licensedialog.h"
@@ -268,6 +270,7 @@ void App::loadEditorsFactories() {
 	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new PersonnageEditor::PersonnageEditorFactory());
 	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new PlaceEditor::PlaceEditorFactory());
 	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new CartographyEditor::CartographyEditorFactory());
+	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new ComicscriptEditor::ComicscriptEditorFactory());
 
 }
 
@@ -276,6 +279,7 @@ void App::loadEditableFactories() {
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Personnage::PersonnageFactory());
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Place::PlaceFactory());
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Cartography::CartographyFactory());
+	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Comicscript::ComicstripFactory());
 
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installSubItemFactory(new CartographyItem::CartographyItemFactory());
 	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installSubItemFactory(new CartographyCategory::CartographyCategoryFactory());

@@ -1,13 +1,22 @@
 set(LIB_NAME Model)
 set(LIB_SRC editableitem.cpp
-            editableitemmanager.cpp
-            editableItemsManagers/jsoneditableitemmanager.cpp
+	        editableitem.h
+			editableitemmanager.cpp
+			editableitemmanager.h
+			editableItemsManagers/jsoneditableitemmanager.cpp
+			editableItemsManagers/jsoneditableitemmanager.h
             model_global.h
-            ressources/ressources.qrc
-            editableItems/personnage.cpp
-            editableItems/place.cpp
-            editableItems/folder.cpp
-            editableItems/cartography.cpp
+			ressources/ressources.qrc
+			editableItems/personnage.cpp
+			editableItems/personnage.h
+			editableItems/place.cpp
+			editableItems/place.h
+			editableItems/folder.cpp
+			editableItems/folder.h
+			editableItems/cartography.cpp
+			editableItems/cartography.h
+			editableItems/comicscript.cpp
+			editableItems/comicscript.h
             notes/noteslist.cpp)
 
 add_library(${LIB_NAME} ${LIB_SRC})

@@ -13,5 +13,11 @@
         <file>icons/legendAnchors/top_left.svg</file>
         <file>icons/legendAnchors/top_middle.svg</file>
         <file>icons/legendAnchors/top_right.svg</file>
+        <file>icons/editable_item_comic.svg</file>
+        <file>icons/comic_parts/addCaption.svg</file>
+        <file>icons/comic_parts/addDialog.svg</file>
+        <file>icons/comic_parts/addPage.svg</file>
+        <file>icons/comic_parts/addPanel.svg</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>
