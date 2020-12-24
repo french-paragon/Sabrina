@@ -188,9 +188,9 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tabSynopsys">
+     <widget class="QWidget" name="tabSynopsis">
       <attribute name="title">
-       <string>Synopsys</string>
+       <string>Synopsis</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>

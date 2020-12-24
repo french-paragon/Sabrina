@@ -84,6 +84,7 @@ protected:
 
 	void paintEvent(QPaintEvent *event) override;
 	void keyPressEvent(QKeyEvent *event) override;
+	void inputMethodEvent(QInputMethodEvent *event) override;
 
 	QModelIndex getIndexAtLine(int l, int * idLine = nullptr) const;
 	int indexLine(QModelIndex id);
@@ -104,6 +105,7 @@ protected:
 					int l,
 					Cursor* cursor);
 
+	void insertText(QString commited);
 	void insertNextType(const QModelIndex &id, int modifiers);
 
 	Cursor* _cursor;

@@ -38,6 +38,7 @@ ComicscriptEditWidget::ComicscriptEditWidget(QWidget *parent) :
 {
 	_cursor = new Cursor(this, 0, 0, 0);
 	setFocusPolicy(Qt::StrongFocus);
+	setAttribute(Qt::WA_InputMethodEnabled, true);
 }
 
 ComicscriptEditWidget::~ComicscriptEditWidget() {
@@ -439,67 +440,7 @@ void ComicscriptEditWidget::keyPressEvent(QKeyEvent *event) {
 
 	} else if(!event->text().isEmpty()) {
 
-		int idLine;
-		QModelIndex id = getIndexAtLine(_cursor->line(), &idLine);
-
-		if (idLine < 0) {
-			return;
-		}
-
-		QString line;
-
-		if (id == QModelIndex()) {
-			line = _currentScript->getTitle();
-		} else {
-			if (id.data(ComicscriptModel::TypeRole).toInt() == ComicscriptModel::ComicstripBlock::DIALOG and
-				idLine == _cursor->line()) {
-				line = id.data(ComicscriptModel::DescrRole).toString();
-			} else {
-				line = id.data(ComicscriptModel::TextRole).toString();
-			}
-		}
-
-		int pLen = line.length();
-
-		int p = _cursor->pos();
-
-		if (event->text().contains(QChar('\b'))) {
-			QStringList lst = event->text().split(QChar('\b'), Qt::KeepEmptyParts);
-			QString last = lst.takeLast();
-
-			for (QString const& s : lst) {
-				line.insert(p, s);
-
-				p += s.size();
-
-				if (p > 0) {
-					line.remove(p-1,1);
-					p -= 1;
-				}
-			}
-
-			line.insert(p, last);
-
-		} else {
-			line.insert(p, event->text());
-		}
-
-		int c_offset = line.length() - pLen;
-
-		ComicscriptModel* m = _currentScript->getModel();
-
-		if (id == QModelIndex()) {
-			_currentScript->setTitle(line);
-		} else {
-			if (id.data(ComicscriptModel::TypeRole).toInt() == ComicscriptModel::ComicstripBlock::DIALOG and
-				idLine == _cursor->line()) {
-				m->setData(id, line, ComicscriptModel::DescrRole);
-			} else {
-				m->setData(id, line, ComicscriptModel::TextRole);
-			}
-		}
-
-		_cursor->move(c_offset);
+		insertText(event->text());
 		update();
 
 	} else {
@@ -508,7 +449,89 @@ void ComicscriptEditWidget::keyPressEvent(QKeyEvent *event) {
 
 }
 
+void ComicscriptEditWidget::inputMethodEvent(QInputMethodEvent *event) {
 
+	QString s = event->commitString();
+
+	if (!s.isEmpty()) {
+		insertText(s);
+		update();
+	}
+
+}
+
+void ComicscriptEditWidget::insertText(QString commited) {
+
+	int idLine;
+	QModelIndex id = getIndexAtLine(_cursor->line(), &idLine);
+
+	if (idLine < 0) {
+		return;
+	}
+
+	QString line;
+
+	if (id == QModelIndex()) {
+		line = _currentScript->getTitle();
+	} else {
+		if (id.data(ComicscriptModel::TypeRole).toInt() == ComicscriptModel::ComicstripBlock::DIALOG and
+			idLine == _cursor->line()) {
+			line = id.data(ComicscriptModel::DescrRole).toString();
+		} else {
+			line = id.data(ComicscriptModel::TextRole).toString();
+		}
+	}
+
+	int pLen = line.length();
+
+	int p = _cursor->pos();
+
+	if (commited.contains(QChar('\b'))) {
+		QStringList lst = commited.split(QChar('\b'), Qt::KeepEmptyParts);
+		QString last = lst.takeLast();
+
+		for (QString const& s : lst) {
+			line.insert(p, s);
+
+			p += s.size();
+
+			if (p > 0) {
+				line.remove(p-1,1);
+				p -= 1;
+			}
+		}
+
+		line.insert(p, last);
+
+	} else {
+		line.insert(p, commited);
+	}
+
+	int c_offset = line.length() - pLen;
+
+	ComicscriptModel* m = _currentScript->getModel();
+
+	int pH = indexHeight(id);
+
+	if (id == QModelIndex()) {
+		_currentScript->setTitle(line);
+	} else {
+		if (id.data(ComicscriptModel::TypeRole).toInt() == ComicscriptModel::ComicstripBlock::DIALOG and
+			idLine == _cursor->line()) {
+			m->setData(id, line, ComicscriptModel::DescrRole);
+		} else {
+			m->setData(id, line, ComicscriptModel::TextRole);
+		}
+	}
+
+	int dH = indexHeight(id) - pH;
+
+	if ((id == _endIndex or _currentScript->getModel()->getNextItem(id) == _endIndex)
+			and dH > 0) {
+		scroll(dH);
+	}
+	_cursor->move(c_offset);
+}
 
 void ComicscriptEditWidget::insertNextType(QModelIndex const& id, int modifiers) {
 
