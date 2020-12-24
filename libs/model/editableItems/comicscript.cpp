@@ -68,6 +68,19 @@ void Comicscript::setTitle(const QString &title)
 	}
 }
 
+QString Comicscript::synopsis() const
+{
+	return _synopsis;
+}
+
+void Comicscript::setSynopsis(const QString &synopsis)
+{
+	if (_synopsis != synopsis) {
+		_synopsis = synopsis;
+		Q_EMIT synopsisChanged(synopsis);
+	}
+}
+
 ComicscriptModel* Comicscript::getModel() {
 	return _model;
 }

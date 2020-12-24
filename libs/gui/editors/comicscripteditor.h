@@ -26,6 +26,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace Sabrina {
 
+class Comicscript;
+
 namespace Ui {
 class ComicscriptEditor;
 }
@@ -61,9 +63,16 @@ protected:
 	bool effectivelySetEditedItem(Aline::EditableItem* item) override;
 
 	void checkAddButtonsActivation();
+	void onNameChanged();
+	void onSynopsisChanged();
+
+	void onScriptNameChanged();
+	void onScriptSynopsisChanged();
 
 private:
 	Ui::ComicscriptEditor *ui;
+
+	Comicscript* _currentScript;
 };
 
 } // namespace Sabrina

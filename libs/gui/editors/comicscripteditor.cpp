@@ -27,7 +27,8 @@ const QString ComicscriptEditor::COMICSCRIPT_EDITOR_TYPE_ID = "sabrina_comic_scr
 
 ComicscriptEditor::ComicscriptEditor(QWidget *parent) :
 	Aline::EditableItemEditor(parent),
-	ui(new Ui::ComicscriptEditor)
+	ui(new Ui::ComicscriptEditor),
+	_currentScript(nullptr)
 {
 	ui->setupUi(this);
 
@@ -37,6 +38,9 @@ ComicscriptEditor::ComicscriptEditor(QWidget *parent) :
 	connect(ui->addPanelButton, &QPushButton::pressed, ui->editWidget, &ComicscriptEditWidget::addPanel);
 	connect(ui->addCaptionButton, &QPushButton::pressed, ui->editWidget, &ComicscriptEditWidget::addCaption);
 	connect(ui->addDialogButton, &QPushButton::pressed, ui->editWidget, &ComicscriptEditWidget::addDialog);
+
+	connect(ui->nameEdit, &QLineEdit::textChanged, this, &ComicscriptEditor::onNameChanged);
+	connect(ui->synopsisEdit, &QTextEdit::textChanged, this, &ComicscriptEditor::onSynopsisChanged);
 }
 
 ComicscriptEditor::~ComicscriptEditor()
@@ -66,6 +70,21 @@ bool ComicscriptEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 		return false;
 	}
 
+	if (_currentScript != nullptr) {
+		disconnect(_currentScript, &Comicscript::objectNameChanged, this, &ComicscriptEditor::onScriptNameChanged);
+		disconnect(_currentScript, &Comicscript::synopsisChanged, this, &ComicscriptEditor::onScriptSynopsisChanged);
+	}
+
+	_currentScript = nullptr;
+
+	ui->nameEdit->setText(script->objectName());
+	ui->synopsisEdit->setText(script->synopsis());
+
+	_currentScript = script;
+
+	connect(_currentScript, &Comicscript::objectNameChanged, this, &ComicscriptEditor::onScriptNameChanged);
+	connect(_currentScript, &Comicscript::synopsisChanged, this, &ComicscriptEditor::onScriptSynopsisChanged);
+
 	ui->editWidget->setCurrentScript(script);
 
 	return true;
@@ -89,6 +108,41 @@ void ComicscriptEditor::checkAddButtonsActivation() {
 	ui->addPanelButton->setVisible(enablePanels);
 	ui->addCaptionButton->setVisible(enableCaptions);
 	ui->addDialogButton->setVisible(enableDialogs);
+}
+
+void ComicscriptEditor::onNameChanged() {
+	if (_currentScript != nullptr) {
+		_currentScript->setObjectName(ui->nameEdit->text());
+	}
+}
+void ComicscriptEditor::onSynopsisChanged() {
+	if (_currentScript != nullptr) {
+		QString txt = ui->synopsisEdit->toPlainText();
+		_currentScript->setSynopsis(txt);
+	}
+}
+
+void ComicscriptEditor::onScriptNameChanged() {
+	if (_currentScript == nullptr) {
+		return;
+	}
+
+	QString txt = _currentScript->objectName();
+
+	if (txt != ui->nameEdit->text()) {
+		ui->nameEdit->setText(txt);
+	}
+}
+void ComicscriptEditor::onScriptSynopsisChanged() {
+	if (_currentScript == nullptr) {
+		return;
+	}
+
+	QString txt = _currentScript->synopsis();
+
+	if (txt != ui->synopsisEdit->toPlainText()) {
+		ui->synopsisEdit->setText(txt);
+	}
 }
 
 ComicscriptEditor::ComicscriptEditorFactory::ComicscriptEditorFactory(QObject* parent) :
