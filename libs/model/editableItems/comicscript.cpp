@@ -731,9 +731,9 @@ ComicscriptModel::PageBlock* ComicscriptModel::decodePageFromJson(QJsonObject co
 
 					if (pobj.contains(CHILDREN_ID)) {
 
-						QJsonValue a = page.value(CHILDREN_ID);
+						QJsonValue a = pobj.value(CHILDREN_ID);
 						if (a.isArray()) {
-							QJsonArray blocks = v.toArray();
+							QJsonArray blocks = a.toArray();
 
 							for (QJsonValue bl : blocks) {
 								if (bl.isObject()) {
