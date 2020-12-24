@@ -54,6 +54,9 @@ public:
 
 	static const QString ITEM_SUBITEM_ID;
 
+	typedef std::function<void(Aline::EditableItem*, QJsonObject const& , bool)> Extractor;
+	typedef std::function<QJsonObject(Aline::EditableItem*)> Encapsulator;
+
 	explicit JsonEditableItemManager(QObject *parent = nullptr);
 
 	virtual bool hasDataSource() const;
@@ -67,6 +70,9 @@ public:
 	virtual bool loadStruct();
 
 	virtual bool isNetworkShared() const;
+
+	void addExtractorDelegate(QString const& type, Extractor const& e);
+	void addEncapsulatorDelegate(QString const& type, Encapsulator const& e);
 
 protected:
 
@@ -94,6 +100,9 @@ protected:
 	bool _hasAProjectOpen;
 	QString _projectFileName;
 	QString _projectFolder;
+
+	QMap<QString,Extractor> _delegate_extractors;
+	QMap<QString,Encapsulator> _delegate_encapsulators;
 };
 
 } // namespace Cathia

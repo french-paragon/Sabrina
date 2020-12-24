@@ -313,6 +313,13 @@ bool JsonEditableItemManager::isNetworkShared() const {
 	return false;
 }
 
+void JsonEditableItemManager::addExtractorDelegate(QString const& type, Extractor const& e) {
+	_delegate_extractors.insert(type, e);
+}
+void JsonEditableItemManager::addEncapsulatorDelegate(QString const& type, Encapsulator const& e) {
+	_delegate_encapsulators.insert(type, e);
+}
+
 void JsonEditableItemManager::extractTreeLeafs(QJsonObject &obj) {
 
 	if (!obj.contains(TREE_CHILDRENS_ID)) {
@@ -451,7 +458,13 @@ Aline::EditableItem* JsonEditableItemManager::effectivelyLoadItem(QString const&
 
 void JsonEditableItemManager::extractItemData(Aline::EditableItem* item, QJsonObject const& obj) {
 
-	Aline::JsonUtils::extractItemData(item, obj, _factoryManager, { EditableItem::NOTES_PROP_NAME}, true);
+	QString id = obj.value(Aline::EditableItem::TYPE_ID_NAME).toString();
+
+	if (_delegate_extractors.contains(id)) {
+		_delegate_extractors[id](item, obj, true);
+	} else {
+		Aline::JsonUtils::extractItemData(item, obj, _factoryManager, { EditableItem::NOTES_PROP_NAME}, true);
+	}
 
 	item->blockSignals(true);
 
@@ -571,7 +584,12 @@ bool JsonEditableItemManager::effectivelySaveItem(const QString &ref) {
 
 QJsonObject JsonEditableItemManager::encapsulateItemToJson(Aline::EditableItem* item) const {
 
-	QJsonObject obj = Aline::JsonUtils::encapsulateItemToJson(item);
+	QJsonObject obj;
+	if (_delegate_encapsulators.contains(item->getTypeId())) {
+		obj = _delegate_encapsulators[item->getTypeId()](item);
+	} else {
+		obj = Aline::JsonUtils::encapsulateItemToJson(item);
+	}
 
 	EditableItem* sab_item = qobject_cast<EditableItem*>(item);
 

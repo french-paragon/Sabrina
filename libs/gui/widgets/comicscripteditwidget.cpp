@@ -518,6 +518,7 @@ void ComicscriptEditWidget::insertNextType(QModelIndex const& id, int modifiers)
 
 	if (id == QModelIndex()) {
 		_currentScript->getModel()->addPage(0);
+		return;
 	}
 
 	int l = _cursor->line();

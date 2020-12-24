@@ -18,15 +18,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "comicscript.h"
 
+#include "aline/src/utils/jsonutils.h"
+
 namespace Sabrina {
 
 const QString Comicscript::COMICSTRIP_TYPE_ID = "sabrina_comic_script";
+const QString Comicscript::COMICSTRIP_TEXT_ID = "ComicScriptText";
+
+
+const QString ComicscriptModel::TEXT_ID = "txt";
+const QString ComicscriptModel::CHARACTER_ID = "character";
+const QString ComicscriptModel::CHILDREN_ID = "children";
 
 Comicscript::Comicscript(QString ref, Aline::EditableItemManager *parent) :
 	EditableItem(ref, parent),
 	_title("Titre")
 {
 	_model = new ComicscriptModel(this);
+
+	connect(this, &Comicscript::titleChanged, this, &Comicscript::newUnsavedChanges);
+
+	connect(_model, &QAbstractItemModel::dataChanged, this, &Comicscript::newUnsavedChanges);
+	connect(_model, &QAbstractItemModel::rowsInserted, this, &Comicscript::newUnsavedChanges);
+	connect(_model, &QAbstractItemModel::rowsMoved, this, &Comicscript::newUnsavedChanges);
+	connect(_model, &QAbstractItemModel::rowsRemoved, this, &Comicscript::newUnsavedChanges);
 }
 
 QString Comicscript::getTypeId() const {
@@ -75,6 +90,46 @@ Aline::EditableItem* Comicscript::ComicstripFactory::createItem(QString ref, Ali
 	return new Comicscript(ref, parent);
 }
 
+void Comicscript::extractComicScriptFromJson(Aline::EditableItem* script, QJsonObject const& obj, bool blockChangeTracks) {
+
+	Aline::JsonUtils::extractItemData(script,
+									  obj,
+									  &Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager,
+									  {COMICSTRIP_TEXT_ID},
+									  blockChangeTracks);
+
+	if (script->getTypeId() == Comicscript::COMICSTRIP_TYPE_ID) {
+		script->blockChangeDetection(blockChangeTracks);
+
+		Comicscript* comicscript = qobject_cast<Comicscript*>(script);
+
+		if (obj.contains(COMICSTRIP_TEXT_ID)) {
+			QJsonValue v = obj.value(COMICSTRIP_TEXT_ID);
+			if (v.isArray()) {
+				QJsonArray pages = v.toArray();
+				comicscript->getModel()->setFromJson(pages);
+			}
+		}
+
+		script->blockChangeDetection(false);
+	}
+
+}
+
+QJsonObject Comicscript::encapsulateComicScriptToJson(Aline::EditableItem* script) {
+
+	QJsonObject obj = Aline::JsonUtils::encapsulateItemToJson(script);
+
+	Comicscript* comicscript = qobject_cast<Comicscript*>(script);
+
+	if (comicscript != nullptr) {
+		QJsonArray pages = comicscript->getModel()->serializeToJson();
+		obj.insert(COMICSTRIP_TEXT_ID, QJsonValue(pages));
+	}
+
+	return obj;
+
+}
 
 
 ComicscriptModel::ComicscriptModel(Comicscript* script) :
@@ -558,6 +613,145 @@ void ComicscriptModel::removeDialog(QModelIndex const& panelIndex, int row) {
 	p->_children.removeOne(static_cast<ComicstripBlock*>(target));
 	delete target;
 	endRemoveRows();
+}
+
+QJsonArray ComicscriptModel::serializeToJson() const {
+
+	QJsonArray array;
+
+	for (PageBlock* p : _pages) {
+		array.append(QJsonValue(encodePageToJson(p)));
+	}
+
+	return array;
+
+}
+void ComicscriptModel::setFromJson(QJsonArray const& array) {
+
+	beginResetModel();
+
+	for (PageBlock* p : _pages) {
+		delete p;
+	}
+
+	_pages.clear();
+	_pages.reserve(array.size());
+
+	for (QJsonValue v : array) {
+		QJsonObject obj = v.toObject();
+		_pages.push_back(decodePageFromJson(obj));
+	}
+
+	endResetModel();
+
+}
+
+
+QJsonObject ComicscriptModel::encodePageToJson(PageBlock* p) const {
+
+	QJsonObject obj;
+
+	obj.insert(TEXT_ID, QJsonValue(p->getText()));
+
+	if (p->_children.size() > 0) {
+		QJsonArray panels;
+
+		for (ComicstripBlock* b : p->_children) {
+
+			QJsonObject panel;
+
+			panel.insert(TEXT_ID, QJsonValue(b->getText()));
+
+			if (b->_children.size() > 0) {
+				QJsonArray boxes;
+
+				for (ComicstripBlock* sb : b->_children) {
+
+					QJsonObject box;
+
+					box.insert(TEXT_ID, QJsonValue(sb->getText()));
+					if (sb->type() == ComicstripBlock::DIALOG) {
+						DialogBlock* diag = static_cast<DialogBlock*>(sb);
+						box.insert(TEXT_ID, QJsonValue(diag->getDescr()));
+					}
+
+					boxes.append(QJsonValue(box));
+				}
+
+				panel.insert(CHILDREN_ID, QJsonValue(boxes));
+			}
+
+			panels.append(QJsonValue(panel));
+
+		}
+
+		obj.insert(CHILDREN_ID, QJsonValue(panels));
+	}
+
+	return obj;
+
+}
+
+ComicscriptModel::PageBlock* ComicscriptModel::decodePageFromJson(QJsonObject const& page) {
+
+	PageBlock* p = new PageBlock(this);
+
+	if (page.contains(TEXT_ID)) {
+		p->setText(page.value(TEXT_ID).toString());
+	}
+
+	if (page.contains(CHILDREN_ID)) {
+
+		QJsonValue v = page.value(CHILDREN_ID);
+		if (v.isArray()) {
+			QJsonArray panels = v.toArray();
+
+			for (QJsonValue panel : panels) {
+				if (panel.isObject()) {
+
+					QJsonObject pobj = panel.toObject();
+					PanelBlock* pan = new PanelBlock(this, p);
+
+					if (pobj.contains(TEXT_ID)) {
+						pan->setText(pobj.value(TEXT_ID).toString());
+					}
+
+					if (pobj.contains(CHILDREN_ID)) {
+
+						QJsonValue a = page.value(CHILDREN_ID);
+						if (a.isArray()) {
+							QJsonArray blocks = v.toArray();
+
+							for (QJsonValue bl : blocks) {
+								if (bl.isObject()) {
+									QJsonObject block = bl.toObject();
+
+									QString txt;
+
+									if (block.contains(TEXT_ID)) {
+										txt = block.value(TEXT_ID).toString();
+									}
+
+									if (block.contains(CHARACTER_ID)) {
+										DialogBlock* dialog = new DialogBlock(this, pan);
+										dialog->setText(txt);
+										dialog->setCharacter(block.value(CHARACTER_ID).toString());
+									} else {
+										CaptionBlock* caption = new CaptionBlock(this, pan);
+										caption->setText(txt);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
+
+	return p;
+
 }
 
 

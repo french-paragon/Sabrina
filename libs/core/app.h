@@ -28,6 +28,7 @@ namespace Sabrina {
 
 class MainWindow;
 class EditableItemManager;
+class JsonEditableItemManager;
 
 class CATHIA_CORE_EXPORT App : public Aline::App
 {
@@ -49,6 +50,8 @@ protected:
 	void openFileProject();
 	void createFileProject();
 	void closeProject();
+
+	JsonEditableItemManager* configureJsonProject();
 
 	void buildMainWindow();
 	void addAppActionsToMainWindows(MainWindow* mw);

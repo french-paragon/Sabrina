@@ -22,6 +22,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "model/editableitem.h"
 #include "aline/src/model/editableitemfactory.h"
 
+#include <QJsonArray>
+#include <QJsonObject>
+
 namespace Sabrina {
 
 class Comicscript;
@@ -30,6 +33,10 @@ class CATHIA_MODEL_EXPORT ComicscriptModel : public QAbstractItemModel
 {
 	Q_OBJECT
 public:
+
+	static const QString TEXT_ID;
+	static const QString CHARACTER_ID;
+	static const QString CHILDREN_ID;
 
 	enum DataRoles : int {
 		TextRole = Qt::UserRole,
@@ -147,7 +154,13 @@ public:
 	void addDialog(QModelIndex const& panelIndex, int row);
 	void removeDialog(QModelIndex const& panelIndex, int row);
 
+	QJsonArray serializeToJson() const;
+	void setFromJson(QJsonArray const& arr);
+
 protected:
+
+	QJsonObject encodePageToJson(PageBlock* p) const;
+	PageBlock* decodePageFromJson(QJsonObject const& page);
 
 	QList<PageBlock*> _pages;
 };
@@ -158,6 +171,11 @@ class CATHIA_MODEL_EXPORT Comicscript : public EditableItem
 public:
 
 	static const QString COMICSTRIP_TYPE_ID;
+	static const QString COMICSTRIP_TEXT_ID;
+
+	static void extractComicScriptFromJson(Aline::EditableItem* script, QJsonObject const& obj, bool blockChangeTracks);
+	static QJsonObject encapsulateComicScriptToJson(Aline::EditableItem* script);
+
 
 	class CATHIA_MODEL_EXPORT ComicstripFactory : public Aline::EditableItemFactory
 	{
@@ -166,6 +184,8 @@ public:
 		Aline::EditableItem* createItem(QString ref, Aline::EditableItemManager* parent) const;
 
 	};
+
+	Q_PROPERTY(QString title READ getTitle WRITE setTitle NOTIFY titleChanged)
 
 	explicit Comicscript(QString ref, Aline::EditableItemManager *parent);
 

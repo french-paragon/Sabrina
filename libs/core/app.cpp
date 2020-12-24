@@ -145,7 +145,7 @@ bool App::start(QString appCode) {
 
 void App::openProject(QString const& projectFile) {
 
-	JsonEditableItemManager* project = new JsonEditableItemManager(this);
+	JsonEditableItemManager* project = configureJsonProject();
 
 	project->connectProject(projectFile);
 
@@ -318,7 +318,7 @@ void App::createFileProject() {
 		projectFile += JsonEditableItemManager::PROJECT_FILE_EXT;
 	}
 
-	JsonEditableItemManager* project = new JsonEditableItemManager(this);
+	JsonEditableItemManager* project = configureJsonProject();
 
 	project->connectProject(projectFile);
 
@@ -347,6 +347,16 @@ void App::closeProject() {
 	_project = nullptr;
 
 	_mainWindow->setCurrentProject(nullptr);
+}
+
+JsonEditableItemManager* App::configureJsonProject() {
+
+	JsonEditableItemManager* p = new JsonEditableItemManager(this);
+	p->addEncapsulatorDelegate(Comicscript::COMICSTRIP_TYPE_ID, &Comicscript::encapsulateComicScriptToJson);
+	p->addExtractorDelegate(Comicscript::COMICSTRIP_TYPE_ID, &Comicscript::extractComicScriptFromJson);
+
+	return p;
+
 }
 
 void App::quitCathia() {
