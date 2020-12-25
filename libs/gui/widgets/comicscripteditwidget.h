@@ -58,6 +58,12 @@ protected:
 
 	class Cursor {
 	public:
+
+		struct CursorState {
+			int line;
+			int pos;
+		};
+
 		Cursor(ComicscriptEditWidget* widget, int line, int pos, int extend = 0);
 
 		int line() const;
@@ -68,6 +74,8 @@ protected:
 		void move(int offset);
 		void jumpLines(int offset);
 		void setLine(int line);
+		void setPos(int pos);
+		void setState(CursorState state);
 
 	private:
 
@@ -94,10 +102,11 @@ protected:
 
 	void scroll (int offset);
 	void scrollToLine (int l);
+	Cursor::CursorState computeNewPosAfterJump(int nbPseudoLinesJump);
 
 	QFont getFont(int blockType);
 	int getLineHeight(int blockType);
-	QMargins getMargins(int blockType);
+	QMargins getMargins(int blockType, QString descr = "");
 	int renderIndex(QModelIndex const& index,
 					QPainter & painter,
 					int x,
@@ -107,6 +116,8 @@ protected:
 
 	void insertText(QString commited);
 	void insertNextType(const QModelIndex &id, int modifiers);
+
+	QString indexText(QModelIndex const& id);
 
 	Cursor* _cursor;
 

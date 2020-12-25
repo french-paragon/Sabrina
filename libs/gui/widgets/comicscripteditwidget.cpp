@@ -295,14 +295,28 @@ int ComicscriptEditWidget::getLineHeight(int blockType) {
 	return fm.height() + fm.leading();
 }
 
-QMargins ComicscriptEditWidget::getMargins(int blockType) {
+QMargins ComicscriptEditWidget::getMargins(int blockType, QString descr) {
+
+	int dMargin = 0;
+
+	if (blockType == ComicscriptModel::ComicstripBlock::PAGE or
+		blockType == ComicscriptModel::ComicstripBlock::PANEL) {
+		if (!descr.isEmpty()) {
+			QFont f = getFont(blockType);
+			f.setBold(true);
+
+			QFontMetrics fm(f);
+			dMargin = fm.horizontalAdvance(descr) + 5;
+		}
+	}
+
 	switch (blockType) {
 	case ComicscriptModel::ComicstripBlock::OTHER:
 		return QMargins(0,0,0,10);
 	case ComicscriptModel::ComicstripBlock::PAGE:
-		return QMargins(0, 30,0,5);
+		return QMargins(0 + dMargin, 30,0,5);
 	case ComicscriptModel::ComicstripBlock::PANEL:
-		return QMargins(15,10,0,5);
+		return QMargins(15 + dMargin, 10,0,5);
 	case ComicscriptModel::ComicstripBlock::CAPTION:
 		return QMargins(25,10,0,5);
 	case ComicscriptModel::ComicstripBlock::DIALOG:
@@ -418,11 +432,13 @@ void ComicscriptEditWidget::keyPressEvent(QKeyEvent *event) {
 		scrollToLine(_cursor->line());
 		update();
 	} else if (event->key() == Qt::Key_Up) {
-		_cursor->jumpLines(-1);
+		Cursor::CursorState cs = computeNewPosAfterJump(-1);
+		_cursor->setState(cs);
 		scrollToLine(_cursor->line());
 		update();
 	} else if (event->key() == Qt::Key_Down) {
-		_cursor->jumpLines(1);
+		Cursor::CursorState cs = computeNewPosAfterJump(1);
+		_cursor->setState(cs);
 		scrollToLine(_cursor->line());
 		update();
 	} else if (event->key() == Qt::Key_Return or event->key() == Qt::Key_Enter) {
@@ -584,6 +600,18 @@ void ComicscriptEditWidget::insertNextType(QModelIndex const& id, int modifiers)
 		break;
 	}
 
+}
+
+QString ComicscriptEditWidget::indexText(QModelIndex const& id) {
+	if (_currentScript == nullptr) {
+		return "";
+	}
+
+	if (id == QModelIndex()) {
+		return _currentScript->getTitle();
+	}
+
+	return id.data(ComicscriptModel::TextRole).toString();
 }
 
 int ComicscriptEditWidget::countLines() const {
@@ -890,6 +918,248 @@ void ComicscriptEditWidget::scrollToLine (int l) {
 
 }
 
+
+ComicscriptEditWidget::Cursor::CursorState ComicscriptEditWidget::computeNewPosAfterJump(int nbPseudoLinesJump) {
+
+	if (_currentScript == nullptr) {
+		return {0,0};
+	}
+
+	int n = nbPseudoLinesJump;
+
+	if (n == 0) {
+		return {_cursor->line(),_cursor->pos()};
+	}
+
+	ComicscriptModel* m = _currentScript->getModel();
+
+	int type;
+	QFont f;
+	int lineWidth = computeLineWidth();
+
+	int idLine;
+	QModelIndex id = getIndexAtLine(_cursor->line(), &idLine);
+	int pseudoPos =  _cursor->pos();
+	int subLine = 0;
+	int currentPos =  _cursor->pos();
+	int currentLine =  _cursor->line();
+	QTextLayout layout;
+
+
+	while (n != 0) {
+
+		if (id == QModelIndex() and n < 0) { //start reached
+			currentLine = 0;
+			currentPos = 0;
+			break;
+		}
+
+		type = id.data(ComicscriptModel::TypeRole).toInt();
+		f = getFont(type);
+		layout.setFont(f);
+
+		if (type == ComicscriptModel::ComicstripBlock::DIALOG
+				and idLine == currentLine) {
+
+			if (n < 0) {
+				id = m->getPrevItem(id);
+				layout.setText(indexText(id));
+
+				QMargins margins = getMargins(type);
+
+				layout.beginLayout();
+				QTextLine line = layout.createLine();
+				while (1) {
+
+					line.setLineWidth(lineWidth - margins.left() - margins.right());
+					int pDelta = line.textLength();
+					line = layout.createLine();
+					if (!line.isValid())
+						break;
+
+					currentPos += pDelta;
+				}
+				subLine = line.lineNumber();
+				layout.endLayout();
+
+				n++;
+				currentLine--;
+			} else if (n > 0) {
+
+				layout.setText(indexText(id));
+
+				QMargins margins = getMargins(type);
+
+				layout.beginLayout();
+				QTextLine line = layout.createLine();
+				line.setLineWidth(lineWidth - margins.left() - margins.right());
+				if (pseudoPos > line.textLength()) {
+					pseudoPos = line.textLength();
+					currentPos = pseudoPos;
+					subLine = 0;
+				}
+				while (1) {
+					line = layout.createLine();
+					if (!line.isValid())
+						break;
+
+					line.setLineWidth(lineWidth - margins.left() - margins.right());
+				}
+				layout.endLayout();
+
+				n--;
+			}
+		} else {
+
+			layout.setText(indexText(id));
+			QString descr = (id != QModelIndex()) ? id.data(ComicscriptModel::DescrRole).toString() + ": " : "";
+
+			QMargins margins = getMargins(type, descr);
+
+			layout.beginLayout();
+			while (1) {
+				QTextLine line = layout.createLine();
+				if (!line.isValid())
+					break;
+
+				line.setLineWidth(lineWidth - margins.left() - margins.right());
+			}
+			layout.endLayout();
+
+			QTextLine l;
+
+			if (currentPos >= 0) {
+				l = layout.lineForTextPosition(currentPos);
+				subLine = l.lineNumber();
+				pseudoPos = currentPos - l.textStart();
+			} else if (currentPos == -1) { //pseudopos is the reference, and we arrive from below
+				l = layout.lineAt(layout.lineCount()-1);
+
+				pseudoPos = (l.textLength() < pseudoPos) ? l.textLength() : pseudoPos;
+				subLine = l.lineNumber();
+				currentPos = l.textStart() + pseudoPos;
+
+			} else { //pseudopos is the reference, and we arrive from above
+				l = layout.lineAt(layout.lineCount()-1);
+
+				pseudoPos = (l.textLength() < pseudoPos) ? l.textLength() : pseudoPos;
+				subLine = l.lineNumber();
+				currentPos = pseudoPos;
+			}
+
+		}
+
+		if (n < 0) {
+
+			if (subLine < -n) {
+				n += subLine + 1;
+				currentLine -= 1;
+				if (type != ComicscriptModel::ComicstripBlock::DIALOG) {
+					id = m->getPrevItem(id);
+				}
+				currentPos = -1;
+				continue;
+
+			} else {
+				QTextLine l;
+
+				while (n < 0) {
+					l = layout.lineAt(subLine-1);
+					currentPos -= l.textLength();
+					n++;
+					subLine--;
+				}
+
+				if (l.textLength() < pseudoPos) {
+					int delta = pseudoPos - l.textLength();
+					pseudoPos -= delta;
+					currentPos -= delta;
+				}
+
+				break;
+			}
+
+		} else if (n > 0) {
+
+			int margin = layout.lineCount() - subLine;
+
+			if (margin <= n) {
+				n -= margin;
+				QModelIndex pid = id;
+				id = m->getNextItem(id);
+
+				if (id == QModelIndex()) { //endReached
+					currentPos = indexText(pid).length();
+					break;
+				}
+
+				currentLine += 1;
+				currentPos = -2;
+				continue;
+
+			} else {
+				QTextLine l;
+
+				while (n > 0) {
+					l = layout.lineAt(subLine);
+					currentPos += l.textLength();
+					n--;
+					subLine++;
+				}
+
+				if (layout.text().length() < currentPos) {
+					currentPos = layout.text().length();
+				}
+
+				break;
+			}
+
+		}
+	}
+
+	if (currentPos < 0) {
+		type = id.data(ComicscriptModel::TypeRole).toInt();
+		f = getFont(type);
+		layout.setFont(f);
+
+		layout.setText(indexText(id));
+		QString descr = (id != QModelIndex()) ? id.data(ComicscriptModel::DescrRole).toString() + ": " : "";
+
+		QMargins margins = getMargins(type, descr);
+
+		layout.beginLayout();
+		while (1) {
+			QTextLine line = layout.createLine();
+			if (!line.isValid())
+				break;
+
+			line.setLineWidth(lineWidth - margins.left() - margins.right());
+		}
+		layout.endLayout();
+
+		QTextLine l;
+
+		if (currentPos == -1) { //pseudopos is the reference, and we arrive from below
+			l = layout.lineAt(layout.lineCount()-1);
+
+			pseudoPos = (l.textLength() < pseudoPos) ? l.textLength() : pseudoPos;
+			subLine = l.lineNumber();
+			currentPos = l.textStart() + pseudoPos;
+
+		} else if (currentPos < 0) { //pseudopos is the reference, and we arrive from above
+			l = layout.lineAt(layout.lineCount()-1);
+
+			pseudoPos = (l.textLength() < pseudoPos) ? l.textLength() : pseudoPos;
+			subLine = l.lineNumber();
+			currentPos = pseudoPos;
+		}
+
+	}
+
+	return {currentLine, currentPos};
+
+}
+
 ComicscriptEditWidget::Cursor::Cursor(ComicscriptEditWidget *widget,
 									  int line,
 									  int pos,
@@ -932,6 +1202,7 @@ void ComicscriptEditWidget::Cursor::move(int offset) {
 	}
 
 }
+
 void ComicscriptEditWidget::Cursor::jumpLines(int offset) {
 	int oldLine = _line;
 	_line += offset;
@@ -949,6 +1220,21 @@ void ComicscriptEditWidget::Cursor::setLine(int line) {
 	constrainPosOnLine();
 
 	if (oldLine != _line) {
+		_widget->currentLineChanged(_line);
+	}
+}
+void ComicscriptEditWidget::Cursor::setPos(int pos) {
+	_pos = pos;
+	constrainPosOnLine();
+}
+void ComicscriptEditWidget::Cursor::setState(CursorState state) {
+	int oldLine = _line;
+	_pos = state.pos;
+	_line = state.line;
+	constrainLine();
+	constrainPosOnLine();
+
+	if (state.line != oldLine) {
 		_widget->currentLineChanged(_line);
 	}
 }
