@@ -1,6 +1,3 @@
-#ifndef SABRINA_COMICSCRIPTEDITWIDGET_H
-#define SABRINA_COMICSCRIPTEDITWIDGET_H
-
 /*
 This file is part of the project Sabrina
 Copyright (C) 2020  Paragon <french.paragon@gmail.com>
@@ -19,31 +16,31 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "./texteditwidget.h"
-#include <QModelIndex>
+#include "text/comicscript.h"
 
-namespace Sabrina {
+#include "gui/widgets/texteditwidget.h"
 
-class Comicscript;
+#include <QApplication>
 
-class ComicscriptEditWidget : public TextEditWidget
-{
-	Q_OBJECT
-public:
+using namespace Sabrina;
 
-	explicit ComicscriptEditWidget(QWidget *parent = nullptr);
-	virtual ~ComicscriptEditWidget();
+int main(int argc, char ** argv) {
 
-	void setCurrentScript(Comicscript* script);
-	void setCurrentScript(TextNode *root);
+	QApplication app(argc, argv);
 
-	void addPage();
-	void addPanel();
-	void addCaption();
-	void addDialog();
+	TextEditWidget w;
 
-};
+	ComicScriptTextStyleManager st;
+	w.setStyleManager(&st);
 
-} // namespace Sabrina
+	TextNode n;
+	n.setStyleId(ComicScriptStyle::MAIN);
+	n.lineAt(0)->setText("Test");
 
-#endif // SABRINA_COMICSCRIPTEDITWIDGET_H
+	w.setCurrentScript(&n);
+
+	w.show();
+
+	return app.exec();
+
+}

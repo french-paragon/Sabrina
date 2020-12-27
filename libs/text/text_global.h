@@ -1,9 +1,9 @@
-#ifndef SABRINA_COMICSCRIPTEDITWIDGET_H
-#define SABRINA_COMICSCRIPTEDITWIDGET_H
+#ifndef TEXT_GLOBAL_H
+#define TEXT_GLOBAL_H
 
 /*
 This file is part of the project Sabrina
-Copyright (C) 2020  Paragon <french.paragon@gmail.com>
+Copyright (C) 2020 Paragon <french.paragon@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,31 +19,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "./texteditwidget.h"
-#include <QModelIndex>
+#if defined(SABRINA_TEXT_LIBRARY)
+#  define SABRINA_TEXT_EXPORT Q_DECL_EXPORT
+#else
+#  define SABRINA_TEXT_EXPORT Q_DECL_IMPORT
+#endif
 
-namespace Sabrina {
-
-class Comicscript;
-
-class ComicscriptEditWidget : public TextEditWidget
-{
-	Q_OBJECT
-public:
-
-	explicit ComicscriptEditWidget(QWidget *parent = nullptr);
-	virtual ~ComicscriptEditWidget();
-
-	void setCurrentScript(Comicscript* script);
-	void setCurrentScript(TextNode *root);
-
-	void addPage();
-	void addPanel();
-	void addCaption();
-	void addDialog();
-
-};
-
-} // namespace Sabrina
-
-#endif // SABRINA_COMICSCRIPTEDITWIDGET_H
+#endif // TEXT_GLOBAL_H

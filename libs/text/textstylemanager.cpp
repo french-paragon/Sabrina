@@ -1,6 +1,3 @@
-#ifndef SABRINA_COMICSCRIPTEDITWIDGET_H
-#define SABRINA_COMICSCRIPTEDITWIDGET_H
-
 /*
 This file is part of the project Sabrina
 Copyright (C) 2020  Paragon <french.paragon@gmail.com>
@@ -19,31 +16,39 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "./texteditwidget.h"
-#include <QModelIndex>
+#include "textstylemanager.h"
+
+#include "abstracttextstyle.h"
 
 namespace Sabrina {
 
-class Comicscript;
-
-class ComicscriptEditWidget : public TextEditWidget
+TextStyleManager::TextStyleManager(QObject *parent) :
+	QObject(parent)
 {
-	Q_OBJECT
-public:
 
-	explicit ComicscriptEditWidget(QWidget *parent = nullptr);
-	virtual ~ComicscriptEditWidget();
+}
 
-	void setCurrentScript(Comicscript* script);
-	void setCurrentScript(TextNode *root);
+bool TextStyleManager::registerStyle(AbstractTextNodeStyle* style) {
+	if (!_styles.contains(style->typeId())) {
+		_styles.insert(style->typeId(), style);
+		Q_EMIT styleInserted(style->typeId());
+		return true;
+	}
+	return false;
+}
+AbstractTextNodeStyle* TextStyleManager::getStyleByCode(int code) {
+	return _styles.value(code, nullptr);
+}
 
-	void addPage();
-	void addPanel();
-	void addCaption();
-	void addDialog();
+void TextStyleManager::removeStyle(int code) {
+	if (_styles.contains(code)) {
+		_styles.remove(code);
+		Q_EMIT styleRemoved(code);
+	}
+}
 
-};
+int TextStyleManager::getDefaultStyleCode() const {
+	return 0;
+}
 
 } // namespace Sabrina
-
-#endif // SABRINA_COMICSCRIPTEDITWIDGET_H

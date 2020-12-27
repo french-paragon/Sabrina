@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "ui_comicscripteditor.h"
 
 #include "model/editableItems/comicscript.h"
+#include "text/comicscript.h"
 
 namespace Sabrina {
 
@@ -92,12 +93,12 @@ bool ComicscriptEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 
 void ComicscriptEditor::checkAddButtonsActivation() {
 
-	int code = ui->editWidget->currentLineType();
+	int code = ui->editWidget->currentLineStyleId();
 
 	bool enablePages = ui->editWidget->hasScript();
-	bool enablePanels = ui->editWidget->hasScript() and (code != ComicscriptModel::ComicstripBlock::OTHER);
-	bool enableCaptions = ui->editWidget->hasScript() and (code >= ComicscriptModel::ComicstripBlock::PANEL);
-	bool enableDialogs = ui->editWidget->hasScript() and (code >= ComicscriptModel::ComicstripBlock::PANEL);
+	bool enablePanels = ui->editWidget->hasScript() and (code != ComicScriptStyle::MAIN);
+	bool enableCaptions = ui->editWidget->hasScript() and (code >= ComicScriptStyle::PANEL);
+	bool enableDialogs = ui->editWidget->hasScript() and (code >= ComicScriptStyle::PANEL);
 
 	ui->addPageButton->setEnabled(enablePages);
 	ui->addPanelButton->setEnabled(enablePanels);

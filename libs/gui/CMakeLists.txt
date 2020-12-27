@@ -28,6 +28,8 @@ set(LIB_SRC mainwindows.cpp
 			widgets/noteseditwidget.cpp
 			widgets/noteseditwidget.h
             widgets/noteseditwidget.ui
+			widgets/texteditwidget.cpp
+			widgets/texteditwidget.h
 			widgets/comicscripteditwidget.cpp
 			widgets/comicscripteditwidget.h
             ressources/ressources_gui.qrc)
@@ -42,4 +44,4 @@ target_link_libraries(${LIB_NAME} Qt5::Widgets)
 target_link_libraries(${LIB_NAME} Qt5::Gui)
 target_link_libraries(${LIB_NAME} Qt5::QuickWidgets)
 
-target_link_libraries(${LIB_NAME} Aline Model)
+target_link_libraries(${LIB_NAME} Aline Model Text)

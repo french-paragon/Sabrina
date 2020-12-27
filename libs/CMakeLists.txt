@@ -1,3 +1,4 @@
+add_subdirectory(text)
 add_subdirectory(model)
 add_subdirectory(core)
 add_subdirectory(gui)
