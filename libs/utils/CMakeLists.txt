@@ -55,6 +55,8 @@ set(LIB_NAME Utils)
 set(LIB_SRC utils_global.h
             app_info.h
             settings_global_keys.h
+			envvars.h
+			envvars.cpp
             ${CMAKE_CURRENT_BINARY_DIR}/app_info.cpp)
 
 add_library(${LIB_NAME} ${LIB_SRC})

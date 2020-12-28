@@ -1,6 +1,26 @@
+/*
+This file is part of the project Sabrina
+Copyright (C) 2020  Paragon <french.paragon@gmail.com>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "texteditwidget.h"
 
 #include <QPainter>
+
+#include "utils/envvars.h"
 
 namespace Sabrina {
 
@@ -217,6 +237,19 @@ void TextEditWidget::inputMethodEvent(QInputMethodEvent *event) {
 
 }
 
+void TextEditWidget::wheelEvent(QWheelEvent *event) {
+
+	QPoint numPixels = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta() / 8;
+
+	if (!numPixels.isNull() and getEnvVar("XDG_SESSION_TYPE").toLower() != "x11") {
+		scroll(-numPixels.y());
+	} else if (!numDegrees.isNull()) {
+		scroll(-numDegrees.y());
+	}
+	update();
+}
+
 int TextEditWidget::nodeHeight(TextNode* n) {
 	AbstractTextNodeStyle* s = nodeStyle(n);
 
@@ -225,6 +258,29 @@ int TextEditWidget::nodeHeight(TextNode* n) {
 	}
 
 	return s->nodeHeight(n, computeLineWidth());
+
+}
+int TextEditWidget::scroolableUpDistance(int maxScroll) {
+
+	if (_endIndexMargin < 0) {
+		return 0;
+	}
+
+	int dist = _endIndexMargin;
+
+	TextNode* n = _endIndex->nextNode();
+
+	while (n != nullptr) {
+		int h = nodeHeight(n);
+
+		if (dist + h > maxScroll) {
+			return maxScroll;
+		}
+
+		dist += h;
+	}
+
+	return dist + _internalMargins.bottom();
 
 }
 AbstractTextNodeStyle* TextEditWidget::nodeStyle(TextNode* n) {
@@ -248,7 +304,7 @@ void TextEditWidget::scroll (int offset) {
 		return;
 	}
 
-	if (_baseIndex == _currentScript and offset < 0) { //can't scroll up
+	if (_baseIndex == _currentScript and _baseIndexHeightDelta == 0 and offset < 0) { //can't scroll up
 		return;
 	}
 
@@ -277,45 +333,22 @@ void TextEditWidget::scroll (int offset) {
 		_baseIndexHeightDelta = std::max(_baseIndexHeightDelta - p, 0);
 	} else { //scroll down
 
+		p = scroolableUpDistance(p);
+
 		int bIdMargin = nodeHeight(_baseIndex) - _baseIndexHeightDelta;
 
 		while (p > 0) {
 
-			if (_endIndexMargin < bIdMargin) { //need to update bottom index;
-
-				p -= _endIndexMargin;
-				bIdMargin -= _endIndexMargin;
-				_baseIndexHeightDelta += _endIndexMargin;
-
-				if (_endIndex->nextNode() == nullptr) { //reached the end
-					_endIndexMargin = 0;
-
-					if (p > 0) {
-						int d = std::min(_internalMargins.bottom(), p);
-						_endIndexMargin = -d;
-
-						_baseIndexHeightDelta += d;
-						bIdMargin -= d;
-
-						while (bIdMargin < 0) {
-							_baseIndex = _baseIndex->nextNode();
-							_baseIndexHeightDelta = bIdMargin;
-							bIdMargin += nodeHeight(_baseIndex);
-						}
-					}
-					break;
-				} else {
-					_endIndex = _endIndex->nextNode();
-					_endIndexMargin = nodeHeight(_endIndex);
-				}
-			} else { //need to update top index
-
-				_endIndexMargin -= bIdMargin;
-
-				_baseIndex = _baseIndex->nextNode();
-				bIdMargin = nodeHeight(_baseIndex);
-				_baseIndexHeightDelta = 0;
+			if (p < bIdMargin) {
+				_baseIndexHeightDelta += p;
+				break;
 			}
+
+			p -= bIdMargin;
+
+			_baseIndex = _baseIndex->nextNode();
+			_baseIndexHeightDelta = 0;
+			bIdMargin = nodeHeight(_baseIndex);
 		}
 	}
 
