@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "texteditwidget.h"
 
 #include <QPainter>
+#include <cmath>
 
 #include "utils/envvars.h"
 
@@ -250,6 +251,17 @@ void TextEditWidget::wheelEvent(QWheelEvent *event) {
 	update();
 }
 
+void TextEditWidget::mousePressEvent(QMouseEvent *event) {
+
+	if (event->buttons() == Qt::LeftButton) {
+		QPoint p = event->pos();
+		setCursorAtPoint(p);
+		update();
+		event->accept();
+	}
+
+}
+
 int TextEditWidget::nodeHeight(TextNode* n) {
 	AbstractTextNodeStyle* s = nodeStyle(n);
 
@@ -292,6 +304,168 @@ AbstractTextNodeStyle* TextEditWidget::nodeStyle(TextNode* n) {
 	}
 
 	return s;
+}
+
+void TextEditWidget::setCursorAtPoint(QPoint const& p, int vMargin) {
+
+	int c_pos;
+	QPoint tp = p;
+	tp.ry() -= vMargin + _internalMargins.top();
+	tp.rx() -= _internalMargins.left();
+	TextLine* l = lineAtPos(tp, &c_pos);
+
+	if (l == nullptr) {
+		return;
+	}
+
+	int line = l->lineLineNumber();
+
+	_cursor->setState({line, c_pos});
+}
+
+TextNode* TextEditWidget::nodeAtHeight(int y, int * nodeH) {
+
+	if (_styleManager == nullptr) {
+		return nullptr;
+	}
+
+	if (y < 0 or y > height()) {
+		return nullptr;
+	}
+
+	TextNode* n = _baseIndex;
+
+	int pos = -_baseIndexHeightDelta;
+
+	int h = nodeHeight(n);
+
+	if (pos + h >= y) {
+		if (nodeH != nullptr) {
+			*nodeH = pos;
+		}
+		return n;
+	}
+
+	pos += h;
+
+	while (n != _endIndex) {
+
+		n = n->nextNode();
+
+		h = nodeHeight(n);
+
+		if (pos + h >= y) {
+			if (nodeH != nullptr) {
+				*nodeH = pos;
+			}
+			return n;
+		}
+
+		pos += h;
+	}
+
+	return _endIndex;
+}
+
+TextLine* TextEditWidget::lineAtPos(QPoint const& pos, int* cursorPos) {
+
+	if (_styleManager == nullptr) {
+		return nullptr;
+	}
+
+	int dy;
+	TextNode* n = nodeAtHeight(pos.y(), &dy);
+
+	QPoint p = pos;
+	p.ry() -= dy;
+
+	if (n == nullptr) {
+		return nullptr;
+	}
+
+	AbstractTextNodeStyle* s = nodeStyle(n);
+
+	if (s == nullptr) {
+		return nullptr;
+	}
+
+	float vd = std::numeric_limits<float>::infinity();
+	float hd = std::numeric_limits<float>::infinity();
+
+	TextLine* l = nullptr;
+
+	for (TextLine* ln : n->lines()) {
+
+		QTextLayout const& lyt = s->lineLayout(ln);
+
+		QRectF r = lyt.boundingRect();
+
+		if (r.contains(p)) {
+			vd = 0;
+			hd = 0;
+			l = ln;
+			continue;
+		}
+
+		float tmp_vd = (p.y() < r.y()) ? r.y() - p.y() : p.y() - r.y() - r.height();
+		if (tmp_vd < 0) tmp_vd = 0;
+		float tmp_hd = (p.x() < r.x()) ? r.x() - p.x() : p.x() - r.x() - r.width();
+		if (tmp_hd < 0) tmp_hd = 0;
+
+		if (tmp_vd < vd) {
+			vd = tmp_vd;
+			hd = tmp_hd;
+			l = ln;
+		} else if (tmp_vd == vd) {
+			if (tmp_hd < hd) {
+				vd = tmp_vd;
+				hd = tmp_hd;
+				l = ln;
+			}
+		}
+
+	}
+
+	if (cursorPos != nullptr) {
+
+		QTextLayout const& lyt = s->lineLayout(l);
+
+		float vd = std::numeric_limits<float>::infinity();
+		int pos = -1;
+
+		if (p.y() > lyt.boundingRect().y() + lyt.boundingRect().height()) {
+			pos = l->getText().length();
+		} else if (p.y() + s->getLineHeight(l) < lyt.boundingRect().y()) {
+			pos = 0;
+		} else {
+			for (int i = 0; i < lyt.lineCount(); i++) {
+				QTextLine l = lyt.lineAt(i);
+
+				float tmp_vd = std::fabs(l.y() - p.y());
+
+				if (tmp_vd < vd) {
+					vd = tmp_vd;
+					pos = l.xToCursor(p.x());
+				}
+			}
+
+			pos -= s->getPrefix(l).length();
+		}
+
+		if (pos < 0) {
+			pos = 0;
+		}
+
+		if (pos > l->getText().length()) {
+			pos = l->getText().length();
+		}
+
+		*cursorPos = pos;
+
+	}
+
+	return l;
+
 }
 
 void TextEditWidget::scroll (int offset) {

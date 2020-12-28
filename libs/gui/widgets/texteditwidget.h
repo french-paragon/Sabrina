@@ -101,10 +101,15 @@ protected:
 	void keyPressEvent(QKeyEvent *event) override;
 	void inputMethodEvent(QInputMethodEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
 
 	int nodeHeight(TextNode* n);
 	int scroolableUpDistance(int maxScroll);
 	AbstractTextNodeStyle* nodeStyle(TextNode* n);
+
+	void setCursorAtPoint(QPoint const& p, int vMargin = 5);
+	TextNode* nodeAtHeight(int y, int * nodeH = nullptr);
+	TextLine* lineAtPos(QPoint const& pos, int *cursorPos = nullptr);
 
 	void scroll (int offset);
 	void scrollToLine (int l);

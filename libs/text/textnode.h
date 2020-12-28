@@ -43,6 +43,8 @@ public:
 	TextLine* nextLine();
 	TextLine* previousLine();
 
+	int lineLineNumber() const;
+
 Q_SIGNALS:
 
 	void lineEdited(TextLine* line);
@@ -87,6 +89,7 @@ public:
 	int maxLine() const;
 
 	QList<TextNode*> childNodes();
+	QList<TextLine*> lines();
 
 	TextNode* nextNode();
 	TextNode* previousNode();

@@ -95,6 +95,16 @@ TextLine* TextLine::previousLine() {
 
 }
 
+int TextLine::lineLineNumber() const {
+
+	TextNode* n = nodeParent();
+
+	int l = n->nodeLine();
+	l += n->lines().indexOf(const_cast<TextLine*>(this));
+
+	return l;
+}
+
 TextNode::TextNode(QObject *parent, int nbLines) :
 	QObject(parent),
 	_lines(),
@@ -188,6 +198,9 @@ int TextNode::maxLine() const {
 
 QList<TextNode*> TextNode::childNodes() {
 	return _children;
+}
+QList<TextLine*> TextNode::lines() {
+	return _lines;
 }
 
 TextNode* TextNode::nextNode() {
