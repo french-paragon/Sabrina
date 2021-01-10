@@ -34,7 +34,8 @@ TextEditWidget::TextEditWidget(QWidget *parent) :
 	_baseIndexHeightDelta(0),
 	_endIndex(nullptr),
 	_endIndexMargin(-1),
-	_internalMargins(25, 25, 25, 25)
+	_internalMargins(25, 25, 25, 25),
+	_nodeSupprBehavior(NodeSupprBehavior::MergeContent)
 {
 	_cursor = new Cursor(this, 0, 0, 0);
 	setFocusPolicy(Qt::StrongFocus);
@@ -215,6 +216,11 @@ void TextEditWidget::keyPressEvent(QKeyEvent *event) {
 		_cursor->setLine(idL + n->nbTextLines());
 
 		scrollToLine(_cursor->line());
+		update();
+
+	} else if (event->key() == Qt::Key_Backspace) {
+
+		removeText();
 		update();
 
 	} else if(!event->text().isEmpty()) {
@@ -780,6 +786,101 @@ void TextEditWidget::insertNextType(TextNode* n, Qt::KeyboardModifiers modifiers
 		break;
 	}
 
+}
+void TextEditWidget::removeText() {
+
+	if (_currentScript == nullptr) {
+		return;
+	}
+
+	TextLine* sl = _currentScript->getLineAtLine(_cursor->line());
+	int offset = (_cursor->extend() > 0) ? _cursor->extend() : -1;
+	int sPos = _cursor->pos();
+	int ePos;
+
+	TextLine* tl = sl->lineAfterOffset(sPos, offset, ePos);
+
+	if (offset < 0) {
+		TextLine* lTmp = sl;
+		sl = tl;
+		tl = lTmp;
+
+		int pTmp = sPos;
+		sPos = ePos;
+		ePos = pTmp;
+	}
+
+	TextLine* l = sl;
+
+	TextNode* sN = sl->nodeParent();
+	TextNode* tN = tl->nodeParent();
+
+	TextNode* n = l->nodeParent();
+
+	bool nodeCanBeEmptied = false;
+	QList<TextNode*> emptiedNodes;
+
+	while (l != tl) {
+
+		TextLine* tmp = l->nextLine();
+
+		if (l != sl and l != tl and (n == sN or n == tN)) {
+			l->setText(""); //empty the lines of non removable blocks;
+		}
+
+		l = tmp;
+		if (l->nodeParent() != n) { //went to a new node
+
+			if (nodeCanBeEmptied) {
+				emptiedNodes.push_back(n);
+			}
+
+			n = l->nodeParent();
+			nodeCanBeEmptied = true;
+		}
+	}
+
+	QString front = sl->getText().mid(0, sPos);
+
+	QString e = tl->getText();
+	QString back = "";
+
+	if (ePos == e.length()) {
+		if (sl != tl) {
+			tl->setText("");
+
+			if (sN != tN and tN->lines().last() == tl) {
+				emptiedNodes.push_back(tN);
+			}
+		}
+	} else if ((tN->lines().last() != tl or _nodeSupprBehavior == NodeSupprBehavior::KeepNonEmptyBlocks)
+			   and sl != tl) {
+
+		tl->setText(e.mid(ePos));
+
+	} else {
+
+		back = e.mid(ePos);
+		tl->setText("");
+
+		if (tN != sN) {
+			emptiedNodes.push_back(tN);
+		}
+	}
+
+	sl->setText(front + back);
+
+	_cursor->setLine(sl->lineLineNumber());
+	_cursor->setPos(sPos);
+	for (TextNode* n : emptiedNodes) {
+		n->clearFromDoc();
+	}
+
+}
+
+TextEditWidget::NodeSupprBehavior TextEditWidget::getNodeSupprBehavior() const
+{
+    return _nodeSupprBehavior;
 }
 
 TextEditWidget::Cursor::Cursor(TextEditWidget* widget,

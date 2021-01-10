@@ -32,6 +32,18 @@ class TextEditWidget : public QWidget
 	Q_OBJECT
 public:
 
+	/*!
+	 * \brief The NodeSupprBehavior enum list possible behavior when suppr is triggered
+	 *
+	 * Possible behavior includes MergeContent (The remaining content of a block when the node jump is suppressed is added to the previous block,
+	 * multiple lines blocks would follow the same rule, thus the empty lines would not be deleted)
+	 * or KeepNonEmptyBlocks (A block cannot be removed as long as it is not empty).
+	 */
+	enum class NodeSupprBehavior {
+		MergeContent,
+		KeepNonEmptyBlocks
+	};
+
 	explicit TextEditWidget(QWidget *parent = nullptr);
 	virtual ~TextEditWidget();
 
@@ -44,6 +56,8 @@ public:
 
 	bool hasScript() const;
 	int currentLineStyleId() const;
+
+	NodeSupprBehavior getNodeSupprBehavior() const;
 
 Q_SIGNALS:
 
@@ -118,6 +132,7 @@ protected:
 
 	void insertText(QString commited);
 	void insertNextType(TextNode* n, Qt::KeyboardModifiers modifiers);
+	void removeText();
 
 	Cursor* _cursor;
 
@@ -130,6 +145,7 @@ protected:
 	int _endIndexMargin;
 
 	QMargins _internalMargins;
+	NodeSupprBehavior _nodeSupprBehavior;
 
 };
 

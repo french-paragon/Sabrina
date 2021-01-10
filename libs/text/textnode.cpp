@@ -94,6 +94,76 @@ TextLine* TextLine::previousLine() {
 	return nullptr;
 
 }
+TextLine* TextLine::lineAfterOffset(int initialPos, int offset, int & newPos, int* unusedOffset)
+{
+	int unused = offset;
+
+	TextLine* l = this;
+	int pos = initialPos;
+
+	while (unused != 0) {
+
+		TextLine* tmp;
+
+		if (unused < 0) {
+
+			tmp = l->previousLine();
+
+			if (unused + pos > 0) {
+
+				pos += unused;
+				unused = 0;
+
+			} else {
+
+				unused += pos;
+
+				if (tmp != nullptr) {
+					unused += 1;
+					l = tmp;
+					pos = l->getText().length();
+				}
+			}
+
+		} else {
+
+			tmp = l->nextLine();
+
+			int ll = l->getText().length();
+
+			if (unused + pos - ll < 0) {
+
+				pos += unused;
+				unused = 0;
+
+			} else {
+
+				unused -= ll - pos;
+
+				if (tmp != nullptr) {
+					unused -= 1;
+					l = tmp;
+					pos = 0;
+				}
+			}
+
+		}
+
+		if (tmp == nullptr) {
+			break;
+		}
+
+	}
+
+	newPos = pos;
+
+	if (unusedOffset != nullptr) {
+		*unusedOffset = unused;
+	}
+
+	return l;
+
+}
 
 int TextLine::lineLineNumber() const {
 
@@ -175,6 +245,7 @@ int TextNode::nodeLine() const {
 
 	return l;
 }
+
 int TextNode::maxLine() const {
 
 	TextNode* n = lastNode();
@@ -194,6 +265,25 @@ int TextNode::maxLine() const {
 
 	return l;
 
+}
+
+bool TextNode::clearFromDoc(bool deleteLater) {
+
+	TextNode* p = parentNode();
+
+	if (p == nullptr) {
+		return false;
+	}
+
+	int i = p->_children.indexOf(this);
+	p->_children.removeAt(i);
+	Q_EMIT nodeRemoved(p, i);
+
+	if (deleteLater) {
+		this->deleteLater();
+	}
+
+	return true;
 }
 
 QList<TextNode*> TextNode::childNodes() {

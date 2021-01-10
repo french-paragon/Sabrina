@@ -42,6 +42,7 @@ public:
 	TextNode * nodeParent() const;
 	TextLine* nextLine();
 	TextLine* previousLine();
+	TextLine* lineAfterOffset(int initialPos, int offset, int & newPos, int* unusedOffset = nullptr);
 
 	int lineLineNumber() const;
 
@@ -87,6 +88,9 @@ public:
 
 	//! \brief the numer of line to the last line of the last child of the node
 	int maxLine() const;
+
+	//! \brief remove the node from the document, will suceed if the node is not a root node.
+	bool clearFromDoc(bool deleteLater = true);
 
 	QList<TextNode*> childNodes();
 	QList<TextLine*> lines();
