@@ -307,6 +307,8 @@ bool JsonEditableItemManager::loadStruct() {
 
 	}
 
+	return true;
+
 }
 
 bool JsonEditableItemManager::isNetworkShared() const {
@@ -494,6 +496,7 @@ bool JsonEditableItemManager::clearItemData(QString itemRef) {
 		file.remove();
 	}
 
+	return true;
 }
 
 void JsonEditableItemManager::effectivelyLoadLabels() {
@@ -649,6 +652,8 @@ bool JsonEditableItemManager::extractNotesFromJson(NotesList* list, QJsonArray c
 		row++;
 
 	}
+
+	return true;
 
 }
 

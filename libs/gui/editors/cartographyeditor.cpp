@@ -436,6 +436,8 @@ void CartographyEditor::heightSpinBoxesChange() {
 
 void CartographyEditor::onMapSizeChanged(QSizeF size) {
 
+	Q_UNUSED(size);
+
 	if (_currentCartography == nullptr) {
 		return;
 	}
@@ -1116,6 +1118,7 @@ QString CartographyMapProxy::getImageBackgroundFile() const {
 	if (_connectedCartography != nullptr) {
 		return _connectedCartography->background();
 	}
+	return "";
 }
 
 Cartography *CartographyMapProxy::getConnectedCartography() const

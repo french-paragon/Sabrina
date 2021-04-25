@@ -152,6 +152,8 @@ bool NotesList::insertRows(int row, int count, const QModelIndex &parent) {
 
 	endInsertRows();
 
+	return true;
+
 }
 bool NotesList::removeRows(int row, int count, const QModelIndex &parent) {
 
@@ -165,6 +167,7 @@ bool NotesList::removeRows(int row, int count, const QModelIndex &parent) {
 
 	endRemoveRows();
 
+	return true;
 }
 
 } //namespace Sabrina
