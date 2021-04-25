@@ -96,16 +96,38 @@ void AbstractTextNodeStyle::renderNode(TextNode* node,
 									   const QPointF &offset,
 									   int availableWidth,
 									   QPainter & painter,
+									   TextNode::NodeCoordinate selectionStart,
+									   TextNode::NodeCoordinate selectionEnd,
 									   int cursorLine,
-									   int cursorPos) {
+									   int cursorPos,
+									   QTextCharFormat const& selectionFormat) {
 
 	layNodeOut(node, availableWidth);
 
+	int sLineIndex = (selectionStart.lineIndex < 0) ?  node->nbTextLines() + selectionStart.lineIndex : selectionStart.lineIndex;
+	int eLineIndex = (selectionEnd.lineIndex < 0) ?  node->nbTextLines() + selectionEnd.lineIndex : selectionEnd.lineIndex;
+
+	bool selectionStarted = false;
+
 	for (int i = 0; i < node->nbTextLines(); i++) {
+
+		int lSelStart = 0;
+		int lSelEnd = (selectionStarted) ? -1 : 0;
+
+		if (sLineIndex == i) {
+			lSelStart = selectionStart.linePos;
+			selectionStarted = true;
+			lSelEnd = -1;
+		}
+		if (eLineIndex == i) {
+			lSelEnd = selectionEnd.linePos;
+			selectionStarted = false;
+		}
+
 		if (cursorLine == i) {
-			renderLine(node->lineAt(i), offset, painter, cursorPos);
+			renderLine(node->lineAt(i), offset, painter, lSelStart, lSelEnd, cursorPos, selectionFormat);
 		} else {
-			renderLine(node->lineAt(i), offset, painter);
+			renderLine(node->lineAt(i), offset, painter, lSelStart, lSelEnd, -1, selectionFormat);
 		}
 	}
 
@@ -134,9 +156,26 @@ int AbstractTextNodeStyle::nodeHeight(TextNode* node, int availableWidth) const 
 void AbstractTextNodeStyle::renderLine(TextLine* line,
 				const QPointF &offset,
 				QPainter & painter,
-				int cursorStart) const {
+				int selectionStart,
+				int selectionEnd,
+				int cursorStart,
+				const QTextCharFormat &selectionFormat) const {
 
-	_cache[line].layout->draw(&painter, offset);
+	QVector<QTextLayout::FormatRange> selections;
+
+	int sStart = selectionStart < 0 ? 0 : selectionStart;
+	int sEnd = selectionEnd < 0 ? line->getText().length() + selectionEnd + 1 : selectionEnd;
+	int l = sEnd - sStart;
+
+	if (l > 0) {
+		QTextLayout::FormatRange range;
+		range.start = sStart + getPrefix(line).size();
+		range.length = l;
+		range.format = selectionFormat;
+		selections.push_back(range);
+	}
+
+	_cache[line].layout->draw(&painter, offset, selections);
 
 	if (cursorStart >= 0) {
 

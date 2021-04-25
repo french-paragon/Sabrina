@@ -23,10 +23,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <QMargins>
 #include <QTextLayout>
 
+#include "textnode.h"
+
 namespace Sabrina {
 
 class TextLine;
-class TextNode;
 
 class AbstractTextNodeStyle : public QObject
 {
@@ -56,8 +57,11 @@ public:
 							const QPointF &offset,
 							int availableWidth,
 							QPainter & painter,
+							TextNode::NodeCoordinate selectionStart = {0,0},
+							TextNode::NodeCoordinate selectionEnd = {0,0},
 							int cursorLine = -1,
-							int cursorPos = 0);
+							int cursorPos = 0,
+							const QTextCharFormat &selectionFormat = QTextCharFormat());
 
 
 	int nodeHeight(TextNode* node, int availableWidth) const;
@@ -69,9 +73,12 @@ Q_SIGNALS:
 protected:
 
 	void renderLine(TextLine* line,
-					const QPointF &offset,
-					QPainter & painter,
-					int cursorStart = -1) const;
+	                const QPointF &offset,
+	                QPainter & painter,
+	                int selectionStart = 0,
+	                int selectionEnd = -1,
+					int cursorStart = -1,
+					const QTextCharFormat &selectionFormat = QTextCharFormat()) const;
 	virtual void layOutLine(TextLine* line,
 							const QPointF &offset,
 							int availableWidth) const;

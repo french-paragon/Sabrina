@@ -70,8 +70,11 @@ public:
 					const QPointF &offset,
 					int availableWidth,
 					QPainter & painter,
+					TextNode::NodeCoordinate selectionStart = {0,0},
+					TextNode::NodeCoordinate selectionEnd = {0,0},
 					int cursorLine = -1,
-					int cursorPos = 0) override;
+					int cursorPos = 0,
+					const QTextCharFormat &selectionFormat = QTextCharFormat()) override;
 };
 
 class ComicScriptPageStyle : public ComicScriptDescribedStyle

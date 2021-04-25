@@ -97,6 +97,10 @@ protected:
 		void setLine(int line);
 		void setPos(int pos);
 		void setState(CursorState state);
+		void clearSelection();
+		void setExtent(int extend);
+
+		int charDistance(CursorState target);
 
 	private:
 
@@ -116,12 +120,14 @@ protected:
 	void inputMethodEvent(QInputMethodEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
 
 	int nodeHeight(TextNode* n);
 	int scroolableUpDistance(int maxScroll);
 	AbstractTextNodeStyle* nodeStyle(TextNode* n);
 
 	void setCursorAtPoint(QPoint const& p, int vMargin = 5);
+	void setSelectionAtPoint(QPoint const& p, int vMargin = 5);
 	TextNode* nodeAtHeight(int y, int * nodeH = nullptr);
 	TextLine* lineAtPos(QPoint const& pos, int *cursorPos = nullptr);
 
@@ -146,6 +152,8 @@ protected:
 
 	QMargins _internalMargins;
 	NodeSupprBehavior _nodeSupprBehavior;
+
+	QTextCharFormat _selectionFormat;
 
 };
 

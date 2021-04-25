@@ -79,8 +79,11 @@ void ComicScriptDescribedStyle::renderNode(TextNode* node,
 										   const QPointF &offset,
 										   int availableWidth,
 										   QPainter & painter,
+										   TextNode::NodeCoordinate selectionStart,
+										   TextNode::NodeCoordinate selectionEnd,
 										   int cursorLine,
-										   int cursorPos) {
+										   int cursorPos,
+										   const QTextCharFormat &selectionFormat) {
 
 	QMargins m = getNodeMargins(node);
 
@@ -93,7 +96,7 @@ void ComicScriptDescribedStyle::renderNode(TextNode* node,
 	painter.setFont(f);
 	painter.drawText(QPointF(offset.x() + m.left(), offset.y() + fm.ascent() + m.top()), descr);
 
-	ComicScriptStyle::renderNode(node, offset, availableWidth, painter, cursorLine, cursorPos);
+	ComicScriptStyle::renderNode(node, offset, availableWidth, painter, selectionStart, selectionEnd, cursorLine, cursorPos, selectionFormat);
 
 }
 

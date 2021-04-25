@@ -1,4 +1,4 @@
-/*
+﻿/*
 This file is part of the project Sabrina
 Copyright (C) 2020  Paragon <french.paragon@gmail.com>
 
@@ -109,7 +109,7 @@ TextLine* TextLine::lineAfterOffset(int initialPos, int offset, int & newPos, in
 
 			tmp = l->previousLine();
 
-			if (unused + pos > 0) {
+			if (unused + pos >= 0) {
 
 				pos += unused;
 				unused = 0;
@@ -131,7 +131,7 @@ TextLine* TextLine::lineAfterOffset(int initialPos, int offset, int & newPos, in
 
 			int ll = l->getText().length();
 
-			if (unused + pos - ll < 0) {
+			if (unused + pos - ll <= 0) {
 
 				pos += unused;
 				unused = 0;
@@ -173,6 +173,70 @@ int TextLine::lineLineNumber() const {
 	l += n->lines().indexOf(const_cast<TextLine*>(this));
 
 	return l;
+}
+int TextLine::lineNodeIndexNumber() const {
+	TextNode* n = nodeParent();
+
+	int l = n->lines().indexOf(const_cast<TextLine*>(this));
+
+	return l;
+}
+
+int TextLine::nCharsBefore() const {
+	TextNode* n = nodeParent();
+
+	int c = n->nCharsBefore();
+	int l = n->lines().indexOf(const_cast<TextLine*>(this));
+
+	for (int i = 0; i < l; i++) {
+		c += n->lines().at(i)->getText().size();
+	}
+
+	return c;
+
+}
+
+int TextLine::nChars() const {
+	return getText().size();
+}
+
+int TextLine::nCharsAfter() const {
+
+	TextNode* n = nodeParent();
+
+	int c = n->nCharsAfter();
+	int l = n->lines().indexOf(const_cast<TextLine*>(this));
+
+	for (int i = l+1; i < n->lines().size(); i++) {
+		c += n->lines()[i]->getText().size();
+	}
+
+	return c;
+}
+
+int TextNode::nCharsBetweenNodes(const TextNode* start, const TextNode* end) {
+
+	const TextNode* n = start;
+	const TextNode* l = end;
+
+	if (n == nullptr) {
+		return 0;
+	}
+
+	if (n == l) {
+		return 0;
+	}
+
+	int c = 0;
+
+	do {
+		for (int i = 0; i < n->nbTextLines(); i++) {
+			c += n->lineAt(i)->getText().size();
+		}
+		n = n->nextNode();
+	} while (n != l and n != nullptr);
+
+	return c;
 }
 
 TextNode::TextNode(QObject *parent, int nbLines) :
@@ -266,6 +330,29 @@ int TextNode::maxLine() const {
 	return l;
 
 }
+int TextNode::nChars() const {
+
+	const TextNode* n = this;
+	const TextNode* l = lastNode()->nextNode();
+
+	return nCharsBetweenNodes(n,l);
+}
+
+int TextNode::nCharsBefore() const {
+
+	const TextNode* n = rootNode();
+	const TextNode* l = this;
+
+	return nCharsBetweenNodes(n,l);
+}
+
+int TextNode::nCharsAfter() const {
+
+	const TextNode* n = this->nextNode();
+	const TextNode* l = nullptr;
+
+	return nCharsBetweenNodes(n,l);
+}
 
 bool TextNode::clearFromDoc(bool deleteLater) {
 
@@ -319,6 +406,10 @@ TextNode* TextNode::nextNode() {
 	}
 }
 
+const TextNode* TextNode::nextNode() const {
+	return const_cast<TextNode*>(this)->nextNode();
+}
+
 TextNode* TextNode::previousNode() {
 
 	TextNode* p = parentNode();
@@ -358,6 +449,9 @@ TextNode* TextNode::rootNode() {
 	}
 
 	return p;
+}
+const TextNode* TextNode::rootNode() const {
+	return const_cast<TextNode*>(this)->rootNode();
 }
 
 TextNode* TextNode::subRootNode() {
@@ -405,6 +499,27 @@ TextLine* TextNode::getLineAtLine(int line) {
 	}
 	return n->lineAt(line - l);
 
+}
+
+bool TextNode::isBetweenNode(const TextNode &sNode, const TextNode &eNode, bool withBoundaries) {
+
+	if (withBoundaries and (this == &sNode or this == &eNode)) {
+		return true;
+	}
+
+	TextNode* n = const_cast<TextNode*>(&sNode);
+	n = n->nextNode();
+
+	while (n != &eNode and n != nullptr) {
+
+		if (this == n) {
+			return true;
+		}
+
+		n = n->nextNode();
+	}
+
+	return false;
 }
 
 TextNode* TextNode::insertNodeAbove(int styleCode) {
