@@ -804,6 +804,10 @@ void TextEditWidget::insertText(QString commited) {
 		return;
 	}
 
+	if (_cursor->extend() != 0) {
+		removeText();
+	}
+
 	TextLine* tLine = n->lineAt(_cursor->line() - idLine);
 	QString line = tLine->getText();
 
@@ -888,7 +892,7 @@ void TextEditWidget::removeText() {
 	}
 
 	TextLine* sl = _currentScript->getLineAtLine(_cursor->line());
-	int offset = (_cursor->extend() > 0) ? _cursor->extend() : -1;
+	int offset = (_cursor->extend() != 0) ? _cursor->extend() : -1;
 	int sPos = _cursor->pos();
 	int ePos;
 
