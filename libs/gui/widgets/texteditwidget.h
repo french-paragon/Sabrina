@@ -154,6 +154,7 @@ protected:
 	NodeSupprBehavior _nodeSupprBehavior;
 
 	QTextCharFormat _selectionFormat;
+	QPoint _clickPos;
 
 };
 

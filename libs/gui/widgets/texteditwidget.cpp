@@ -310,8 +310,8 @@ void TextEditWidget::wheelEvent(QWheelEvent *event) {
 void TextEditWidget::mousePressEvent(QMouseEvent *event) {
 
 	if (event->buttons() == Qt::LeftButton) {
-		QPoint p = event->pos();
-		setCursorAtPoint(p);
+		_clickPos = event->pos();
+		setCursorAtPoint(_clickPos);
 		update();
 		event->accept();
 	}
@@ -321,7 +321,8 @@ void TextEditWidget::mouseMoveEvent(QMouseEvent *event) {
 
 	if (event->buttons() == Qt::LeftButton) {
 		QPoint p = event->pos();
-		setSelectionAtPoint(p);
+		setCursorAtPoint(p);
+		setSelectionAtPoint(_clickPos);
 		update();
 		event->accept();
 	}
