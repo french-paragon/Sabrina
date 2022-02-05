@@ -373,10 +373,10 @@ bool TextNode::clearFromDoc(bool deleteLater) {
 	return true;
 }
 
-QList<TextNode*> TextNode::childNodes() {
+const QList<TextNode *> & TextNode::childNodes() {
 	return _children;
 }
-QList<TextLine*> TextNode::lines() {
+const QList<TextLine*> & TextNode::lines() {
 	return _lines;
 }
 

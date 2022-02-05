@@ -119,7 +119,7 @@ void extractPageFromJson(TextNode* doc,  QJsonObject const& obj) {
 
 		if (v.isArray()) {
 
-			QJsonArray panels = v.toArray();
+			const QJsonArray panels = v.toArray();
 
 			for (QJsonValue const& p : panels) {
 				QJsonObject panel = p.toObject();
@@ -137,7 +137,7 @@ void extractPageFromJson(TextNode* doc,  QJsonObject const& obj) {
 
 					if (v.isArray()) {
 
-						QJsonArray blocks = v.toArray();
+						const QJsonArray blocks = v.toArray();
 
 						for (QJsonValue const& b : blocks) {
 							QJsonObject block = b.toObject();
@@ -146,6 +146,7 @@ void extractPageFromJson(TextNode* doc,  QJsonObject const& obj) {
 							TextNode* blockNode = panelNode->insertNodeBelow(nodeType, -1);
 
 							if (nodeType == ComicScriptStyle::DIALOG) {
+								blockNode->setNbTextLines(2);
 								blockNode->lineAt(0)->setText(block.value(Comicscript::CHARACTER_ID).toString());
 
 								if (block.contains(Comicscript::TEXT_ID)) {
@@ -183,7 +184,7 @@ void Comicscript::extractComicScriptFromJson(Aline::EditableItem* script, QJsonO
 		if (obj.contains(COMICSTRIP_TEXT_ID)) {
 			QJsonValue v = obj.value(COMICSTRIP_TEXT_ID);
 			if (v.isArray()) {
-				QJsonArray pages = v.toArray();
+				const QJsonArray pages = v.toArray();
 
 				for (QJsonValue const& v : pages) {
 					extractPageFromJson(doc, v.toObject());
@@ -218,7 +219,7 @@ QJsonObject encapsulatePage(TextNode* page) {
 
 				QJsonArray blocks;
 
-				for (TextNode* block : page->childNodes()) {
+				for (TextNode* block : panel->childNodes()) {
 					QJsonObject blk;
 
 					int nodeType = block->styleId();

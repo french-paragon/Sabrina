@@ -128,8 +128,8 @@ public:
 	//! \brief remove the node from the document, will suceed if the node is not a root node.
 	bool clearFromDoc(bool deleteLater = true);
 
-	QList<TextNode*> childNodes();
-	QList<TextLine*> lines();
+	QList<TextNode*> const& childNodes();
+	QList<TextLine *> const& lines();
 
 	TextNode* nextNode();
 	const TextNode* nextNode() const;
