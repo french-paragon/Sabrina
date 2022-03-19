@@ -62,6 +62,9 @@ protected:
 
 	bool effectivelySetEditedItem(Aline::EditableItem* item) override;
 
+	void onHighlightTextButtonToggled();
+	void onSelectionModeToggled();
+
 	void checkAddButtonsActivation();
 	void onNameChanged();
 	void onSynopsisChanged();

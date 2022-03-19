@@ -98,4 +98,16 @@ void ComicscriptEditWidget::addDialog() {
 	}
 }
 
+void ComicscriptEditWidget::highlightCurrentNode(bool highlight) {
+	TextEditWidget::setHighlightCurrent(highlight);
+}
+
+void ComicscriptEditWidget::selectFullBlocks(bool selectFullBlocks) {
+	TextEditWidget::SelectionMode selMode = TextEditWidget::SelectionMode::Text;
+	if (selectFullBlocks) {
+		selMode = TextEditWidget::SelectionMode::FullLeveldMultiNodes;
+	}
+	TextEditWidget::setSelectionMode(selMode);
+}
+
 } // namespace Sabrina

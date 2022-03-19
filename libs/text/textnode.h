@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "./text_global.h"
 
 #include <QObject>
-#include <QTextLayout>
+#include <QMap>
 
 
 namespace Sabrina {
@@ -49,10 +49,14 @@ public:
 
 	//! \brief the numer of character in the document before the line
 	int nCharsBefore() const;
+	//! \brief the numer of character in the node before the line
+	int nCharsBeforeInNode() const;
 	//! \brief the numer of character in the line
 	int nChars() const;
 	//! \brief the numer of character in the document after the line
 	int nCharsAfter() const;
+	//! \brief the numer of character in the node after the line
+	int nCharsAfterInNode() const;
 
 Q_SIGNALS:
 
@@ -73,10 +77,14 @@ public:
 	 * The line pos is relative to the start of the line, but the line index can be related to the parent node or document note depending on context.
 	 */
 	struct NodeCoordinate{
+		NodeCoordinate() : lineIndex(-1), linePos(-1) {};
 		NodeCoordinate(int lI, int lP) : lineIndex(lI), linePos(lP) {};
+		inline bool isValid() const { return lineIndex >= 0 and linePos >= 0; }
 		int lineIndex;
 		int linePos;
 	};
+
+	typedef std::pair<TextNode::NodeCoordinate, TextNode::NodeCoordinate> DocumentInterval;
 
 	/*!
 	 * \brief nCharsBetweenNodes gives the number of text character present between two nodes
@@ -85,6 +93,8 @@ public:
 	 * \return the number of character in the interval.
 	 */
 	static int nCharsBetweenNodes(const TextNode* start, const TextNode* end = nullptr);
+
+	static DocumentInterval intervalWithFlatParentsLevel(TextNode* n1, TextNode* n2);
 
 	explicit TextNode(QObject *parent = nullptr, int nbLines = 1);
 
@@ -113,11 +123,17 @@ public:
 	//! \brief the starting line of the node in the document
 	int nodeLine() const;
 
+	//! \brief the level of the node in the document
+	int nodeLevel() const;
+
 	//! \brief the numer of line to the last line of the last child of the node
 	int maxLine() const;
 
 	//! \brief the numer of character in the document part spanned by the node
 	int nChars() const;
+
+	//! \brief the numer of characters in the node (without child nodes).
+	int nCharsInNode() const;
 
 	//! \brief the numer of character in the document before the node
 	int nCharsBefore() const;
@@ -137,9 +153,21 @@ public:
 	TextNode* lastNode() const;
 	TextNode* rootNode();
 	const TextNode* rootNode() const;
+	TextNode* nodeAbove(int lvl);
+	const TextNode* nodeAbove(int lvl) const;
 	TextNode* subRootNode();
 	TextNode* nodeAtLine(int line, int* nLine = nullptr);
 	TextLine* getLineAtLine(int line);
+
+	NodeCoordinate coordinateAtLineStart(NodeCoordinate coord) const;
+	NodeCoordinate coordinateAtLineEnd(NodeCoordinate coord) const;
+
+	NodeCoordinate coordinateAtNodeStart(NodeCoordinate coord) const;
+	NodeCoordinate coordinateAtNodeEnd(NodeCoordinate coord) const;
+	NodeCoordinate coordinateAfterNodeChildrens(NodeCoordinate coord) const;
+
+	NodeCoordinate getCoordinateAfterOffset(NodeCoordinate coord, int offset) const;
+	int offsetBetweenCoordinates(NodeCoordinate start, NodeCoordinate end) const;
 
 	/*!
 	 * \brief isBetweenNode determine if the node is between the two input nodes.

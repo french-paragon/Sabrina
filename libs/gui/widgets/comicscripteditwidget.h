@@ -42,6 +42,9 @@ public:
 	void addCaption();
 	void addDialog();
 
+	void highlightCurrentNode(bool highlight);
+	void selectFullBlocks(bool selectFullBlocks);
+
 };
 
 } // namespace Sabrina

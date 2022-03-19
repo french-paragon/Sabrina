@@ -22,6 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "model/editableItems/comicscript.h"
 #include "text/comicscript.h"
 
+#include <QSettings>
+#define COMIC_EDITOR_HIGHLIGHT_SETTING "comic_editor_highlight_activetext"
+#define COMIC_EDITOR_SELECTBYBLOCK_SETTING "comic_editor_select_restricted_to_blocks"
+
 namespace Sabrina {
 
 const QString ComicscriptEditor::COMICSCRIPT_EDITOR_TYPE_ID = "sabrina_comic_script_editor";
@@ -42,6 +46,31 @@ ComicscriptEditor::ComicscriptEditor(QWidget *parent) :
 
 	connect(ui->nameEdit, &QLineEdit::textChanged, this, &ComicscriptEditor::onNameChanged);
 	connect(ui->synopsisEdit, &QTextEdit::textChanged, this, &ComicscriptEditor::onSynopsisChanged);
+
+	connect(ui->highlightActiveTextPartButton, &QPushButton::toggled, this, &ComicscriptEditor::onHighlightTextButtonToggled);
+
+	QSettings settings;
+
+	if (settings.contains(COMIC_EDITOR_HIGHLIGHT_SETTING)) {
+		ui->highlightActiveTextPartButton->setChecked(settings.value(COMIC_EDITOR_HIGHLIGHT_SETTING).toBool());
+		onHighlightTextButtonToggled(); //depending on the state of the button the signal might have not propagated to the corresponding widgets if the function is not called explicitely.
+	} else {
+		ui->highlightActiveTextPartButton->setChecked(true);
+	}
+
+	bool selectByBlock = false;
+	if (settings.contains(COMIC_EDITOR_SELECTBYBLOCK_SETTING)) {
+		selectByBlock = settings.value(COMIC_EDITOR_HIGHLIGHT_SETTING).toBool();
+	}
+
+	ui->editWidget->selectFullBlocks(selectByBlock);
+	if (selectByBlock) {
+		ui->blockSelectButton->setChecked(true);
+	} else {
+		ui->freeSelectButton->setChecked(true);
+	}
+
+	connect(ui->selectionMode, &QButtonGroup::idToggled, this, &ComicscriptEditor::onSelectionModeToggled);
 }
 
 ComicscriptEditor::~ComicscriptEditor()
@@ -89,6 +118,21 @@ bool ComicscriptEditor::effectivelySetEditedItem(Aline::EditableItem* item) {
 	ui->editWidget->setCurrentScript(script);
 
 	return true;
+}
+
+void ComicscriptEditor::onHighlightTextButtonToggled() {
+	ui->editWidget->highlightCurrentNode(ui->highlightActiveTextPartButton->isChecked());
+
+	QSettings settings;
+
+	settings.setValue(COMIC_EDITOR_HIGHLIGHT_SETTING, ui->highlightActiveTextPartButton->isChecked());
+}
+void ComicscriptEditor::onSelectionModeToggled() {
+	if(ui->freeSelectButton->isChecked()) {
+		ui->editWidget->selectFullBlocks(false);
+	} else if (ui->blockSelectButton->isChecked()) {
+		ui->editWidget->selectFullBlocks(true);
+	}
 }
 
 void ComicscriptEditor::checkAddButtonsActivation() {

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 2.8)
 project(Sabrina)
 
 #global options
@@ -23,6 +23,9 @@ endif (CMAKE_CROSS_COMPILING AND CMAKE_SYSTEM_NAME STREQUAL Windows)
 
 #set (CMAKE_CXX_STANDARD 11) # we use C++ version 11
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+
+#enable testing
+enable_testing()
 
 #Qt
 

@@ -37,7 +37,9 @@ TextEditWidget::TextEditWidget(QWidget *parent) :
 	_endIndex(nullptr),
 	_endIndexMargin(-1),
 	_internalMargins(25, 25, 25, 25),
-	_nodeSupprBehavior(NodeSupprBehavior::MergeContent)
+	_nodeSupprBehavior(NodeSupprBehavior::MergeContent),
+	_selectionMode(SelectionMode::Text),
+	_highlightCurrent(true)
 {
 	_cursor = new Cursor(this, 0, 0, 0);
 	setFocusPolicy(Qt::StrongFocus);
@@ -119,6 +121,29 @@ int TextEditWidget::currentLineStyleId() const {
 	return getCurrentNode()->styleId();
 }
 
+void TextEditWidget::setSelectionMode(SelectionMode mode) {
+	_selectionMode = mode;
+
+	_cursor->constrainExtend();
+
+	if (_cursor->extend() != 0) {
+		update();
+	}
+}
+TextEditWidget::SelectionMode TextEditWidget::currentSelectionMode() const {
+	return _selectionMode;
+}
+
+void TextEditWidget::setHighlightCurrent(bool highlight) {
+	if (highlight != _highlightCurrent) {
+		_highlightCurrent = highlight;
+		update();
+	}
+}
+bool TextEditWidget::highlightCurrent() const {
+	return _highlightCurrent;
+}
+
 int TextEditWidget::computeLineWidth() const {
 	return width() - _internalMargins.left() - _internalMargins.right();
 }
@@ -157,17 +182,19 @@ void TextEditWidget::paintEvent(QPaintEvent *event) {
 	int selStart = 0;
 	int selEnd = -1;
 
+	Cursor::CursorState selectionState = _cursor->getExtendedSelectionState();
+
 	TextLine* startSelectionLine = nullptr;
 	TextLine* endSelectionLine = nullptr;
 
-	if (_cursor->extend() > 0) {
-		startSelectionLine = _currentScript->getLineAtLine(_cursor->line());
-		selStart = _cursor->pos();
-		endSelectionLine = startSelectionLine->lineAfterOffset(_cursor->pos(),_cursor->extend(), selEnd);
-	} else if (_cursor->extend() < 0) {
-		endSelectionLine = _currentScript->getLineAtLine(_cursor->line());
-		selEnd = _cursor->pos();
-		startSelectionLine = endSelectionLine->lineAfterOffset(_cursor->pos(),_cursor->extend(), selStart);
+	if (selectionState.extend > 0) {
+		startSelectionLine = _currentScript->getLineAtLine(selectionState.line);
+		selStart = selectionState.pos;
+		endSelectionLine = startSelectionLine->lineAfterOffset(selectionState.pos,selectionState.extend, selEnd);
+	} else if (selectionState.extend < 0) {
+		endSelectionLine = _currentScript->getLineAtLine(selectionState.line);
+		selEnd = selectionState.pos;
+		startSelectionLine = endSelectionLine->lineAfterOffset(selectionState.pos,selectionState.extend, selStart);
 	}
 
 	bool selection_running = false;
@@ -179,13 +206,14 @@ void TextEditWidget::paintEvent(QPaintEvent *event) {
 											 true);
 
 	}
+	bool currentNodeInSelection = selection_running;
 
 	while(v_pos < height()) {
-		Cursor* c = nullptr;
+		Cursor::CursorState* c = nullptr;
 
 		if (hasFocus()) {
-			if (_cursor->line() >= l and _cursor->line() < l+n->nbTextLines()) {
-				c = _cursor;
+			if (selectionState.line >= l and selectionState.line < l+n->nbTextLines()) {
+				c = &selectionState;
 			}
 		}
 
@@ -197,6 +225,7 @@ void TextEditWidget::paintEvent(QPaintEvent *event) {
 
 			if (startSelectionLine->nodeParent() == n) {
 				selection_running = true;
+				currentNodeInSelection = true;
 				sStart = TextNode::NodeCoordinate(startSelectionLine->lineNodeIndexNumber(), selStart);
 			}
 
@@ -217,13 +246,26 @@ void TextEditWidget::paintEvent(QPaintEvent *event) {
 
 		QPointF o(computeLineStartingX(), v_pos);
 
+		int nodeHeight = s->nodeHeight(n, availableWidth);
+
+		if (highlightCurrent()) {
+			if (currentNodeInSelection or n == _currentScript->getLineAtLine(_cursor->line())->nodeParent()) {
+				painter.fillRect(0,
+								 v_pos,
+								 width(),
+								 nodeHeight,
+								 QColor(230, 240, 255));
+			}
+		}
+
 		if (c != nullptr) {
-			s->renderNode(n, o, availableWidth, painter, sStart, sEnd, c->line() - l, c->pos(), _selectionFormat);
+			s->renderNode(n, o, availableWidth, painter, sStart, sEnd, c->line - l, c->pos, _selectionFormat);
 		} else {
 			s->renderNode(n, o, availableWidth, painter, sStart, sEnd, -1, 0, _selectionFormat);
 		}
+		currentNodeInSelection = selection_running;
 
-		v_pos += s->nodeHeight(n, availableWidth);
+		v_pos += nodeHeight;
 		l += n->nbTextLines();
 		_endIndex = n;
 		n = n->nextNode();
@@ -246,12 +288,12 @@ void TextEditWidget::keyPressEvent(QKeyEvent *event) {
 		scrollToLine(_cursor->line());
 		update();
 	} else if (event->key() == Qt::Key_Up) {
-		Cursor::CursorState cs = computeNewPosAfterJump(-1);
+		Cursor::CursorPos cs = computeNewPosAfterJump(-1);
 		_cursor->setState(cs);
 		scrollToLine(_cursor->line());
 		update();
 	} else if (event->key() == Qt::Key_Down) {
-		Cursor::CursorState cs = computeNewPosAfterJump(1);
+		Cursor::CursorPos cs = computeNewPosAfterJump(1);
 		_cursor->setState(cs);
 		scrollToLine(_cursor->line());
 		update();
@@ -374,7 +416,6 @@ AbstractTextNodeStyle* TextEditWidget::nodeStyle(TextNode* n) {
 
 void TextEditWidget::setCursorAtPoint(QPoint const& p, int vMargin) {
 
-	int c_pos;
 	QPoint tp = p;
 
 	tp.ry() -= vMargin + _internalMargins.top();
@@ -384,19 +425,13 @@ void TextEditWidget::setCursorAtPoint(QPoint const& p, int vMargin) {
 
 	tp.rx() -= _internalMargins.left();
 
-	TextLine* l = lineAtPos(tp, &c_pos);
-
-	if (l == nullptr) {
-		return;
+	TextNode::NodeCoordinate pos = textCordAtPoint(tp);
+	if (pos.isValid()) {
+		_cursor->setState(pos);
 	}
-
-	int line = l->lineLineNumber();
-
-	_cursor->setState({line, c_pos});
 }
 void TextEditWidget::setSelectionAtPoint(QPoint const& p, int vMargin) {
 
-	int c_pos;
 	QPoint tp = p;
 
 	tp.ry() -= vMargin + _internalMargins.top();
@@ -406,17 +441,19 @@ void TextEditWidget::setSelectionAtPoint(QPoint const& p, int vMargin) {
 
 	tp.rx() -= _internalMargins.left();
 
-	TextLine* l = lineAtPos(tp, &c_pos);
-
-	if (l == nullptr) {
-		return;
+	TextNode::NodeCoordinate pos = textCordAtPoint(tp);
+	if (pos.isValid()) {
+		int dist = _currentScript->offsetBetweenCoordinates(_cursor->currentCoordinate(), pos);
+		_cursor->setExtent(dist);
 	}
 
-	int line = l->lineLineNumber();
+}
+TextNode::NodeCoordinate TextEditWidget::textCordAtPoint(QPoint const& point) {
 
-	int dist = _cursor->charDistance({line, c_pos}) + line - _cursor->line(); //char distance don't count paragraphs break, but selection formatting have to.
-	_cursor->setExtent(dist);
+	int pos;
+	TextLine* tl = lineAtPos(point, &pos);
 
+	return {tl->lineLineNumber(), pos};
 }
 
 TextNode* TextEditWidget::nodeAtHeight(int y, int * nodeH) {
@@ -694,7 +731,7 @@ void TextEditWidget::scrollToLine (int l) {
 
 }
 
-TextEditWidget::Cursor::CursorState TextEditWidget::computeNewPosAfterJump(int nbPseudoLinesJump) {
+TextEditWidget::Cursor::CursorPos TextEditWidget::computeNewPosAfterJump(int nbPseudoLinesJump) {
 
 	TextNode* n = getCurrentNode();
 	AbstractTextNodeStyle* style = nodeStyle(n);
@@ -709,7 +746,7 @@ TextEditWidget::Cursor::CursorState TextEditWidget::computeNewPosAfterJump(int n
 
 	TextLine* tl = n->lineAt(aLine);
 
-	Cursor::DecomposedCursorState s = _cursor->decomposePos(tl);
+	Cursor::DecomposedCursorPos s = _cursor->decomposePos(tl);
 
 	int nJs = nbPseudoLinesJump;
 
@@ -819,7 +856,7 @@ void TextEditWidget::insertText(QString commited) {
 		QStringList lst = commited.split(QChar('\b'), Qt::KeepEmptyParts);
 		QString last = lst.takeLast();
 
-		for (QString const& s : lst) {
+		for (QString const& s : qAsConst(lst)) {
 			line.insert(p, s);
 
 			p += s.size();
@@ -882,6 +919,12 @@ void TextEditWidget::insertNextType(TextNode* n, Qt::KeyboardModifiers modifiers
 	case TextStyleManager::LevelJump::UnderRoot:
 		inserted = n->insertNodeSubRoot(jumpInfo[modifiers].code);
 		break;
+	}
+
+	int exptexdLines = _styleManager->getStyleByCode(jumpInfo[modifiers].code)->expectedNodeNbTextLines();
+
+	if (inserted->nbTextLines() != exptexdLines) {
+		inserted->setNbTextLines(exptexdLines);
 	}
 
 }
@@ -1004,7 +1047,11 @@ int TextEditWidget::Cursor::extend() const {
 	return _extend;
 }
 
-TextEditWidget::Cursor::DecomposedCursorState TextEditWidget::Cursor::decomposePos(TextLine* currentLine) {
+TextNode::NodeCoordinate TextEditWidget::Cursor::currentCoordinate() const {
+	return {_line, _pos};
+}
+
+TextEditWidget::Cursor::DecomposedCursorPos TextEditWidget::Cursor::decomposePos(TextLine* currentLine) {
 
 	if (currentLine == nullptr) {
 		return {0,0,0};
@@ -1037,7 +1084,7 @@ TextEditWidget::Cursor::DecomposedCursorState TextEditWidget::Cursor::decomposeP
 	return {_line, subLine.lineNumber(), _pos - subLine.textStart() + ((subLine.textStart() > 0) ? s->getPrefix(currentLine).length() : 0) };
 }
 
-TextEditWidget::Cursor::CursorState TextEditWidget::Cursor::composePos(TextLine* currentLine, DecomposedCursorState decomposed) {
+TextEditWidget::Cursor::CursorPos TextEditWidget::Cursor::composePos(TextLine* currentLine, DecomposedCursorPos decomposed) {
 
 	if (currentLine == nullptr) {
 		return {0,0};
@@ -1065,6 +1112,85 @@ TextEditWidget::Cursor::CursorState TextEditWidget::Cursor::composePos(TextLine*
 	int compPos = l.textStart() - ((l.textStart() > 0) ? s->getPrefix(currentLine).length() : 0) + decomposed.subpos;
 
 	return {decomposed.line, compPos};
+}
+
+
+TextEditWidget::Cursor::CursorState TextEditWidget::Cursor::getPositiveExtendState() {
+
+	if (_extend >= 0) {
+		return {_line, _pos, _extend};
+	}
+
+	TextNode::NodeCoordinate newCord = _widget->_currentScript->getCoordinateAfterOffset(
+				TextNode::NodeCoordinate(_line, _pos),
+				_extend);
+
+	if (newCord.isValid()) {
+		return {newCord.lineIndex, newCord.linePos, -_extend};
+	}
+
+	TextLine* tl = _widget->_currentScript->getLineAtLine(_line);
+
+	if (tl != nullptr) {
+		return {0,0,tl->nCharsBefore()+_pos};
+	}
+
+	return {0,0,0};
+
+}
+
+TextEditWidget::Cursor::CursorState TextEditWidget::Cursor::getExtendedSelectionState() {
+
+	SelectionMode sMode = _widget->_selectionMode;
+
+	CursorState state = getPositiveExtendState();
+
+	if (_extend != 0 ) {
+		if (sMode == SelectionMode::FullMultiNodes or
+			sMode == SelectionMode::FullMultiNodesWithChild or
+			sMode == SelectionMode::FullLeveldMultiNodes) {
+
+			TextLine* tl = _widget->_currentScript->getLineAtLine(state.line);
+
+			int linePos = tl->lineNodeIndexNumber();
+
+			if (state.pos + state.extend <= tl->getText().length()) {
+				return state;
+			}
+
+			state.extend += tl->nCharsBeforeInNode() + state.pos;
+			state.line -= linePos;
+			state.pos = 0;
+
+			TextNode::NodeCoordinate source(state.line, state.pos);
+			TextNode::NodeCoordinate offseted = _widget->_currentScript->getCoordinateAfterOffset(source, state.extend);
+
+			TextLine* fl = _widget->_currentScript->getLineAtLine(offseted.lineIndex);
+			state.extend += fl->nCharsAfterInNode() + fl->getText().length() - offseted.linePos;
+
+			if (sMode == SelectionMode::FullMultiNodesWithChild) {
+				TextNode* n = fl->nodeParent();
+
+				if (n != nullptr) {
+					state.extend += n->childNodes().size();
+					for (TextNode* child : n->childNodes()) {
+						state.extend += child->nChars();
+					}
+				}
+			}
+
+			if (sMode == SelectionMode::FullLeveldMultiNodes) {
+				auto interval = TextNode::intervalWithFlatParentsLevel(tl->nodeParent(), fl->nodeParent());
+
+				state.line = interval.first.lineIndex;
+				state.extend = _widget->_currentScript->offsetBetweenCoordinates(interval.first, interval.second);
+			}
+
+		}
+	}
+
+	return state;
+
 }
 
 void TextEditWidget::Cursor::reset() {
@@ -1108,7 +1234,7 @@ void TextEditWidget::Cursor::setPos(int pos) {
 	_pos = pos;
 	constrainPosOnLine();
 }
-void TextEditWidget::Cursor::setState(CursorState state) {
+void TextEditWidget::Cursor::setState(CursorPos state) {
 	int oldLine = _line;
 	_pos = state.pos;
 	_line = state.line;
@@ -1145,9 +1271,57 @@ void TextEditWidget::Cursor::setExtent(int extend) {
 		_extend = std::min(extend, remainingText);
 	}
 
+	constrainExtend();
+
 }
 
-int TextEditWidget::Cursor::charDistance(CursorState target) {
+void TextEditWidget::Cursor::constrainExtend() {
+	if (_widget->currentSelectionMode() == SelectionMode::SingleLine) {
+		limitExtendToLine();
+	} else if (_widget->currentSelectionMode() == SelectionMode::SingleNode) {
+		limitExtendToNode();
+	}
+}
+
+void TextEditWidget::Cursor::limitExtendToLine() {
+
+	if (_widget->_currentScript == nullptr) {
+		return;
+	}
+
+	TextLine* tl = _widget->_currentScript->getLineAtLine(_line);
+
+	int lLen = tl->nChars();
+
+	if (_extend < 0) {
+		_extend = std::max(_extend, -_pos);
+	} else {
+		_extend = std::min(_extend, lLen - _pos);
+	}
+
+}
+void TextEditWidget::Cursor::limitExtendToNode() {
+
+	if (_widget->_currentScript == nullptr) {
+		return;
+	}
+
+	TextLine* tl = _widget->_currentScript->getLineAtLine(_line);
+	TextNode* tn = tl->nodeParent();
+
+	int lLen = tn->nCharsInNode();
+
+	int p = tl->nCharsBeforeInNode() + _pos;
+
+	if (_extend < 0) {
+		_extend = std::max(_extend, - p);
+	} else {
+		_extend = std::min(_extend, lLen - p);
+	}
+
+}
+
+int TextEditWidget::Cursor::charDistance(CursorPos target) {
 
 	if (target.line == _line) {
 		return target.pos - _pos;

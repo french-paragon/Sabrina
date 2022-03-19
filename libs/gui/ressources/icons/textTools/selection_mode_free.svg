@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="SVGRoot"
+   version="1.1"
+   viewBox="0 0 16 16"
+   height="16px"
+   width="16px"
+   sodipodi:docname="selection_mode_free.svg"
+   inkscape:version="1.0.2 (e86c870, 2021-01-15)">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1018"
+     id="namedview913"
+     showgrid="false"
+     inkscape:zoom="18.230097"
+     inkscape:cx="8.2479304"
+     inkscape:cy="6.8570799"
+     inkscape:window-x="0"
+     inkscape:window-y="34"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="SVGRoot"
+     inkscape:document-rotation="0" />
+  <defs
+     id="defs8417" />
+  <metadata
+     id="metadata8420">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     style="fill:none;stroke:#616161;stroke-width:1.48021758;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="M 0.97795102,1.8622913 H 15.022049"
+     id="path926" />
+  <path
+     style="fill:none;stroke:#616161;stroke-width:1.48022;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;font-variation-settings:normal;opacity:1;vector-effect:none;fill-opacity:1;stroke-dashoffset:0;stop-color:#000000;stop-opacity:1"
+     d="M 0.97795077,4.325026 H 6.0296762"
+     id="path926-3" />
+  <path
+     style="fill:#a4daee;stroke:#3a91de;stroke-width:1.489;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;font-variation-settings:normal;opacity:1;vector-effect:none;fill-opacity:1;stroke-dashoffset:0;paint-order:markers fill stroke;stop-color:#000000;stop-opacity:1"
+     d="M 0.9779512,6.7877607 H 13.261354"
+     id="path926-6" />
+  <path
+     style="fill:#a4daee;stroke:#3a91de;stroke-width:1.489;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;font-variation-settings:normal;opacity:1;vector-effect:none;fill-opacity:1;stroke-dashoffset:0;paint-order:markers fill stroke;stop-color:#000000;stop-opacity:1"
+     d="M 0.97795115,9.250495 H 11.214808"
+     id="path926-7" />
+  <path
+     style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#a4daee;fill-opacity:1;stroke:#3a91de;stroke-width:1.489;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke;stop-color:#000000;stop-opacity:1"
+     d="M 0.9779508,11.713229 H 8.831647"
+     id="path926-5" />
+  <path
+     style="fill:none;stroke:#616161;stroke-width:1.48008823;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="M 0.97795104,14.175964 H 15.022049"
+     id="path926-35" />
+  <path
+     style="font-variation-settings:normal;vector-effect:none;fill:#a4daee;fill-opacity:1;stroke:#3a91de;stroke-width:1.489;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke;stop-color:#000000;opacity:1;stop-opacity:1"
+     d="M 6.0296762,4.325026 H 14.311169"
+     id="path926-6-3" />
+  <path
+     style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#616161;stroke-width:1.48009;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke;stop-color:#000000;stop-opacity:1"
+     d="m 8.831647,11.713229 h 3.482127"
+     id="path926-5-6" />
+</svg>

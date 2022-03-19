@@ -44,6 +44,21 @@ public:
 		KeepNonEmptyBlocks
 	};
 
+	/*!
+	 * \brief The SelectionMode enum represent a mode of selection
+	 *
+	 * For certain types of document, it makes little sense to allow the user to select parts of multiple lines/paragraphs or even select text across multiple lines/paragraphs.
+	 * This enum describe the different selection modes that can be used by the widget.
+	 */
+	enum class SelectionMode {
+		SingleLine, //! Selections are constrained to a single line
+		SingleNode, //! Selections are constrained to a single node in the document
+		FullMultiNodes, //! if the selection span more than a single node, then all the text is selected in each and every node
+		FullMultiNodesWithChild, //! same as FullMultiNodes, but child nodes are considered part of parents nodes.
+		FullLeveldMultiNodes, //! same as FullMultiNodesWithChild, but all the childs of the nodes with the smallest level in the interval are included.
+		Text //! free selection across multiple lines and nodes.
+	};
+
 	explicit TextEditWidget(QWidget *parent = nullptr);
 	virtual ~TextEditWidget();
 
@@ -65,21 +80,36 @@ Q_SIGNALS:
 
 protected:
 
+	void setSelectionMode(SelectionMode mode);
+	SelectionMode currentSelectionMode() const;
+
+	void setHighlightCurrent(bool highlight);
+	bool highlightCurrent() const;
+
 	int computeLineWidth() const;
 	int computeLineStartingX() const;
 
 	class Cursor {
 	public:
 
-		struct CursorState {
+		struct CursorPos {
+			CursorPos() = default;
+			CursorPos(int lineIndex, int posIndex) : line(lineIndex), pos(posIndex) {}
+			CursorPos(TextNode::NodeCoordinate coord) : line(coord.lineIndex), pos(coord.linePos) {}
 			int line;
 			int pos;
 		};
 
-		struct DecomposedCursorState {
+		struct DecomposedCursorPos {
 			int line;
 			int subline;
 			int subpos;
+		};
+
+		struct CursorState {
+			int line;
+			int pos;
+			int extend;
 		};
 
 		Cursor(TextEditWidget* widget, int line, int pos, int extend = 0);
@@ -88,19 +118,30 @@ protected:
 		int pos() const;
 		int extend() const;
 
-		DecomposedCursorState decomposePos(TextLine* currentLine);
-		CursorState composePos(TextLine* currentLine, DecomposedCursorState decomposed);
+		TextNode::NodeCoordinate currentCoordinate() const;
+
+		DecomposedCursorPos decomposePos(TextLine* currentLine);
+		CursorPos composePos(TextLine* currentLine, DecomposedCursorPos decomposed);
+
+		//! \brief If the current state is valid, return a state guaranteed to be equivalent to the cursor current state, but with a positive extend.
+		CursorState getPositiveExtendState();
+
+		//! \brief get the (virtual) state of the cursor after applying the constraints due to the selection mode and other selection extender.
+		CursorState getExtendedSelectionState();
 
 		void reset();
 		void move(int offset);
 		void jumpLines(int offset);
 		void setLine(int line);
 		void setPos(int pos);
-		void setState(CursorState state);
+		void setState(CursorPos state);
 		void clearSelection();
 		void setExtent(int extend);
+		void constrainExtend();
+		void limitExtendToLine();
+		void limitExtendToNode();
 
-		int charDistance(CursorState target);
+		int charDistance(CursorPos target);
 
 	private:
 
@@ -128,13 +169,14 @@ protected:
 
 	void setCursorAtPoint(QPoint const& p, int vMargin = 5);
 	void setSelectionAtPoint(QPoint const& p, int vMargin = 5);
+	TextNode::NodeCoordinate textCordAtPoint(QPoint const& point);
 	TextNode* nodeAtHeight(int y, int * nodeH = nullptr);
 	TextLine* lineAtPos(QPoint const& pos, int *cursorPos = nullptr);
 
 	void scroll (int offset);
 	void scrollToLine (int l);
 	void scrollToLine (int l, int subL);
-	Cursor::CursorState computeNewPosAfterJump(int nbPseudoLinesJump);
+	Cursor::CursorPos computeNewPosAfterJump(int nbPseudoLinesJump);
 
 	void insertText(QString commited);
 	void insertNextType(TextNode* n, Qt::KeyboardModifiers modifiers);
@@ -155,6 +197,10 @@ protected:
 
 	QTextCharFormat _selectionFormat;
 	QPoint _clickPos;
+
+private:
+	SelectionMode _selectionMode;
+	bool _highlightCurrent;
 
 };
 

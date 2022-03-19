@@ -196,6 +196,19 @@ int TextLine::nCharsBefore() const {
 
 }
 
+int TextLine::nCharsBeforeInNode() const {
+	TextNode* n = nodeParent();
+
+	int c = 0;
+	int l = n->lines().indexOf(const_cast<TextLine*>(this));
+
+	for (int i = 0; i < l; i++) {
+		c += n->lines().at(i)->getText().size();
+	}
+
+	return c;
+}
+
 int TextLine::nChars() const {
 	return getText().size();
 }
@@ -205,6 +218,20 @@ int TextLine::nCharsAfter() const {
 	TextNode* n = nodeParent();
 
 	int c = n->nCharsAfter();
+	int l = n->lines().indexOf(const_cast<TextLine*>(this));
+
+	for (int i = l+1; i < n->lines().size(); i++) {
+		c += n->lines()[i]->getText().size();
+	}
+
+	return c;
+}
+
+int TextLine::nCharsAfterInNode() const{
+
+	TextNode* n = nodeParent();
+
+	int c = 0;
 	int l = n->lines().indexOf(const_cast<TextLine*>(this));
 
 	for (int i = l+1; i < n->lines().size(); i++) {
@@ -227,16 +254,65 @@ int TextNode::nCharsBetweenNodes(const TextNode* start, const TextNode* end) {
 		return 0;
 	}
 
-	int c = 0;
+	int c = -1;
 
 	do {
 		for (int i = 0; i < n->nbTextLines(); i++) {
-			c += n->lineAt(i)->getText().size();
+			c += n->lineAt(i)->getText().size() + 1;
 		}
 		n = n->nextNode();
 	} while (n != l and n != nullptr);
 
 	return c;
+}
+
+TextNode::DocumentInterval TextNode::intervalWithFlatParentsLevel(TextNode* n1, TextNode* n2) {
+
+	if (n1->rootNode() != n2->rootNode()) {
+		return {{-1,-1},{-1,-1}};
+	}
+
+	int lvl1 = n1->nodeLevel();
+	int lvl2 = n2->nodeLevel();
+
+	TextNode* node1 = n1;
+	TextNode* node2 = n2;
+
+	if (lvl1 > lvl2) {
+		node1 = node1->nodeAbove(lvl1-lvl2);
+	} else if (lvl2 > lvl1) {
+		node2 = node2->nodeAbove(lvl2-lvl1);
+	}
+
+	if (node1 == nullptr or node2 == nullptr) {
+		return {{-1,-1},{-1,-1}};
+	}
+
+	while (node1->parentNode() != node2->parentNode()) {
+
+		node1 = node1->parentNode();
+		node2 = node2->parentNode();
+
+		if (node1 == nullptr or node2 == nullptr) {
+			return {{-1,-1},{-1,-1}};
+		}
+	}
+
+	int id1 = node1->nodeIndex();
+	int id2 = node2->nodeIndex();
+
+	if (id1 > id2) {
+		TextNode* tmp = node1;
+		node1 = node2;
+		node2 = tmp;
+	}
+
+	node2 = node2->lastNode();
+
+	NodeCoordinate coord1 = {node1->nodeLine(), 0};
+	NodeCoordinate coord2 = {node2->nodeLine() + node2->nbTextLines() -1, node2->lineAt(node2->nbTextLines() -1)->nChars()};
+
+	return {coord1, coord2};
 }
 
 TextNode::TextNode(QObject *parent, int nbLines) :
@@ -310,6 +386,20 @@ int TextNode::nodeLine() const {
 	return l;
 }
 
+int TextNode::nodeLevel() const {
+	int level = 0;
+
+	TextNode* n = const_cast<TextNode*>(this);
+
+
+	while (!n->isRootNode()) {
+		n = n->parentNode();
+		level++;
+	}
+
+	return level;
+}
+
 int TextNode::maxLine() const {
 
 	TextNode* n = lastNode();
@@ -338,12 +428,26 @@ int TextNode::nChars() const {
 	return nCharsBetweenNodes(n,l);
 }
 
+int TextNode::nCharsInNode() const {
+
+	const TextNode* n = this;
+	const TextNode* l = n->nextNode();
+
+	return nCharsBetweenNodes(n,l);
+}
+
 int TextNode::nCharsBefore() const {
 
 	const TextNode* n = rootNode();
 	const TextNode* l = this;
 
-	return nCharsBetweenNodes(n,l);
+	int numChars = nCharsBetweenNodes(n,l);
+
+	if (numChars > 0) {
+		return numChars + 1; //acount for the line break before the start of the node
+	}
+
+	return 0;
 }
 
 int TextNode::nCharsAfter() const {
@@ -351,7 +455,13 @@ int TextNode::nCharsAfter() const {
 	const TextNode* n = this->nextNode();
 	const TextNode* l = nullptr;
 
-	return nCharsBetweenNodes(n,l);
+	int numChars = nCharsBetweenNodes(n,l);
+
+	if (numChars > 0) {
+		return numChars + 1; //acount for the line break after the end of the node
+	}
+
+	return 0;
 }
 
 bool TextNode::clearFromDoc(bool deleteLater) {
@@ -453,6 +563,26 @@ TextNode* TextNode::rootNode() {
 const TextNode* TextNode::rootNode() const {
 	return const_cast<TextNode*>(this)->rootNode();
 }
+TextNode* TextNode::nodeAbove(int lvl) {
+
+	if (lvl < 0) {
+		return nullptr;
+	}
+
+	TextNode* n = this;
+
+	for (int i = 0; i < lvl; i++) {
+		n = n->parentNode();
+		if (n == nullptr) {
+			return n;
+		}
+	}
+
+	return n;
+}
+const TextNode* TextNode::nodeAbove(int lvl) const {
+	return const_cast<TextNode*>(this)->nodeAbove(lvl);
+}
 
 TextNode* TextNode::subRootNode() {
 
@@ -498,6 +628,177 @@ TextLine* TextNode::getLineAtLine(int line) {
 		return nullptr;
 	}
 	return n->lineAt(line - l);
+
+}
+
+TextNode::NodeCoordinate TextNode::coordinateAtLineStart(NodeCoordinate coord) const {
+	return {coord.lineIndex, 0};
+}
+TextNode::NodeCoordinate TextNode::coordinateAtLineEnd(NodeCoordinate coord) const {
+	TextLine* tl = const_cast<TextNode*>(this)->getLineAtLine(coord.lineIndex);
+
+	if (tl != nullptr) {
+		return {coord.lineIndex, tl->getText().size()};
+	}
+
+	return {-1,-1};
+}
+
+TextNode::NodeCoordinate TextNode::coordinateAtNodeStart(NodeCoordinate coord) const {
+	int finalLine;
+	TextNode* n = const_cast<TextNode*>(this)->nodeAtLine(coord.lineIndex, &finalLine);
+
+	if (n != nullptr) {
+		return {finalLine, 0};
+	}
+
+	return {-1,-1};
+}
+TextNode::NodeCoordinate TextNode::coordinateAtNodeEnd(NodeCoordinate coord) const {
+	int nodeStartLine;
+	TextNode* n = const_cast<TextNode*>(this)->nodeAtLine(coord.lineIndex, &nodeStartLine);
+
+	if (n != nullptr) {
+		TextLine* ftl = n->lineAt(n->nbTextLines() - 1);
+		return {nodeStartLine + n->nbTextLines() - 1, (ftl != nullptr) ? ftl->getText().size() : 0};
+	}
+
+	return {-1,-1};
+
+}
+TextNode::NodeCoordinate TextNode::coordinateAfterNodeChildrens(NodeCoordinate coord) const {
+	int nodeStartLine;
+	TextNode* n = const_cast<TextNode*>(this)->nodeAtLine(coord.lineIndex, &nodeStartLine);
+
+	if (n != nullptr) {
+
+		auto childs = n->childNodes();
+
+		TextNode* final = n;
+
+		if (!childs.isEmpty()) {
+
+			for(int i = 0; i < childs.size()-1; i++) {
+				nodeStartLine += childs.at(i)->nbTextLines();
+			}
+
+			final = childs.last();
+
+		}
+		TextLine* ftl = final->lineAt(final->nbTextLines() - 1);
+		return {nodeStartLine + final->nbTextLines() - 1, (ftl != nullptr) ? ftl->getText().size() : 0};
+	}
+
+	return {-1,-1};
+}
+
+TextNode::NodeCoordinate TextNode::getCoordinateAfterOffset(TextNode::NodeCoordinate coord,
+															int offset) const {
+	TextLine* tl = const_cast<TextNode*>(this)->getLineAtLine(coord.lineIndex);
+
+	if (tl == nullptr) {
+		return {-1, -1};
+	}
+
+	int len = tl->getText().length();
+
+	if (len < 0) {
+		return {-1,-1};
+	}
+
+	TextNode::NodeCoordinate newCoord(coord.lineIndex, coord.linePos+offset);
+
+	if (newCoord.linePos < 0) {
+		while (newCoord.linePos < 0) {
+			if (newCoord.lineIndex > 0) {
+				newCoord.lineIndex--;
+
+				tl =  tl->previousLine();
+
+				if (tl == nullptr) {
+					return {-1,-1};
+				}
+
+				len = tl->getText().length();
+				if (len < 0) {
+					return {-1,-1};
+				}
+
+				newCoord.linePos += len+1;
+			} else {
+				return {-1,-1};
+			}
+		}
+	}
+
+	if (newCoord.linePos > len) {
+
+		int nLines  = rootNode()->maxLine();
+
+		while(newCoord.linePos > len) {
+			if (newCoord.lineIndex < nLines-1) {
+				newCoord.linePos -= len+1;
+				newCoord.lineIndex++;
+
+				tl =  tl->nextLine();
+
+				if (tl == nullptr) {
+					return {-1,-1};
+				}
+
+				len = tl->getText().length();
+				if (len < 0) {
+					return {-1,-1};
+				}
+			} else {
+				return {-1,-1};
+			}
+		}
+	}
+
+	return newCoord;
+}
+int TextNode::offsetBetweenCoordinates(NodeCoordinate start, NodeCoordinate end) const {
+
+	if (end.lineIndex == start.lineIndex) {
+		return end.linePos - start.linePos;
+	}
+
+	int d = end.lineIndex - start.lineIndex;
+	int dir = (d < 0) ? -1 : 1;
+
+	TextLine* sl = const_cast<TextNode*>(this)->rootNode()->getLineAtLine(start.lineIndex);
+
+	int dist = 0;
+
+	if (dir < 0) {
+		dist = start.linePos;
+	} else {
+		dist = sl->nChars() - start.linePos;
+	}
+
+	for (int i = d-dir; i != 0; i -= dir) {
+		if (dir < 0) {
+			sl = sl->previousLine();
+		} else {
+			sl = sl->nextLine();
+		}
+		dist += sl->nChars();
+	}
+
+	if (dir < 0) {
+		sl = sl->previousLine();
+	} else {
+		sl = sl->nextLine();
+	}
+
+	if (dir > 0) {
+		dist += end.linePos;
+	} else {
+		dist += sl->nChars() - end.linePos;
+	}
+
+	return dir*dist + end.lineIndex - start.lineIndex;
 
 }
 
@@ -624,7 +925,7 @@ int TextNode::styleId() const
 
 void TextNode::setStyleId(int style_id)
 {
-    _style_id = style_id;
+	_style_id = style_id;
 }
 
 } // namespace Sabrina

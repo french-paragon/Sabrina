@@ -146,6 +146,97 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QPushButton" name="highlightActiveTextPartButton">
+        <property name="toolTip">
+         <string>Highlight the current text node in editors</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ressources/ressources_gui.qrc">
+          <normaloff>:/icons/icons/textTools/highlight_lines.svg</normaloff>:/icons/icons/textTools/highlight_lines.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="freeSelectButton">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Freely select text &lt;/p&gt;&lt;p&gt;(copy/paste will ignore blocks types)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ressources/ressources_gui.qrc">
+          <normaloff>:/icons/icons/textTools/selection_mode_free.svg</normaloff>:/icons/icons/textTools/selection_mode_free.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">selectionMode</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="blockSelectButton">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selection across multiple lines cover full blocks &lt;/p&gt;&lt;p&gt;(copy/paste will account for blocks types)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ressources/ressources_gui.qrc">
+          <normaloff>:/icons/icons/textTools/selection_mode_blocks.svg</normaloff>:/icons/icons/textTools/selection_mode_blocks.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">selectionMode</string>
+        </attribute>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -186,7 +277,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabSynopsis">
       <attribute name="title">
@@ -260,7 +351,11 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../ressources/ressources_gui.qrc"/>
   <include location="../../model/ressources/ressources.qrc"/>
  </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="selectionMode"/>
+ </buttongroups>
 </ui>

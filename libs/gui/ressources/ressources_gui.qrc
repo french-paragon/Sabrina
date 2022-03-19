@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/icons">
         <file>icons/app_icon.svg</file>
+        <file>icons/textTools/highlight_lines.svg</file>
+        <file>icons/textTools/selection_mode_blocks.svg</file>
+        <file>icons/textTools/selection_mode_free.svg</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/logo_paragon.png</file>
