@@ -45,6 +45,11 @@ ComicScriptTitleStyle::ComicScriptTitleStyle(QObject* parent) :
 int ComicScriptTitleStyle::typeId() const {
 	return MAIN;
 }
+QString ComicScriptTitleStyle::typeName() const {
+	return "ComicScriptTitle";
+}
+
+
 QFont ComicScriptTitleStyle::getFont(TextLine* line) const {
 	Q_UNUSED(line);
 	return QFont("Monospace", 18);
@@ -109,6 +114,10 @@ ComicScriptPageStyle::ComicScriptPageStyle(QObject* parent) :
 int ComicScriptPageStyle::typeId() const {
 	return PAGE;
 }
+QString ComicScriptPageStyle::typeName() const {
+	return "ComicScriptPage";
+}
+
 
 QMargins ComicScriptPageStyle::getNodeMargins(TextNode* node) const {
 
@@ -127,6 +136,10 @@ ComicScriptPanelStyle::ComicScriptPanelStyle(QObject* parent) :
 int ComicScriptPanelStyle::typeId() const {
 	return PANEL;
 }
+QString ComicScriptPanelStyle::typeName() const {
+	return "ComicScriptPanel";
+}
+
 
 QMargins ComicScriptPanelStyle::getNodeMargins(TextNode* node) const {
 
@@ -145,6 +158,10 @@ ComicScriptCaptionStyle::ComicScriptCaptionStyle(QObject* parent) :
 int ComicScriptCaptionStyle::typeId() const {
 	return CAPTION;
 }
+QString ComicScriptCaptionStyle::typeName() const {
+	return "ComicScriptCaption";
+}
+
 
 QMargins ComicScriptCaptionStyle::getNodeMargins(TextNode* node) const {
 	return QMargins(35, getLineHeight(node->lineAt(0))/2, 0, 0);
@@ -159,6 +176,9 @@ ComicScriptDialogStyle::ComicScriptDialogStyle(QObject* parent) :
 
 int ComicScriptDialogStyle::typeId() const {
 	return DIALOG;
+}
+QString ComicScriptDialogStyle::typeName() const {
+	return "ComicScriptDialog";
 }
 
 int ComicScriptDialogStyle::expectedNodeNbTextLines() const {
@@ -263,6 +283,56 @@ ComicScriptTextStyleManager::getNextNodeStyleAndPos(int code) const {
 
 	return m;
 
+}
+
+QMap<TextStyleManager::LevelJump, int>
+ComicScriptTextStyleManager::defaultFollowingStyle(int code) const {
+
+	QMap<TextStyleManager::LevelJump, int> m;
+
+	m.insert(LevelJump::UnderRoot, ComicScriptStyle::PAGE);
+
+	switch (code) {
+	case ComicScriptStyle::MAIN:
+		m.insert(LevelJump::Below, ComicScriptStyle::PAGE);
+		break;
+	case ComicScriptStyle::PAGE:
+		m.insert(LevelJump::Below, ComicScriptStyle::PANEL);
+		m.insert(LevelJump::After, ComicScriptStyle::PAGE);
+		break;
+	case ComicScriptStyle::PANEL:
+		m.insert(LevelJump::Below, ComicScriptStyle::CAPTION);
+		m.insert(LevelJump::After, ComicScriptStyle::PANEL);
+		m.insert(LevelJump::Above, ComicScriptStyle::PAGE);
+		break;
+	case ComicScriptStyle::CAPTION:
+		m.insert(LevelJump::After, ComicScriptStyle::DIALOG);
+		m.insert(LevelJump::Above, ComicScriptStyle::PANEL);
+		break;
+	case ComicScriptStyle::DIALOG:
+		m.insert(LevelJump::After, ComicScriptStyle::DIALOG);
+		m.insert(LevelJump::Above, ComicScriptStyle::PANEL);
+		break;
+	}
+
+	return m;
+
+}
+
+QVector<int> ComicScriptTextStyleManager::getAuthorizedChildrenStyles(int code) const {
+	switch (code) {
+	case ComicScriptStyle::MAIN:
+		return {ComicScriptStyle::PAGE};
+	case ComicScriptStyle::PAGE:
+		return {ComicScriptStyle::PANEL};
+	case ComicScriptStyle::PANEL:
+		return {ComicScriptStyle::DIALOG, ComicScriptStyle::CAPTION};
+	case ComicScriptStyle::CAPTION:
+		return {};
+	case ComicScriptStyle::DIALOG:
+		return {};
+	}
+	return {};
 }
 
 } // namespace Sabrina

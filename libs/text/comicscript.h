@@ -23,9 +23,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "./abstracttextstyle.h"
 #include "./textstylemanager.h"
 
+#include "./text_global.h"
+
 namespace Sabrina {
 
-class ComicScriptStyle : public AbstractTextNodeStyle
+class SABRINA_TEXT_EXPORT ComicScriptStyle : public AbstractTextNodeStyle
 {
 	Q_OBJECT
 public:
@@ -43,7 +45,7 @@ public:
 	QFont getFont(TextLine* line) const override;
 };
 
-class ComicScriptTitleStyle : public ComicScriptStyle
+class SABRINA_TEXT_EXPORT ComicScriptTitleStyle : public ComicScriptStyle
 {
 	Q_OBJECT
 public:
@@ -51,11 +53,13 @@ public:
 	ComicScriptTitleStyle(QObject* parent = nullptr);
 
 	int typeId() const override;
+	QString typeName() const override;
+
 	QFont getFont(TextLine* line) const override;
 	QMargins getNodeMargins(TextNode* node) const override;
 };
 
-class ComicScriptDescribedStyle : public ComicScriptStyle
+class SABRINA_TEXT_EXPORT ComicScriptDescribedStyle : public ComicScriptStyle
 {
 	Q_OBJECT
 public:
@@ -77,7 +81,7 @@ public:
 					const QTextCharFormat &selectionFormat = QTextCharFormat()) override;
 };
 
-class ComicScriptPageStyle : public ComicScriptDescribedStyle
+class SABRINA_TEXT_EXPORT ComicScriptPageStyle : public ComicScriptDescribedStyle
 {
 	Q_OBJECT
 public:
@@ -85,12 +89,13 @@ public:
 	ComicScriptPageStyle(QObject* parent = nullptr);
 
 	int typeId() const override;
+	QString typeName() const override;
 
 	QMargins getNodeMargins(TextNode* node) const override;
 	QString getDescr(TextNode* node) const override;
 };
 
-class ComicScriptPanelStyle : public ComicScriptDescribedStyle
+class SABRINA_TEXT_EXPORT ComicScriptPanelStyle : public ComicScriptDescribedStyle
 {
 	Q_OBJECT
 public:
@@ -98,13 +103,14 @@ public:
 	ComicScriptPanelStyle(QObject* parent = nullptr);
 
 	int typeId() const override;
+	QString typeName() const override;
 
 	QMargins getNodeMargins(TextNode* node) const override;
 	QString getDescr(TextNode* node) const override;
 };
 
 
-class ComicScriptCaptionStyle : public ComicScriptStyle
+class SABRINA_TEXT_EXPORT ComicScriptCaptionStyle : public ComicScriptStyle
 {
 	Q_OBJECT
 public:
@@ -112,12 +118,13 @@ public:
 	ComicScriptCaptionStyle(QObject* parent = nullptr);
 
 	int typeId() const override;
+	QString typeName() const override;
 
 	QMargins getNodeMargins(TextNode* node) const override;
 };
 
 
-class ComicScriptDialogStyle : public ComicScriptStyle
+class SABRINA_TEXT_EXPORT ComicScriptDialogStyle : public ComicScriptStyle
 {
 	Q_OBJECT
 public:
@@ -125,6 +132,7 @@ public:
 	ComicScriptDialogStyle(QObject* parent = nullptr);
 
 	int typeId() const override;
+	QString typeName() const override;
 
 	int expectedNodeNbTextLines() const override;
 
@@ -138,7 +146,7 @@ public:
 	QMargins getLineMargins(TextLine* line) const override;
 };
 
-class ComicScriptTextStyleManager : public TextStyleManager
+class SABRINA_TEXT_EXPORT ComicScriptTextStyleManager : public TextStyleManager
 {
 	Q_OBJECT
 public:
@@ -146,6 +154,8 @@ public:
 	ComicScriptTextStyleManager(QObject* parent = nullptr);
 
 	QMap<Qt::KeyboardModifiers, NextNodeStyleAndPos> getNextNodeStyleAndPos(int code) const override;
+	QMap<LevelJump, int> defaultFollowingStyle(int code) const override;
+	QVector<int> getAuthorizedChildrenStyles(int code) const override;
 };
 
 } // namespace Sabrina

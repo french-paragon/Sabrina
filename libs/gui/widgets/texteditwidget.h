@@ -1,4 +1,4 @@
-#ifndef SABRINA_TEXTEDITWIDGET_H
+﻿#ifndef SABRINA_TEXTEDITWIDGET_H
 #define SABRINA_TEXTEDITWIDGET_H
 
 /*
@@ -74,11 +74,17 @@ public:
 
 	NodeSupprBehavior getNodeSupprBehavior() const;
 
+	QString getTextInSelection() const;
+	QString getHtmlInSelection() const;
+	QJsonDocument getJsonInSelection() const;
+
 Q_SIGNALS:
 
 	void currentLineChanged(int line);
 
 protected:
+
+	void configureActions();
 
 	void setSelectionMode(SelectionMode mode);
 	SelectionMode currentSelectionMode() const;
@@ -180,7 +186,19 @@ protected:
 
 	void insertText(QString commited);
 	void insertNextType(TextNode* n, Qt::KeyboardModifiers modifiers);
+	TextNode* insertNode(TextNode* n, int codeStyle, TextStyleManager::LevelJump level);
+	TextNode* setNodeStyleId(TextNode* n, int codeStyle);
 	void removeText();
+
+	void copyTextToClipboard() const;
+	void cutTextToClipboard();
+	void pasteTxtFromClipboard();
+	void pasteTextFromClipboard();
+	void pasteTxt(QString const& txt);
+	void pasteDoc(QByteArray const& docData);
+
+	TextNode* configureNodeFromJson(TextNode* currentNode, QJsonObject const& obj, bool eraseStyle = true, QStringList lastLines = {});
+	TextNode* setLinesInTextNode(TextNode* node, QStringList const& lines);
 
 	Cursor* _cursor;
 

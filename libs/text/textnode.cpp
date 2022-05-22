@@ -20,6 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
+#include <QJsonArray>
+#include <QJsonValue>
+
 namespace Sabrina {
 
 TextLine::TextLine(TextNode *parent ) :
@@ -483,8 +486,23 @@ bool TextNode::clearFromDoc(bool deleteLater) {
 	return true;
 }
 
+int TextNode::nbChildren() const {
+	return _children.size();
+}
+
 const QList<TextNode *> & TextNode::childNodes() {
 	return _children;
+}
+
+QList<const TextNode*> TextNode::childNodes() const {
+	QList<const TextNode*> children;
+	children.reserve(_children.size());
+
+	for (TextNode* n : _children) {
+		children.append(n);
+	}
+
+	return children;
 }
 const QList<TextLine*> & TextNode::lines() {
 	return _lines;
@@ -842,6 +860,19 @@ TextNode* TextNode::insertNodeAfter(int styleCode) {
 	return p->insertNodeBelow(styleCode, nodeIndex()+1);
 
 }
+
+
+TextNode* TextNode::insertNodeBefore(int styleCode) {
+
+	TextNode* p = parentNode();
+
+	if (p == nullptr) {
+		return nullptr;
+	}
+
+	return p->insertNodeBelow(styleCode, nodeIndex());
+}
+
 TextNode* TextNode::insertNodeSubRoot(int styleCode) {
 
 	TextNode* sr = subRootNode();
@@ -875,6 +906,385 @@ TextNode* TextNode::insertNodeBelow(int styleCode, int pos) {
 	Q_EMIT nodeAdded(this, n_pos);
 
 	return n;
+}
+
+TextNode* TextNode::moveNode(TextNode* newParent, int newPos) {
+
+	if (newParent == nullptr) {
+		return nullptr;
+	}
+
+	if (newParent->rootNode() != rootNode()) {
+		return nullptr;
+	}
+
+	if (newParent->isBetweenNode(*this, *lastNode(), true)) { //cannot move the node to one of its descendants.
+		return nullptr;
+	}
+
+	TextNode* oldParent = parentNode();
+
+	if (oldParent != nullptr) {
+		oldParent->_children.removeAt(nodeIndex());
+
+		disconnect(this, &TextNode::nodeAdded, oldParent, &TextNode::nodeAdded);
+		disconnect(this, &TextNode::nodeRemoved, oldParent, &TextNode::nodeRemoved);
+		disconnect(this, &TextNode::nodeEdited, oldParent, &TextNode::nodeEdited);
+	}
+
+	newParent->_children.insert(newPos, this);
+	setParent(newParent);
+
+	connect(this, &TextNode::nodeAdded, newParent, &TextNode::nodeAdded);
+	connect(this, &TextNode::nodeRemoved, newParent, &TextNode::nodeRemoved);
+	connect(this, &TextNode::nodeEdited, newParent, &TextNode::nodeEdited);
+
+	Q_EMIT nodeMoved(this, oldParent);
+
+	return this;
+
+}
+
+QString TextNode::getHtmlRepresentation(NodeCoordinate start,
+										NodeCoordinate end,
+										QMap<int, QString> const& styleNameMap) const {
+
+	const TextNode* root = rootNode();
+	const TextNode* current = root;
+	const TextLine* currentLine = current->lineAt(0);
+
+	int nodeStartLine = 0;
+	int currentTxtLine = 0;
+	int currentLineId = 0;
+	int currentLinePos = 0;
+
+	if (start.isValid()) {
+		current = const_cast<TextNode*>(root)->nodeAtLine(start.lineIndex, &nodeStartLine);
+		currentTxtLine = start.lineIndex;
+		currentLineId = start.lineIndex - nodeStartLine;
+		currentLine = current->lineAt(currentLineId);
+		currentLinePos = start.linePos;
+	}
+
+	QString out;
+	int currentPlevel = 0;
+
+	if (currentLineId == 0 and currentLinePos == 0) {
+		if (!(end.lineIndex >= currentTxtLine and end.lineIndex < currentTxtLine + current->nbTextLines()) or
+				(end.lineIndex == currentTxtLine + current->nbTextLines() - 1 and end.linePos == current->lineAt(current->nbTextLines() - 1)->nChars())) {
+			out += "<p";
+
+			int nodeStyleId = current->styleId();
+
+			if (styleNameMap.contains(nodeStyleId)) {
+				out += " class=\"";
+				out += styleNameMap.value(nodeStyleId) + "\"";
+			}
+			out += " styleId=\"";
+			out += QString::number(nodeStyleId);
+			out += "\"";
+
+			out += ">";
+			currentPlevel++;
+		}
+	}
+
+	int endLinePos = currentLine->nChars();
+
+	if (currentTxtLine == end.lineIndex) {
+		endLinePos = end.lineIndex;
+	}
+
+	out += currentLine->getText().midRef(currentLinePos, endLinePos - currentLinePos);
+	out += "<br>";
+
+	while (currentLine != nullptr and currentTxtLine != end.lineIndex) {
+		currentLine = const_cast<TextLine*>(currentLine)->nextLine();
+		currentTxtLine++;
+
+		if (currentLine->nodeParent() != current) {
+
+			int delta = currentLine->nodeParent()->nodeLevel() - current->nodeLevel();
+
+			if (delta <= 0) {
+				int jumps = std::max(1 - delta, currentPlevel);
+
+				for (int i = 0; i < jumps; i++) {
+					out += "</p>";
+				}
+
+				currentPlevel -= jumps;
+			}
+
+			current = currentLine->nodeParent();
+
+			out += "<p";
+
+			int nodeStyleId = current->styleId();
+
+			if (styleNameMap.contains(nodeStyleId)) {
+				out += " class=\"";
+				out += styleNameMap.value(nodeStyleId) + "\"";
+			}
+			out += " styleId=\"";
+			out += QString::number(nodeStyleId);
+			out += "\"";
+
+			out += ">";
+			currentPlevel++;
+
+		}
+
+		endLinePos = (currentTxtLine == end.linePos) ? end.linePos : -1;
+
+		out += currentLine->getText().midRef(0, endLinePos);
+		out += "<br>";
+	}
+
+	for (int i = 0; i < currentPlevel; i++) {
+		out += "</p>";
+	}
+
+	return out;
+
+}
+
+const QString TextNode::TextNodeJsonRepresentationInfos::LINES_KEY = "lines";
+const QString TextNode::TextNodeJsonRepresentationInfos::STYLE_ID_KEY = "style_id";
+const QString TextNode::TextNodeJsonRepresentationInfos::STYLE_NAME_KEY = "style_name";
+const QString TextNode::TextNodeJsonRepresentationInfos::CHILDREN_KEY = "childs";
+const QString TextNode::TextNodeJsonRepresentationInfos::JUMPS_KEY = "jumps";
+
+const QString TextNode::TextNodeJsonRepresentationInfos::NODES_KEY = "nodes";
+
+const QString TextNode::TextNodeMimeTypeInfos::DocumentData = "application/sabrina-text-document";
+
+QJsonObject TextNode::fullJsonRepresentation(QMap<int, QString> const& styleNameMap,
+											 TextNode const* limitNode) const {
+	bool hitLimit = false;
+	return fullJsonRepresentation(styleNameMap, limitNode, &hitLimit);
+}
+
+QJsonObject TextNode::fullJsonRepresentation(QMap<int, QString> const& styleNameMap,
+											 TextNode const* limitNode,
+											 bool * hitLimit) const {
+
+	bool hitLimitBck;
+	bool* hitLimitPtr;
+
+	if (hitLimit != nullptr) {
+		hitLimitPtr = hitLimit;
+	} else {
+		hitLimitPtr = &hitLimitBck;
+	}
+
+	QJsonObject out;
+
+	out.insert(TextNodeJsonRepresentationInfos::STYLE_ID_KEY, styleId());
+
+	if (styleNameMap.contains(styleId())) {
+		out.insert(TextNodeJsonRepresentationInfos::STYLE_NAME_KEY, styleNameMap.value(styleId()));
+	}
+
+	QJsonArray lines;
+
+	for (TextLine* l : _lines) {
+		lines.append(l->getText());
+	}
+
+	out.insert(TextNodeJsonRepresentationInfos::LINES_KEY, lines);
+
+	QJsonArray children;
+
+	for (TextNode* n : _children) {
+		if (n == limitNode) {
+			*hitLimitPtr = true;
+			break;
+		}
+		children.append(n->fullJsonRepresentation(styleNameMap, limitNode, hitLimitPtr));
+
+		if (*hitLimitPtr) {
+			break;
+		}
+	}
+
+	out.insert(TextNodeJsonRepresentationInfos::CHILDREN_KEY, lines);
+
+	return out;
+}
+
+QJsonObject TextNode::rangeJsonRepresentation(NodeCoordinate start,
+
+											  NodeCoordinate end,
+											  QMap<int, QString> const& styleNameMap) const {
+
+
+	const TextNode* root = rootNode();
+	const TextNode* curentNode = root;
+
+	int nodeStartLine = 0;
+	int startLineNumber = 0;
+	int currentLineNumber = 0;
+	int startLinePos = 0;
+
+	if (start.isValid()) {
+		startLineNumber = start.lineIndex;
+		curentNode = const_cast<TextNode*>(root)->nodeAtLine(start.lineIndex, &nodeStartLine);
+		startLinePos = start.linePos;
+		currentLineNumber = nodeStartLine;
+	}
+
+	int endLineNumber = root->maxLine();
+	int endLinePos = -1;
+
+	if (end.isValid()) {
+		endLineNumber = end.lineIndex;
+		endLinePos = end.linePos;
+	}
+
+	QJsonObject out;
+	QJsonArray nodesArray;
+	QVector<QJsonObject> nodes = {QJsonObject()}; // root node
+	int depth = 0;
+
+	do {
+		nodes[depth].insert(TextNodeJsonRepresentationInfos::STYLE_ID_KEY, curentNode->styleId());
+
+		if (styleNameMap.contains(styleId())) {
+			nodes[depth].insert(TextNodeJsonRepresentationInfos::STYLE_NAME_KEY, styleNameMap.value(curentNode->styleId()));
+		}
+
+		QJsonArray lines;
+
+		for (TextLine* l : curentNode->_lines) {
+
+			if (currentLineNumber < startLineNumber) {
+				currentLineNumber++;
+				continue;
+			}
+
+			QString txt = l->getText();
+
+			int startPos = 0;
+			int len = -1;
+
+			if (currentLineNumber == startLineNumber) {
+				startPos = startLinePos;
+			}
+
+			if (currentLineNumber == endLineNumber) {
+				len = endLinePos - startPos;
+				if (len < 0) {
+					len = 0;
+				}
+			}
+
+			lines.append(txt.mid(startPos, len));
+			currentLineNumber++;
+
+			if (currentLineNumber > end.lineIndex) {
+				break;
+			}
+		}
+
+		nodes[depth].insert(TextNodeJsonRepresentationInfos::LINES_KEY, lines);
+
+		if (currentLineNumber > end.lineIndex) {
+			break;
+		}
+
+		const TextNode* next = curentNode->nextNode();
+
+		if (next == nullptr) {
+			break;
+		}
+
+		if (curentNode->nbChildren() > 0) { //we move to a child
+			QJsonObject next_node;
+			nodes.append(next_node);
+			depth++;
+		} else if (curentNode->parentNode() == next->parentNode()) { //we keep the same parent
+
+			if (depth == 0) {
+				nodesArray.append(nodes[depth]);
+			} else {
+				if (nodes[depth-1].contains(TextNodeJsonRepresentationInfos::CHILDREN_KEY)) {
+					QJsonArray nds = nodes[depth-1].value(TextNodeJsonRepresentationInfos::CHILDREN_KEY).toArray();
+					nds.append(nodes[depth]);
+					nodes[depth-1].insert(TextNodeJsonRepresentationInfos::CHILDREN_KEY, nds);
+				} else {
+					QJsonArray nds;
+					nds.append(nodes[depth]);
+					nodes[depth-1].insert(TextNodeJsonRepresentationInfos::CHILDREN_KEY, nds);
+				}
+			}
+			nodes[depth] = QJsonObject();
+
+		} else { //we climb to a different parent
+
+			const TextNode* p = curentNode;
+			int jumps = 0;
+
+			while (p != next->parentNode() and jumps <= depth) {
+				p = p->parentNode();
+				jumps++;
+			}
+
+			for (int i = 0; i < jumps; i++) {
+
+				if (depth == 0) {
+					nodesArray.append(nodes[depth]);
+				} else {
+					if (nodes[depth-1].contains(TextNodeJsonRepresentationInfos::CHILDREN_KEY)) {
+						QJsonArray nds = nodes[depth-1].value(TextNodeJsonRepresentationInfos::CHILDREN_KEY).toArray();
+						nds.append(nodes[depth]);
+						nodes[depth-1].insert(TextNodeJsonRepresentationInfos::CHILDREN_KEY, nds);
+					} else {
+						QJsonArray nds;
+						nds.append(nodes[depth]);
+						nodes[depth-1].insert(TextNodeJsonRepresentationInfos::CHILDREN_KEY, nds);
+					}
+				}
+				nodes.pop_back();
+				depth--;
+			}
+			nodes.push_back(QJsonObject());
+			depth++;
+
+			if (depth == 0) {
+				nodes[depth].insert(TextNode::TextNodeJsonRepresentationInfos::JUMPS_KEY, jumps);
+			}
+		}
+
+		curentNode = next;
+
+	} while (depth >= 0);
+
+
+	int jumps = depth+1;
+	for (int i = 0; i < jumps; i++) {
+
+		if (depth == 0) {
+			nodesArray.append(nodes[depth]);
+		} else {
+			if (nodes[depth-1].contains(TextNodeJsonRepresentationInfos::CHILDREN_KEY)) {
+				QJsonArray nds = nodes[depth-1].value(TextNodeJsonRepresentationInfos::CHILDREN_KEY).toArray();
+				nds.append(nodes[depth]);
+				nodes[depth-1].insert(TextNodeJsonRepresentationInfos::CHILDREN_KEY, nds);
+			} else {
+				QJsonArray nds;
+				nds.append(nodes[depth]);
+				nodes[depth-1].insert(TextNodeJsonRepresentationInfos::CHILDREN_KEY, nds);
+			}
+		}
+		nodes.pop_back();
+		depth--;
+	}
+
+	out.insert(TextNodeJsonRepresentationInfos::NODES_KEY, nodesArray);
+
+	return out;
+
 }
 
 void TextNode::onLineEdited(TextLine* line) {

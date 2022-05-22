@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QMap>
+#include <QJsonObject>
 
 
 namespace Sabrina {
@@ -71,6 +72,23 @@ class SABRINA_TEXT_EXPORT TextNode : public QObject
 {
 	Q_OBJECT
 public:
+
+	/*!
+	 * \brief The TextNodeJsonRepresentationInfos struct store some const static member representing usefull key for a textnode json representation.
+	 */
+	struct TextNodeJsonRepresentationInfos {
+		static const QString LINES_KEY;
+		static const QString STYLE_ID_KEY;
+		static const QString STYLE_NAME_KEY;
+		static const QString CHILDREN_KEY;
+		static const QString JUMPS_KEY;
+
+		static const QString NODES_KEY;
+	};
+
+	struct TextNodeMimeTypeInfos {
+		static const QString DocumentData;
+	};
 
 	/*!
 	 * \brief The NodeCoordinate struct store a line index and a line pos.
@@ -144,7 +162,10 @@ public:
 	//! \brief remove the node from the document, will suceed if the node is not a root node.
 	bool clearFromDoc(bool deleteLater = true);
 
+	int nbChildren() const;
+
 	QList<TextNode*> const& childNodes();
+	QList<const TextNode *> childNodes() const;
 	QList<TextLine *> const& lines();
 
 	TextNode* nextNode();
@@ -180,17 +201,36 @@ public:
 
 	TextNode* insertNodeAbove(int styleCode = 0);
 	TextNode* insertNodeAfter(int styleCode = 0);
+	TextNode* insertNodeBefore(int styleCode = 0);
 	TextNode* insertNodeSubRoot(int styleCode = 0);
 	TextNode* insertNodeBelow(int styleCode = 0, int pos = 0);
+
+	TextNode* moveNode(TextNode* newParent, int newPos);
+
+	QString getHtmlRepresentation(NodeCoordinate start = NodeCoordinate(),
+								  NodeCoordinate end = NodeCoordinate(),
+								  QMap<int, QString> const& styleNameMap = {}) const;
+
+	QJsonObject rangeJsonRepresentation(NodeCoordinate start = NodeCoordinate(),
+										NodeCoordinate end = NodeCoordinate(),
+										QMap<int, QString> const& styleNameMap = {}) const;
+
+	QJsonObject fullJsonRepresentation(QMap<int, QString> const& styleNameMap = {}, const
+									   TextNode *limitNode = nullptr) const;
 
 Q_SIGNALS:
 
 	void nodeRemoved(TextNode* parent, int oldRow);
 	void nodeAdded(TextNode* parent, int newRow);
 	void nodeEdited(TextNode* node, TextLine* line);
+	void nodeMoved(TextNode* node, TextNode* oldParent);
 	void nodeLineLayoutChanged(TextNode* node);
 
 protected:
+
+	QJsonObject fullJsonRepresentation(QMap<int, QString> const& styleNameMap = {}, const
+									   TextNode *limitNode = nullptr,
+									   bool *hitLimit = nullptr) const;
 
 	void onLineEdited(TextLine* line);
 

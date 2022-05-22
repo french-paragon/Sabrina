@@ -51,4 +51,32 @@ int TextStyleManager::getDefaultStyleCode() const {
 	return 0;
 }
 
+QVector<int> TextStyleManager::getAuthorizedChildrenStyles(int code) const {
+	Q_UNUSED(code);
+	return {ANYSTYLE}; //anything will go there
+}
+
+QMap<int, QString> TextStyleManager::getStyleMapNames() const {
+
+	QMap<int, QString> r;
+
+	for (auto style: _styles) {
+		r.insert(style->typeId(), style->typeName());
+	}
+
+	return r;
+
+}
+bool TextStyleManager::acceptableStyleAsChild(int parent, int child) const {
+	const QVector<int> acceptable = getAuthorizedChildrenStyles(parent);
+
+	for (int style : acceptable) {
+		if (style == child or style == ANYSTYLE) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 } // namespace Sabrina

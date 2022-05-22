@@ -19,6 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "texteditwidget.h"
 
 #include <QPainter>
+#include <QGuiApplication>
+#include <QClipboard>
+#include <QMimeData>
+#include <QAction>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+
 #include <cmath>
 
 #include "utils/envvars.h"
@@ -46,6 +54,33 @@ TextEditWidget::TextEditWidget(QWidget *parent) :
 	setAttribute(Qt::WA_InputMethodEnabled, true);
 
 	_selectionFormat.setBackground(QBrush(QColor(123, 169, 220)));
+
+	configureActions();
+}
+
+void TextEditWidget::configureActions() {
+
+	QAction* copy = new QAction("Copy", this);
+	copy->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_C));
+
+	connect(copy, &QAction::triggered, this, &TextEditWidget::copyTextToClipboard);
+
+	addAction(copy);
+
+	QAction* cut = new QAction("Cut", this);
+	cut->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_X));
+
+	connect(cut, &QAction::triggered, this, &TextEditWidget::cutTextToClipboard);
+
+	addAction(cut);
+
+	QAction* paste = new QAction("Paste", this);
+	paste->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_V));
+
+	connect(paste, &QAction::triggered, this, &TextEditWidget::pasteTextFromClipboard);
+
+	addAction(paste);
+
 }
 
 TextEditWidget::~TextEditWidget() {
@@ -86,6 +121,7 @@ void TextEditWidget::setCurrentScript(TextNode *root) {
 			disconnect(_currentScript, &TextNode::nodeRemoved, this, static_cast<void(TextEditWidget::*)()>(&TextEditWidget::update));
 			disconnect(_currentScript, &TextNode::nodeEdited, this, static_cast<void(TextEditWidget::*)()>(&TextEditWidget::update));
 			disconnect(_currentScript, &TextNode::nodeLineLayoutChanged, this, static_cast<void(TextEditWidget::*)()>(&TextEditWidget::update));
+			disconnect(_currentScript, &TextNode::nodeMoved, this, static_cast<void(TextEditWidget::*)()>(&TextEditWidget::update));
 		}
 
 		_currentScript = root;
@@ -97,6 +133,7 @@ void TextEditWidget::setCurrentScript(TextNode *root) {
 			connect(_currentScript, &TextNode::nodeRemoved, this, static_cast<void(TextEditWidget::*)()>(&TextEditWidget::update));
 			connect(_currentScript, &TextNode::nodeEdited, this, static_cast<void(TextEditWidget::*)()>(&TextEditWidget::update));
 			connect(_currentScript, &TextNode::nodeLineLayoutChanged, this, static_cast<void(TextEditWidget::*)()>(&TextEditWidget::update));
+			connect(_currentScript, &TextNode::nodeMoved, this, static_cast<void(TextEditWidget::*)()>(&TextEditWidget::update));
 		}
 
 		_baseIndex = _currentScript;
@@ -279,6 +316,7 @@ void TextEditWidget::paintEvent(QPaintEvent *event) {
 
 }
 void TextEditWidget::keyPressEvent(QKeyEvent *event) {
+
 	if (event->key() == Qt::Key_Left) {
 		_cursor->move(-1);
 		scrollToLine(_cursor->line());
@@ -904,30 +942,107 @@ void TextEditWidget::insertNextType(TextNode* n, Qt::KeyboardModifiers modifiers
 		return;
 	}
 
+	insertNode(n, jumpInfo[modifiers].code, jumpInfo[modifiers].levelJump);
+
+}
+
+
+TextNode* TextEditWidget::insertNode(TextNode* n, int codeStyle, TextStyleManager::LevelJump level) {
+
 	TextNode* inserted = nullptr;
 
-	switch (jumpInfo[modifiers].levelJump) {
+	switch (level) {
 	case TextStyleManager::LevelJump::Below:
-		inserted = n->insertNodeBelow(jumpInfo[modifiers].code);
+		inserted = n->insertNodeBelow(codeStyle);
 		break;
 	case TextStyleManager::LevelJump::After:
-		inserted = n->insertNodeAfter(jumpInfo[modifiers].code);
+		inserted = n->insertNodeAfter(codeStyle);
 		break;
 	case TextStyleManager::LevelJump::Above:
-		inserted = n->insertNodeAbove(jumpInfo[modifiers].code);
+		inserted = n->insertNodeAbove(codeStyle);
 		break;
 	case TextStyleManager::LevelJump::UnderRoot:
-		inserted = n->insertNodeSubRoot(jumpInfo[modifiers].code);
+		inserted = n->insertNodeSubRoot(codeStyle);
 		break;
 	}
 
-	int exptexdLines = _styleManager->getStyleByCode(jumpInfo[modifiers].code)->expectedNodeNbTextLines();
+	int exptexdLines = _styleManager->getStyleByCode(codeStyle)->expectedNodeNbTextLines();
 
 	if (inserted->nbTextLines() != exptexdLines) {
 		inserted->setNbTextLines(exptexdLines);
 	}
 
+	return inserted;
 }
+TextNode* TextEditWidget::setNodeStyleId(TextNode* n, int codeStyle) {
+
+	if (codeStyle == TextStyleManager::SpecialNodeStyles::NOSTYLE) {
+		return nullptr;
+	}
+
+	if (n == nullptr) {
+		return n;
+	}
+
+	if (_styleManager == nullptr) {
+		return n;
+	}
+
+	if (n->styleId() == codeStyle) {
+		return n;
+	}
+
+	//int oldCode = n->styleId();
+
+	//int oldLinesN = _styleManager->getStyleByCode(oldCode)->expectedNodeNbTextLines();
+	int newLinesN = _styleManager->getStyleByCode(codeStyle)->expectedNodeNbTextLines();
+
+	TextNode* parent = n->parentNode();
+
+	if (parent == nullptr) { //do not change the style of the root node
+		return n;
+	}
+
+	int nodePos = n->nodeIndex();
+
+	if (!_styleManager->acceptableStyleAsChild(parent->styleId(), codeStyle)) {
+
+		if (nodePos == 0) {
+			return n;
+		}
+
+		parent = parent->childNodes()[nodePos-1];
+		nodePos = -1;
+	}
+
+	while (!_styleManager->acceptableStyleAsChild(parent->styleId(), codeStyle)) {
+
+		if (parent->childNodes().isEmpty()) {
+			break;
+		}
+
+		parent = parent->childNodes().last();
+	}
+
+	if (!_styleManager->acceptableStyleAsChild(parent->styleId(), codeStyle)) {
+		return n;
+	}
+
+	_currentScript->blockSignals(true);
+
+	if (parent != n->parentNode()) {
+		n->moveNode(parent, nodePos);
+	}
+
+	n->setStyleId(codeStyle);
+	n->setNbTextLines(newLinesN);
+
+	update();
+	_currentScript->blockSignals(false);
+
+	return n;
+}
+
 void TextEditWidget::removeText() {
 
 	if (_currentScript == nullptr) {
@@ -1019,9 +1134,575 @@ void TextEditWidget::removeText() {
 
 }
 
+void TextEditWidget::copyTextToClipboard() const {
+
+	Cursor::CursorState cursorState = _cursor->getExtendedSelectionState();
+
+	if (cursorState.extend == 0) {
+		return;
+	}
+
+	QClipboard *clipboard = QGuiApplication::clipboard();
+
+	QMimeData* data = new QMimeData();
+
+	data->setText(getTextInSelection());
+	data->setHtml(getHtmlInSelection());
+
+	QByteArray jsondata = getJsonInSelection().toJson();
+	data->setData(TextNode::TextNodeMimeTypeInfos::DocumentData, jsondata);
+
+	clipboard->setMimeData(data);
+}
+void TextEditWidget::cutTextToClipboard() {
+
+	Cursor::CursorState cursorState = _cursor->getExtendedSelectionState();
+
+	if (cursorState.extend == 0) {
+		return;
+	}
+
+	copyTextToClipboard();
+	removeText();
+	update();
+}
+void TextEditWidget::pasteTxtFromClipboard() {
+
+	if (_currentScript == nullptr) {
+		return;
+	}
+
+	QClipboard *clipboard = QGuiApplication::clipboard();
+
+	QString txt = clipboard->text(QClipboard::Clipboard);
+
+	pasteTxt(txt);
+
+}
+void TextEditWidget::pasteTextFromClipboard() {
+
+	if (_currentScript == nullptr) {
+		return;
+	}
+
+	QClipboard *clipboard = QGuiApplication::clipboard();
+	const QMimeData* data = clipboard->mimeData(QClipboard::Clipboard);
+
+	if (data != nullptr) {
+
+		if (data->hasFormat(TextNode::TextNodeMimeTypeInfos::DocumentData)) {
+			QByteArray jsonData = data->data(TextNode::TextNodeMimeTypeInfos::DocumentData);
+			pasteDoc(jsonData);
+		} else if (data->hasText()) {
+			pasteTxt(data->text());
+		}
+
+	}
+
+	update();
+
+}
+
+void TextEditWidget::pasteTxt(QString const& txt) {
+
+	if (_currentScript == nullptr) {
+		return;
+	}
+
+	auto lines = txt.splitRef("\n", Qt::SkipEmptyParts);
+
+	if (_cursor->extend() != 0) { //first clear the current selection (it is expected pasted text replace it).
+		removeText();
+	}
+
+	int startLine = _cursor->line();
+	int startPos = _cursor->pos();
+
+	TextLine* line = _currentScript->getLineAtLine(startLine);
+
+	QString remaining = line->getText().mid(startPos);
+	auto first = lines.takeFirst();
+
+	line->setText(line->getText().mid(0, startPos) + first);
+
+	TextNode* initialNode = line->nodeParent();
+	TextNode* currentNode = initialNode;
+
+	if (currentNode == nullptr) {
+		return;
+	}
+
+	int move = lines.size() + first.length();
+
+	for (auto & txtline : lines) {
+		TextLine* next =  line->nextLine();
+		TextNode* nextNode;
+
+		if (next == nullptr) {
+			nextNode = nullptr;
+		} else {
+			nextNode = next->nodeParent();
+		}
+
+		if (nextNode != currentNode or currentNode == initialNode) {
+			auto map = _styleManager->getNextNodeStyleAndPos(currentNode->styleId());
+
+			TextStyleManager::NextNodeStyleAndPos jump;
+			if (map.contains(Qt::NoModifier)) { //assume the user jumped without a modifier
+				jump = map.value(Qt::NoModifier);
+			} else {
+				jump = {currentNode->styleId(), TextStyleManager::LevelJump::After}; //the same node type should be insertable in place.
+			}
+
+			if (currentNode == initialNode and next != nullptr) { // if the current node is split into multiple lines, we just skip those.
+				move += next->getText().length() + 1;
+				int lid = next->lineNodeIndexNumber();
+
+				for (int i = lid+1; i < initialNode->nbTextLines(); i++) {
+					move += initialNode->lineAt(i)->getText().length() + 1;
+				}
+			}
+
+			currentNode = insertNode(currentNode, jump.code, jump.levelJump);
+			line = currentNode->lineAt(0);
+		} else {
+			line = next;
+		}
+
+		line->setText(txtline.toString());
+		move += txtline.length();
+	}
+
+	if (line != nullptr) {
+		if (!remaining.isEmpty()) {
+			line->setText(line->getText()+remaining); //add the remaining to the line
+		}
+	}
+
+	_cursor->move(move);
+
+}
+
+void TextEditWidget::pasteDoc(QByteArray const& docData) {
+
+	if (_currentScript == nullptr) {
+		return;
+	}
+
+	QJsonParseError err;
+	QJsonDocument doc = QJsonDocument::fromJson(docData, &err);
+
+	if (err.error != QJsonParseError::NoError) {
+		return;
+	}
+
+	if (!doc.isObject()) {
+		return;
+	}
+
+	QJsonObject obj = doc.object();
+
+	QJsonArray nodes;
+
+	if (obj.contains(TextNode::TextNodeJsonRepresentationInfos::NODES_KEY)) {
+		QJsonValue val = obj.value(TextNode::TextNodeJsonRepresentationInfos::NODES_KEY);
+
+		if (val.isArray()) {
+			nodes = val.toArray();
+		} else {
+			return;
+		}
+
+	} else {
+		if (obj.contains(TextNode::TextNodeJsonRepresentationInfos::LINES_KEY)) {
+			nodes.append(obj);
+		} else {
+			return;
+		}
+	}
+
+	if (nodes.isEmpty()) {
+		return;
+	}
+
+	if (nodes.size() == 1) {
+		QJsonValue val = nodes.first();
+
+		if (!val.isObject()) {
+			return;
+		}
+
+		QJsonObject obj = val.toObject();
+
+		if (!obj.contains(TextNode::TextNodeJsonRepresentationInfos::CHILDREN_KEY)) {
+			if (obj.contains(TextNode::TextNodeJsonRepresentationInfos::LINES_KEY)) {
+				QJsonValue v = obj.value(TextNode::TextNodeJsonRepresentationInfos::LINES_KEY);
+
+				if (v.isArray()) {
+					const QJsonArray arr = v.toArray();
+					QStringList lst;
+
+					for (QJsonValue const& l : arr) {
+						lst.append(l.toString());
+					}
+
+					pasteTxt(lst.join("\n"));
+					return;
+				}
+			}
+		}
+	}
+
+	if (_cursor->extend() != 0) { //first clear the current selection (it is expected pasted text replace it).
+		removeText();
+	}
+
+	int startLine = _cursor->line();
+	int startPos = _cursor->pos();
+	int writtenLines = 0;
+
+	TextLine* line = _currentScript->getLineAtLine(startLine);
+
+	TextNode* n = line->nodeParent();
+	int lId = line->lineNodeIndexNumber();
+	writtenLines -= n->nbTextLines(); //do not count the lines already written from the current position
+
+	QStringList linesBefore;
+
+	for (int i = 0; i < lId; i++) {
+		linesBefore.append(n->lineAt(i)->getText());
+	}
+
+	QString prior = line->getText().mid(0, startPos);
+	QString remaining = line->getText().mid(startPos);
+
+	QStringList linesAfter = {remaining};
+
+	for (int i = lId+1; i < n->lines().size(); i++) {
+		linesAfter.append(n->lineAt(i)->getText());
+	}
+
+	QJsonValue first = nodes.first();
+	QJsonValue last = nodes.last();
+
+	if (first.isObject()) {
+
+		QJsonArray priorlines;
+
+		QJsonObject obj = first.toObject();
+		if (obj.contains(TextNode::TextNodeJsonRepresentationInfos::LINES_KEY)) {
+			priorlines = obj.value(TextNode::TextNodeJsonRepresentationInfos::LINES_KEY).toArray();
+		}
+
+		QJsonArray lines;
+
+		for (QString const& l : linesBefore) {
+			lines.push_back(l);
+		}
+
+		QString merged = prior;
+
+		if (priorlines.size() > 0) {
+			merged += priorlines.first().toString();
+		}
+
+		lines.push_back(merged);
+
+		for (int i = 1; i < priorlines.size(); i++) {
+			lines.push_back(priorlines.at(i).toString());
+		}
+
+		obj.insert(TextNode::TextNodeJsonRepresentationInfos::LINES_KEY, lines);
+		nodes.replace(0, obj);
+
+	}
+
+	TextNode* initialNode = line->nodeParent();
+	TextNode* currentNode = initialNode;
+
+	if (currentNode == nullptr) {
+		return;
+	}
+
+	for (int i = 0; i < nodes.size(); i++) {
+
+		QJsonValue nodeValue = nodes.at(i);
+
+		if (!nodeValue.isObject()) {
+			continue;
+		}
+
+		QJsonObject obj = nodeValue.toObject();
+
+		bool eraseStyle = i > 0;
+
+		configureNodeFromJson(currentNode, obj, eraseStyle, (i == nodes.size()-1) ? linesAfter : QStringList());
+
+		writtenLines += currentNode->maxLine();
+
+		if (i < nodes.size()-1) {
+
+			for (int i2 = i+1; i2 < nodes.size(); i2++) {
+
+				QJsonValue nodeValue = nodes.at(i);
+
+				if (nodeValue.isObject()) {
+					QJsonObject obj = nodeValue.toObject();
+
+					if (obj.contains(TextNode::TextNodeJsonRepresentationInfos::JUMPS_KEY)) {
+						int nJumps = obj.value(TextNode::TextNodeJsonRepresentationInfos::JUMPS_KEY).toInt(0);
+
+						if (nJumps > 0) {
+							for (int j = 0; j < nJumps; j++) {
+								auto p = currentNode->parentNode();
+								if (p == nullptr) {
+									break;
+								}
+								currentNode = p;
+							}
+						}
+					}
+
+					break;
+				}
+
+			}
+
+
+			TextNode* next = currentNode->insertNodeAfter(currentNode->styleId());
+
+			if (next != nullptr) {
+				currentNode = next;
+			} else {
+				break;
+			}
+		}
+	}
+
+	int finalLine = startLine + writtenLines;
+	TextLine* fline = _currentScript->getLineAtLine(finalLine);
+
+	int finalPos = fline->getText().length() - remaining.length();
+	if (finalPos < 0) {
+		finalPos = 0;
+	}
+
+	_cursor->setState(Cursor::CursorPos(finalLine, finalPos));
+
+}
+
+
+TextNode* TextEditWidget::configureNodeFromJson(TextNode* currentNode, QJsonObject const& obj, bool eraseStyle, QStringList lastLines) {
+
+	TextNode* parent = currentNode->parentNode();
+
+	int styleCode = currentNode->styleId();
+
+	if (eraseStyle and parent != nullptr) {
+		if (obj.contains(TextNode::TextNodeJsonRepresentationInfos::STYLE_ID_KEY)) {
+			styleCode = obj.value(TextNode::TextNodeJsonRepresentationInfos::STYLE_ID_KEY).toInt(styleCode);
+		}
+
+		if (!_styleManager->acceptableStyleAsChild(parent->styleId(), styleCode)) {
+			QMap<TextStyleManager::LevelJump, int> styleInfo = _styleManager->defaultFollowingStyle(parent->styleId());
+			styleCode = styleInfo.value(TextStyleManager::LevelJump::Below, TextStyleManager::SpecialNodeStyles::NOSTYLE);
+
+			if (styleCode == TextStyleManager::SpecialNodeStyles::NOSTYLE) {
+				if (parent != currentNode) {
+					styleCode = currentNode->styleId();
+				} else {
+					return nullptr; //impossible to assign a proper style to the node;
+				}
+			}
+		}
+	}
+
+	int expectedLines = _styleManager->getStyleByCode(styleCode)->expectedNodeNbTextLines();
+	if (expectedLines > currentNode->lines().size()) {
+		currentNode->setNbTextLines(expectedLines); //ensure the node will not be brocken up at that stage.
+	}
+	setNodeStyleId(currentNode, styleCode);
+
+	bool hasChildren = false;
+
+	if (obj.contains(TextNode::TextNodeJsonRepresentationInfos::CHILDREN_KEY)) {
+		QJsonValue val = obj.value(TextNode::TextNodeJsonRepresentationInfos::CHILDREN_KEY);
+
+		if (val.isArray()) {
+
+			const QJsonArray childrenArray = val.toArray();
+
+			int subCode = _styleManager->defaultFollowingStyle(currentNode->styleId())
+					.value(TextStyleManager::LevelJump::Below, TextStyleManager::SpecialNodeStyles::NOSTYLE);
+
+			if (subCode != TextStyleManager::SpecialNodeStyles::NOSTYLE) {
+				hasChildren = true;
+			}
+		}
+	}
+
+	if (obj.contains(TextNode::TextNodeJsonRepresentationInfos::LINES_KEY)) {
+		QJsonValue val = obj.value(TextNode::TextNodeJsonRepresentationInfos::LINES_KEY);
+
+		if (val.isArray()) {
+			const QJsonArray linesArray = val.toArray();
+
+			QStringList lineslist;
+
+			for (const auto & val : linesArray) {
+				lineslist.append(val.toString());
+			}
+
+			if (!lastLines.isEmpty() and !hasChildren) {
+				lineslist.last().append(lastLines.takeFirst());
+				lineslist += lastLines;
+			}
+
+			setLinesInTextNode(currentNode, lineslist);
+		}
+	}
+
+	if (hasChildren) {
+		QJsonValue val = obj.value(TextNode::TextNodeJsonRepresentationInfos::CHILDREN_KEY);
+
+		const QJsonArray childrenArray = val.toArray();
+
+		int subCode = _styleManager->defaultFollowingStyle(currentNode->styleId())
+					.value(TextStyleManager::LevelJump::Below, TextStyleManager::SpecialNodeStyles::NOSTYLE);
+
+		TextNode* target = currentNode->insertNodeBelow();
+
+		for (int i = 0; i < childrenArray.size(); i++) {
+
+			QJsonValue val = childrenArray.at(i);
+
+			configureNodeFromJson(target, val.toObject(), true, (i == childrenArray.size()-1) ? lastLines: QStringList());
+
+			if (i < childrenArray.size()-1) {
+				TextNode* next = target->insertNodeAfter(subCode);
+
+				if (next != nullptr) {
+					target = next;
+				} else {
+					break;
+				}
+			}
+
+		}
+	}
+
+	return currentNode;
+
+}
+
+TextNode* TextEditWidget::setLinesInTextNode(TextNode* node, QStringList const& lines) {
+
+	for (int i = 0; i < std::min(node->lines().size(), lines.size()); i++) {
+		node->lines()[i]->setText(lines[i]);
+	}
+
+	return node;
+
+}
+
 TextEditWidget::NodeSupprBehavior TextEditWidget::getNodeSupprBehavior() const
 {
     return _nodeSupprBehavior;
+}
+
+QString TextEditWidget::getTextInSelection() const {
+
+	QString txt;
+
+	if (_currentScript == nullptr) {
+		return txt;
+	}
+
+	Cursor::CursorState extended = _cursor->getExtendedSelectionState();
+
+	TextLine* line = _currentScript->getLineAtLine(extended.line);
+
+	if (line == nullptr) {
+		return txt;
+	}
+
+	int endPos;
+	int unused;
+	TextLine* end = line->lineAfterOffset(extended.pos, extended.extend, endPos, &unused);
+
+	if (end == nullptr) {
+		return txt;
+	}
+
+	int nLines = end->lineLineNumber() - line->lineLineNumber();
+
+	txt.reserve(extended.extend + nLines + 1);
+
+	txt += line->getText().midRef(extended.pos);
+	line = line->nextLine();
+
+	while (line != end and line != nullptr) {
+		txt += "\n";
+		txt += line->getText();
+		line = line->nextLine();
+	}
+
+	if (line != nullptr) {
+		txt += "\n";
+		txt += line->getText().midRef(0, endPos);
+	}
+
+	return txt;
+
+}
+QString TextEditWidget::getHtmlInSelection() const {
+
+	QString txt;
+
+
+	if (_currentScript == nullptr) {
+		return txt;
+	}
+
+	Cursor::CursorState extended = _cursor->getExtendedSelectionState();
+
+	TextLine* line = _currentScript->getLineAtLine(extended.line);
+
+	if (line == nullptr) {
+		return txt;
+	}
+
+	int endPos;
+	int unused;
+	TextLine* end = line->lineAfterOffset(extended.pos, extended.extend, endPos, &unused);
+
+	if (end == nullptr) {
+		return txt;
+	}
+
+	TextNode::NodeCoordinate startCoord(extended.line, extended.pos);
+	TextNode::NodeCoordinate endCoord(end->lineLineNumber(), endPos);
+	QMap<int, QString> styleName = _styleManager->getStyleMapNames();
+
+	return _currentScript->getHtmlRepresentation(startCoord, endCoord, styleName);
+}
+
+QJsonDocument TextEditWidget::getJsonInSelection() const {
+
+	if (_currentScript == nullptr) {
+		return QJsonDocument();
+	}
+
+	Cursor::CursorState cursorState = _cursor->getExtendedSelectionState();
+
+	TextNode::NodeCoordinate startPos(cursorState.line, cursorState.pos);
+	TextNode::NodeCoordinate endPos = _currentScript->getCoordinateAfterOffset(startPos, cursorState.extend);
+
+	QJsonObject jsonobj = _currentScript->rangeJsonRepresentation(startPos, endPos, _styleManager->getStyleMapNames());
+	QJsonDocument jsondata;
+	jsondata.setObject(jsonobj);
+
+	return jsondata;
 }
 
 TextEditWidget::Cursor::Cursor(TextEditWidget* widget,

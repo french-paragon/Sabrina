@@ -25,17 +25,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "textnode.h"
 
+#include "./text_global.h"
+
 namespace Sabrina {
 
 class TextLine;
 
-class AbstractTextNodeStyle : public QObject
+class SABRINA_TEXT_EXPORT AbstractTextNodeStyle : public QObject
 {
 	Q_OBJECT
 public:
 	explicit AbstractTextNodeStyle(QObject *parent = nullptr);
 
 	virtual int typeId() const = 0;
+	virtual QString typeName() const = 0;
 
 	virtual QString getPrefix(TextLine* line) const;
 	virtual QString getSuffix(TextLine* line) const;

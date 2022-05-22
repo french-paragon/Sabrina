@@ -22,11 +22,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QMap>
 
+#include "./text_global.h"
+
 namespace Sabrina {
 
 class AbstractTextNodeStyle;
 
-class TextStyleManager : public QObject
+class SABRINA_TEXT_EXPORT TextStyleManager : public QObject
 {
 	Q_OBJECT
 public:
@@ -50,7 +52,26 @@ public:
 		LevelJump levelJump;
 	};
 
+	/*!
+	 * \brief The SpecialNodeStyles enum contain special styles used to convay not a specific style, but a concept
+	 *
+	 * All values are garanteed to be negative and should not be used by any given style as id.
+	 */
+	enum SpecialNodeStyles {
+		ANYSTYLE = -1,
+		SAMESTYLE = -2,
+		PARENTSTYLE = -3,
+		DEFAULTSTYLE = -4,
+		ROOTSTYLE = -5,
+		NOSTYLE = -6,
+	};
+
 	virtual QMap<Qt::KeyboardModifiers, NextNodeStyleAndPos> getNextNodeStyleAndPos(int code) const = 0;
+	virtual QMap<LevelJump, int> defaultFollowingStyle(int code) const = 0;
+	virtual QVector<int> getAuthorizedChildrenStyles(int code) const;
+
+	QMap<int, QString> getStyleMapNames() const;
+	bool acceptableStyleAsChild(int parent, int child) const;
 
 Q_SIGNALS:
 
