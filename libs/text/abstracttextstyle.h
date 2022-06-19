@@ -68,6 +68,11 @@ public:
 
 
 	int nodeHeight(TextNode* node, int availableWidth) const;
+	int nodeHeightBetweenLines(TextNode* node, int availableWidth, int lineStart = 0, int lineEnd = -1) const;
+	int nodeNbLayoutLines(TextNode* node, int availableWidth) const;
+	int nodeNbLayoutLines(TextNode* node, int availableWidth, int availableHeight) const;
+
+	void clearCache();
 
 Q_SIGNALS:
 

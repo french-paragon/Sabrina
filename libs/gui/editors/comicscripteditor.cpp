@@ -21,10 +21,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "model/editableItems/comicscript.h"
 #include "text/comicscript.h"
+#include "text/exportfunctions.h"
+
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QStandardPaths>
 
 #include <QSettings>
 #define COMIC_EDITOR_HIGHLIGHT_SETTING "comic_editor_highlight_activetext"
 #define COMIC_EDITOR_SELECTBYBLOCK_SETTING "comic_editor_select_restricted_to_blocks"
+#define COMIC_EDITOR_EXPORT_SETTING "comic_editor_export_path"
 
 namespace Sabrina {
 
@@ -43,6 +49,8 @@ ComicscriptEditor::ComicscriptEditor(QWidget *parent) :
 	connect(ui->addPanelButton, &QPushButton::pressed, ui->editWidget, &ComicscriptEditWidget::addPanel);
 	connect(ui->addCaptionButton, &QPushButton::pressed, ui->editWidget, &ComicscriptEditWidget::addCaption);
 	connect(ui->addDialogButton, &QPushButton::pressed, ui->editWidget, &ComicscriptEditWidget::addDialog);
+
+	connect(ui->exportPdfButton, &QPushButton::pressed, this, &ComicscriptEditor::exportPdf);
 
 	connect(ui->nameEdit, &QLineEdit::textChanged, this, &ComicscriptEditor::onNameChanged);
 	connect(ui->synopsisEdit, &QTextEdit::textChanged, this, &ComicscriptEditor::onSynopsisChanged);
@@ -188,6 +196,74 @@ void ComicscriptEditor::onScriptSynopsisChanged() {
 	if (txt != ui->synopsisEdit->toPlainText()) {
 		ui->synopsisEdit->setText(txt);
 	}
+}
+
+void ComicscriptEditor::exportPdf() {
+
+	QString dir;
+
+	QStringList dirs = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+
+	if (dirs.size() > 0) {
+		dir = dirs.first();
+	}
+
+	QSettings settings;
+
+	if (settings.contains(COMIC_EDITOR_EXPORT_SETTING)) {
+		QString exportDir = settings.value(COMIC_EDITOR_EXPORT_SETTING).toString();
+
+		QFileInfo info(exportDir);
+
+		if (info.exists() and info.isDir()) {
+			dir = exportDir;
+		}
+	}
+
+	bool ok = true;
+	QString file;
+	QDir outDir;
+
+	do {
+		ok = true;
+
+		file = QFileDialog::getSaveFileName(this, tr("Save script to pdf"), dir, "pdf files (*.pdf)");
+
+		if (file.isEmpty()) {
+			return;
+		}
+
+		QFileInfo outFileInfo(file);
+
+		outDir = outFileInfo.dir();
+
+		if (!outDir.exists()) {
+			QMessageBox::warning(this, tr("Imposible to save file"), tr("Target directory do not exist !"));
+			return;
+		}
+
+		if (!file.endsWith(".pdf")) {
+			QMessageBox::warning(this, tr("Imposible to save file"), tr("The file is not a pdf !"));
+			return;
+		}
+
+	} while (!ok);
+
+	ComicScriptTextStyleManager comicstyle;
+
+	QPageLayout layout;
+	layout.setUnits(QPageLayout::Unit::Point);
+	layout.setOrientation(QPageLayout::Orientation::Portrait);
+	layout.setPageSize(QPageSize(QPageSize::A4), QMargins(40.0, 40.0, 40.0, 40.0));
+
+	ok = savePdf(ui->editWidget->getCurrentNode(), &comicstyle, layout, file);
+	settings.setValue(COMIC_EDITOR_EXPORT_SETTING, outDir.path());
+
+	if (!ok) {
+		QMessageBox::warning(this, tr("Imposible to save file"), tr("Unknown error !"));
+		return;
+	}
+
 }
 
 ComicscriptEditor::ComicscriptEditorFactory::ComicscriptEditorFactory(QObject* parent) :

@@ -72,6 +72,8 @@ protected:
 	void onScriptNameChanged();
 	void onScriptSynopsisChanged();
 
+	void exportPdf();
+
 private:
 	Ui::ComicscriptEditor *ui;
 

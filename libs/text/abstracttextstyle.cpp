@@ -153,6 +153,94 @@ int AbstractTextNodeStyle::nodeHeight(TextNode* node, int availableWidth) const 
 	return mH + getNodeMargins(node).bottom();
 }
 
+
+int AbstractTextNodeStyle::nodeHeightBetweenLines(TextNode* node, int availableWidth, int pLineStart, int pLineEnd) const {
+
+	layNodeOut(node, availableWidth);
+
+	int n = 0;
+	qreal sH = 0;
+	qreal eH = 0;
+
+	int lineStart = pLineStart;
+
+	if (lineStart < 0) {
+		lineStart = nodeNbLayoutLines(node, availableWidth) + lineStart;
+	}
+
+	int lineEnd = pLineEnd;
+
+	if (lineEnd < 0) {
+		lineEnd = nodeNbLayoutLines(node, availableWidth) + lineEnd;
+	}
+
+	for (int i = 0; i < node->nbTextLines(); i++) {
+		const QTextLayout& layout = lineLayout(node->lineAt(i));
+
+		for (int i = 0; i < layout.lineCount(); i++) {
+			QTextLine l = layout.lineAt(i);
+
+			if (n == lineStart) {
+				sH = l.rect().top();
+			}
+
+			eH = l.rect().bottom();
+			if (n == lineEnd) {
+				break;
+			}
+
+			n++;
+		}
+	}
+
+	return eH - sH;
+
+}
+
+int AbstractTextNodeStyle::nodeNbLayoutLines(TextNode* node, int availableWidth) const {
+
+	layNodeOut(node, availableWidth);
+
+	int n = 0;
+
+	for (int i = 0; i < node->nbTextLines(); i++) {
+		const QTextLayout& layout = lineLayout(node->lineAt(i));
+		n += layout.lineCount();
+	}
+
+	return n;
+}
+int AbstractTextNodeStyle::nodeNbLayoutLines(TextNode* node, int availableWidth, int availableHeight) const {
+
+	layNodeOut(node, availableWidth);
+
+	int n = 0;
+	int mH = 0;
+
+	for (int i = 0; i < node->nbTextLines(); i++) {
+		const QTextLayout& layout = lineLayout(node->lineAt(i));
+
+		for (int i = 0; i < layout.lineCount(); i++) {
+			QTextLine l = layout.lineAt(i);
+
+			mH = l.rect().bottom();
+
+			if (mH >= availableHeight) {
+				return n;
+			}
+
+			n++;
+		}
+	}
+
+	return n;
+
+}
+
+void AbstractTextNodeStyle::clearCache() {
+	_cache.clear();
+}
+
 void AbstractTextNodeStyle::renderLine(TextLine* line,
 				const QPointF &offset,
 				QPainter & painter,

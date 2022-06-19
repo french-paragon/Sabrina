@@ -4,6 +4,7 @@
         <file>icons/textTools/highlight_lines.svg</file>
         <file>icons/textTools/selection_mode_blocks.svg</file>
         <file>icons/textTools/selection_mode_free.svg</file>
+        <file>icons/files_io/pdf.svg</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/logo_paragon.png</file>

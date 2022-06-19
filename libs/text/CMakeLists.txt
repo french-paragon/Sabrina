@@ -7,11 +7,13 @@ set(LIB_SRC text_global.h
 			textstylemanager.h
 			textstylemanager.cpp
 			comicscript.h
-			comicscript.cpp)
+			comicscript.cpp
+			exportfunctions.h
+			exportfunctions.cpp)
 
 add_library(${LIB_NAME} ${LIB_SRC})
 
 target_compile_definitions(${LIB_NAME}
   PRIVATE SABRINA_TEXT_LIBRARY)
 
-target_link_libraries(${LIB_NAME} Qt5::Core Qt5::Gui)
+target_link_libraries(${LIB_NAME} Qt5::Core Qt5::Gui Qt5::PrintSupport)

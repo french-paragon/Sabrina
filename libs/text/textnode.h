@@ -92,7 +92,7 @@ public:
 
 	/*!
 	 * \brief The NodeCoordinate struct store a line index and a line pos.
-	 * The line pos is relative to the start of the line, but the line index can be related to the parent node or document note depending on context.
+	 * The line pos is relative to the start of the line, but the line index can be related to the parent node or document node depending on context.
 	 */
 	struct NodeCoordinate{
 		NodeCoordinate() : lineIndex(-1), linePos(-1) {};
