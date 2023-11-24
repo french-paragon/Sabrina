@@ -22,9 +22,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gui/mainwindows.h"
 #include "gui/mainwindowsfactory.h"
-#include "aline/src/view/projecttreedockwidget.h"
-#include "aline/src/view/projectlabelsdockwidget.h"
-#include "aline/src/view/labelitemsdockwidget.h"
+
+#include <Aline/view/projecttreedockwidget.h>
+#include <Aline/view/projectlabelsdockwidget.h>
+#include <Aline/view/labelitemsdockwidget.h>
+
 #include "gui/dockWidgets/projectnotesdockwidget.h"
 
 #include <QUrl>
@@ -56,9 +58,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "gui/utilsDialogs/aboutdialog.h"
 #include "gui/utilsDialogs/licensedialog.h"
 
-#include <aline/src/view/editor.h>
-#include <aline/src/view/editorfactory.h>
-#include <aline/src/view/editorfactorymanager.h>
+#include <Aline/view/editor.h>
+#include <Aline/view/editorfactory.h>
+#include <Aline/view/editorfactorymanager.h>
 
 #include "utils/app_info.h"
 
@@ -267,23 +269,34 @@ void App::addAboutActionsToMainWindows(MainWindow* mw) {
 
 void App::loadEditorsFactories() {
 
-	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new PersonnageEditor::PersonnageEditorFactory());
-	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new PlaceEditor::PlaceEditorFactory());
-	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new CartographyEditor::CartographyEditorFactory());
-	Aline::EditorFactoryManager::GlobalEditorFactoryManager.installFactory(new ComicscriptEditor::ComicscriptEditorFactory());
+	appEditorsFactoryManager()->installFactory(new PersonnageEditor::PersonnageEditorFactory());
+	appEditorsFactoryManager()->installFactory(new PlaceEditor::PlaceEditorFactory());
+	appEditorsFactoryManager()->installFactory(new CartographyEditor::CartographyEditorFactory());
+	appEditorsFactoryManager()->installFactory(new ComicscriptEditor::ComicscriptEditorFactory());
 
 }
 
 void App::loadEditableFactories() {
 
-	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Personnage::PersonnageFactory());
-	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Place::PlaceFactory());
-	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Cartography::CartographyFactory());
-	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installFactory(new Comicscript::ComicstripFactory());
+	getAppEditableItemFactoryManager()->installFactory(new Personnage::PersonnageFactory());
+	getAppEditableItemFactoryManager()->installFactory(new Place::PlaceFactory());
+	getAppEditableItemFactoryManager()->installFactory(new Cartography::CartographyFactory());
+	getAppEditableItemFactoryManager()->installFactory(new Comicscript::ComicstripFactory());
 
-	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installSubItemFactory(new CartographyItem::CartographyItemFactory());
-	Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager.installSubItemFactory(new CartographyCategory::CartographyCategoryFactory());
+	getAppEditableItemFactoryManager()->installSubItemFactory(new CartographyItem::CartographyItemFactory());
+	getAppEditableItemFactoryManager()->installSubItemFactory(new CartographyCategory::CartographyCategoryFactory());
 
+}
+
+Aline::EditorFactoryManager* App::appEditorsFactoryManager() {
+
+	static Aline::EditorFactoryManager* manager = nullptr;
+
+	if (manager == nullptr and getAppInstance() != nullptr) {
+		manager = new Aline::EditorFactoryManager(getAppInstance()); //build a global EditableItemFactoryManager which will be deleted when the app instance is deleted
+	}
+
+	return manager;
 }
 
 void App::openFileProject() {

@@ -21,8 +21,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "gui/gui_global.h"
 
-#include "aline/src/view/editableitemeditor.h"
-#include "aline/src/view/editorfactory.h"
+#include <Aline/view/editableitemeditor.h>
+#include <Aline/view/editorfactory.h>
 
 namespace Sabrina {
 

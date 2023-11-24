@@ -41,6 +41,10 @@ set(CMAKE_AUTOMOC ON)
 SET(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+#Aline
+
+find_package(Aline REQUIRED)
+
 #libaries
 
 set(BUILD_SHARED_LIBS ON)
@@ -60,7 +64,6 @@ link_directories(${CMAKE_BINARY_DIR}/libs)
 
 #sub dirs
 
-add_subdirectory(modules)
 add_subdirectory(libs)
 add_subdirectory(prog)
 add_subdirectory(tests)

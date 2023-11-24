@@ -1,6 +1,6 @@
 /*
 This file is part of the project Sabrina
-Copyright (C) 2020  Paragon <french.paragon@gmail.com>
+Copyright (C) 2020-2023  Paragon <french.paragon@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "comicscript.h"
 
-#include "aline/src/utils/jsonutils.h"
+#include <Aline/control/app.h>
+#include <Aline/utils/jsonutils.h>
 
 namespace Sabrina {
 
@@ -171,7 +172,7 @@ void Comicscript::extractComicScriptFromJson(Aline::EditableItem* script, QJsonO
 
 	Aline::JsonUtils::extractItemData(script,
 									  obj,
-									  &Aline::EditableItemFactoryManager::GlobalEditableItemFactoryManager,
+									  Aline::App::getAppEditableItemFactoryManager(),
 									  {COMICSTRIP_TEXT_ID},
 									  blockChangeTracks);
 

@@ -1,6 +1,6 @@
 /*
 This file is part of the project Sabrina
-Copyright (C) 2018  Paragon <french.paragon@gmail.com>
+Copyright (C) 2018-2023  Paragon <french.paragon@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "editableitemmanager.h"
 
 #include "editableitem.h"
-#include "aline/src/model/editableitemfactory.h"
+#include <Aline/model/editableitemfactory.h>
 
 #include "notes/noteslist.h"
 

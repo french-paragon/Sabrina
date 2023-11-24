@@ -1,8 +1,8 @@
 #include <QTest>
 
 #include "core/app.h"
-#include "aline/tests/tests_utils/editableitemtestmodel.h"
-#include "aline/tests/tests_utils/testeditableitemmanager.h"
+#include <Aline/tests/editableitemtestmodel.h>
+#include <Aline/tests/testeditableitemmanager.h>
 
 #include "model/editableItems/personnage.h"
 

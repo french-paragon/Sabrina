@@ -12,4 +12,4 @@ target_link_libraries(${LIB_NAME} Qt5::Widgets)
 target_link_libraries(${LIB_NAME} Qt5::Gui)
 
 target_link_libraries(${LIB_NAME} Gui Model Utils)
-target_link_libraries(${LIB_NAME} Aline)
+target_link_libraries(${LIB_NAME} Aline::Aline)

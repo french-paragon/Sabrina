@@ -3,7 +3,7 @@
 
 /*
 This file is part of the project Sabrina
-Copyright (C) 2018  Paragon <french.paragon@gmail.com>
+Copyright (C) 2018-2023  Paragon <french.paragon@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,8 +21,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "core_global.h"
 
-#include "aline/src/control/app.h"
+#include <Aline/control/app.h>
+
 #include <QString>
+
+namespace Aline {
+class EditorFactoryManager;
+class EditableItemFactoryManager;
+}
 
 namespace Sabrina {
 
@@ -37,6 +43,8 @@ class CATHIA_CORE_EXPORT App : public Aline::App
 public:
 	static void loadEditorsFactories();
 	static void loadEditableFactories();
+
+	static Aline::EditorFactoryManager* appEditorsFactoryManager();
 
 	explicit App(int & argc, char** argv);
 	~App();

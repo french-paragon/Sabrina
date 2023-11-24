@@ -24,8 +24,8 @@ add_library(${LIB_NAME} ${LIB_SRC})
 target_compile_definitions(${LIB_NAME}
   PRIVATE CATHIA_MODEL_LIBRARY)
 
-target_link_libraries(${LIB_NAME} Qt5::Core)
+target_link_libraries(${LIB_NAME} Qt5::Core Qt5::Widgets Qt5::Gui)
 
-target_link_libraries(${LIB_NAME} Aline)
+target_link_libraries(${LIB_NAME} Aline::Aline)
 
 target_link_libraries(${LIB_NAME} Utils)

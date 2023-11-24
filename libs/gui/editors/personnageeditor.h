@@ -3,7 +3,7 @@
 
 /*
 This file is part of the project Sabrina
-Copyright (C) 2018  Paragon <french.paragon@gmail.com>
+Copyright (C) 2018-2023  Paragon <french.paragon@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <aline/src/view/editableitemeditor.h>
-#include <aline/src/view/editorfactory.h>
+#include <Aline/view/editableitemeditor.h>
+#include <Aline/view/editorfactory.h>
+
 #include <QWidget>
 
 #include "gui/gui_global.h"

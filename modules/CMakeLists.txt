@@ -1,6 +1,0 @@
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/libs)
-
-#config module aline
-set(CMAKE_CXX_FLAGS_OLD ${CMAKE_CXX_FLAGS})
-add_subdirectory(aline)
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_OLD})
